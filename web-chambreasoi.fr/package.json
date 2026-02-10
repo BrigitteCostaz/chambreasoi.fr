@@ -2,6 +2,7 @@
   "name": "web-chambreasoi-fr",
   "type": "module",
   "version": "0.0.1",
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "node --env-file=.env node_modules/astro/astro.js dev",
     "build": "node --env-file=.env node_modules/astro/astro.js build",
