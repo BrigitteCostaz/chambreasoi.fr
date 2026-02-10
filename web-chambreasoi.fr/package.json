@@ -8,8 +8,8 @@
     "build": "node --env-file-if-exists=.env node_modules/astro/astro.js build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy": "pnpm build && wrangler pages deploy dist",
-    "deploy:preview": "pnpm build && wrangler pages deploy dist --branch=preview"
+    "deploy": "pnpm build && wrangler deploy",
+    "deploy:preview": "pnpm build && wrangler versions upload"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
