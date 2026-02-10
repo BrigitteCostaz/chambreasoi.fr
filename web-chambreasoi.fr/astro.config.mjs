@@ -16,6 +16,12 @@ export default defineConfig({
         conditions: ["workerd", "worker", "browser"],
       },
     },
+    resolve: {
+      alias:
+        process.env.NODE_ENV === "production"
+          ? { "react-dom/server": "react-dom/server.edge" }
+          : {},
+    },
   },
   integrations: [
     react(),
