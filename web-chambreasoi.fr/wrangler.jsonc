@@ -1,6 +1,8 @@
 {
-  "name": "web-chambreasoi-fr",
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chambreasoi",
   "compatibility_date": "2024-12-01",
   "compatibility_flags": ["nodejs_compat"],
   "pages_build_output_dir": "./dist",
+  "observability": { "enabled": true },
 }
