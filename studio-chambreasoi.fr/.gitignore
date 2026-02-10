@@ -25,5 +25,10 @@
 # Typescript
 *.tsbuildinfo
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Dotenv and similar local-only files
 *.local

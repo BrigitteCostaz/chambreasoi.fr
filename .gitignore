@@ -21,6 +21,12 @@
 **/.env.local
 **/.env.*.local
 **/.env.production
+**/.env.*
+!**/.env.example
+
+# Cloudflare
+**/.wrangler/
+**/.dev.vars
 
 # Logs
 **/logs/
@@ -35,6 +41,7 @@
 
 # IDE/Editor files
 .vscode/
+.zed/
 .idea/
 **/*.swp
 **/*.swo

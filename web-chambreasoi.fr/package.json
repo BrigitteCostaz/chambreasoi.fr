@@ -3,12 +3,28 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "node --env-file=.env node_modules/astro/astro.js dev",
+    "build": "node --env-file=.env node_modules/astro/astro.js build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy": "pnpm build && wrangler pages deploy dist",
+    "deploy:preview": "pnpm build && wrangler pages deploy dist --branch=preview"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/react": "^4.4.2",
+    "@sanity/astro": "^3.2.11",
+    "@sanity/client": "^7.14.1",
+    "@sanity/image-url": "^2.0.3",
+    "@sanity/vision": "^5.8.1",
+    "astro": "^5.17.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sanity": "^5.8.1",
+    "styled-components": "^6.3.9"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.13",
+    "wrangler": "^4.64.0"
   }
 }
