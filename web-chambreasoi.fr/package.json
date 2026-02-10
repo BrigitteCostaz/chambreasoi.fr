@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "dev": "node --env-file=.env node_modules/astro/astro.js dev",
-    "build": "node --env-file=.env node_modules/astro/astro.js build",
+    "dev": "node --env-file-if-exists=.env node_modules/astro/astro.js dev",
+    "build": "node --env-file-if-exists=.env node_modules/astro/astro.js build",
     "preview": "astro preview",
     "astro": "astro",
     "deploy": "pnpm build && wrangler pages deploy dist",
