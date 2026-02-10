@@ -10,6 +10,13 @@ const dataset = process.env.PUBLIC_SANITY_DATASET;
 export default defineConfig({
   output: "server",
   adapter: cloudflare(),
+  vite: {
+    ssr: {
+      resolve: {
+        conditions: ["workerd", "worker", "browser"],
+      },
+    },
+  },
   integrations: [
     react(),
     sanity({
