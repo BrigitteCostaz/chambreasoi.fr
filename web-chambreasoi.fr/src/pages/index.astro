@@ -1,17 +1,93 @@
 ---
+import {
+  fetchSanity,
+  buildSanityImageUrl,
+  TEST_CONTENT_LIST_QUERY,
+} from "../lib/sanity";
 
+type TestContentListItem = {
+  _id: string;
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  image?: {
+    alt?: string;
+    asset?: {
+      _ref?: string;
+      _id?: string;
+      url?: string;
+    };
+  };
+};
+
+const items =
+  (await fetchSanity<TestContentListItem[]>(
+    TEST_CONTENT_LIST_QUERY,
+    undefined,
+    // SSR/build friendly: avoid CDN caching by default for freshness
+    { useCdn: false },
+  )) ?? [];
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Chambre à Soi — Test Content</title>
+  </head>
+
+  <body>
+    <h1>Test Content (example)</h1>
+
+    {items.length === 0 ? (
+      <p>
+        No <code>testContent</code> documents found. Create one in the Studio,
+        then refresh this page.
+      </p>
+    ) : (
+      <ul>
+        {items.map((doc) => {
+          const imgUrl = doc.image
+            ? buildSanityImageUrl({
+                source: doc.image,
+                width: 800,
+                quality: 80,
+              })
+            : null;
+
+          return (
+            <li>
+              <h2>{doc.title ?? "(untitled)"}</h2>
+
+              {doc.slug ? (
+                <p>
+                  Slug: <code>{doc.slug}</code>
+                </p>
+              ) : null}
+
+              {imgUrl ? (
+                <figure>
+                  <img
+                    src={imgUrl}
+                    alt={doc.image?.alt ?? doc.title ?? ""}
+                    loading="lazy"
+                  />
+                  {doc.image?.alt ? <figcaption>{doc.image.alt}</figcaption> : null}
+                </figure>
+              ) : null}
+
+              {doc.excerpt ? <p>{doc.excerpt}</p> : null}
+
+              <p>
+                <small>ID: <code>{doc._id}</code></small>
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </body>
 </html>

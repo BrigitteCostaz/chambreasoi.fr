@@ -2,7 +2,6 @@
   "name": "web-chambreasoi-fr",
   "type": "module",
   "version": "0.0.1",
-  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "node --env-file-if-exists=.env node_modules/astro/astro.js dev",
     "build": "node --env-file-if-exists=.env node_modules/astro/astro.js build",
@@ -14,6 +13,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/react": "^4.4.2",
+    "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.2.11",
     "@sanity/client": "^7.14.1",
     "@sanity/image-url": "^2.0.3",

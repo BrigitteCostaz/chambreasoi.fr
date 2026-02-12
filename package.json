@@ -1,0 +1,14 @@
+{
+  "name": "chambreasoi-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev:web": "pnpm --filter web-chambreasoi-fr dev",
+    "dev:studio": "pnpm --filter chambreasoifr dev",
+    "build:web": "pnpm --filter web-chambreasoi-fr build",
+    "build:studio": "pnpm --filter chambreasoifr build",
+    "deploy:web": "pnpm --filter web-chambreasoi-fr deploy",
+    "install:all": "pnpm install"
+  }
+}

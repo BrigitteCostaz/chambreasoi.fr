@@ -1,17 +1,49 @@
+/**
+ * Sanity helpers for the Astro web app.
+ *
+ * Re-exports everything from the shared `@chambreasoi/sanity` workspace package
+ * and bridges the `sanity:client` virtual module provided by `@sanity/astro`.
+ *
+ * Import from here (`~/lib/sanity`) in Astro pages and components — it gives
+ * you both the shared SDK utilities and the Astro-specific client binding.
+ */
+
+// ---------------------------------------------------------------------------
+// Astro-specific: virtual module client provided by @sanity/astro integration
+// ---------------------------------------------------------------------------
+
 import { sanityClient } from "sanity:client";
-import { createImageUrlBuilder } from "@sanity/image-url";
 
-export const client = sanityClient;
+/**
+ * The Sanity client instance configured by `@sanity/astro`.
+ * Use this when you need the Astro-managed client (e.g. for preview mode,
+ * Visual Editing, or any integration-specific feature).
+ */
+export { sanityClient };
 
-const builder = createImageUrlBuilder(client);
+// ---------------------------------------------------------------------------
+// Shared package re-exports (workspace: @chambreasoi/sanity)
+// ---------------------------------------------------------------------------
 
-export function urlFor(source: Parameters<typeof builder.image>[0]) {
-  return builder.image(source);
-}
+// Config
+export {
+  sanityConfig,
+  type SanityPublicConfig,
+} from "@chambreasoi/sanity/config";
 
-export async function fetchSanity<T>(
-  query: string,
-  params?: Record<string, unknown>,
-): Promise<T> {
-  return client.fetch<T>(query, params ?? {});
-}
+// Client factory (standalone — for scripts, API routes, etc.)
+export { getSanityClient } from "@chambreasoi/sanity/client";
+
+// Fetch wrapper with in-flight deduplication
+export { fetchSanity, devLog } from "@chambreasoi/sanity/fetch";
+
+// Image URL helpers
+export {
+  sanityImageUrl,
+  buildSanityImageUrl,
+  buildSanityDprSrcSet,
+  type SanityImageFormat,
+} from "@chambreasoi/sanity/image";
+
+// GROQ query constants
+export * from "@chambreasoi/sanity/queries";
