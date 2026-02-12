@@ -1,7 +1,11 @@
 // @chambreasoi/sanity — barrel export
 // Each module is also available via subpath imports (e.g. "@chambreasoi/sanity/fetch")
 
-export { sanityConfig, type SanityPublicConfig } from "./config.ts";
+export {
+  sanityConfig,
+  setWorkerEnv,
+  type SanityPublicConfig,
+} from "./config.ts";
 export { getSanityClient } from "./client.ts";
 export { fetchSanity, devLog } from "./fetch.ts";
 export {

@@ -28,6 +28,7 @@ export { sanityClient };
 // Config
 export {
   sanityConfig,
+  setWorkerEnv,
   type SanityPublicConfig,
 } from "@chambreasoi/sanity/config";
 
