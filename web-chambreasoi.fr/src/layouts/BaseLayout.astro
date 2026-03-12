@@ -1,0 +1,19 @@
+---
+import Head from "@layouts/Head.astro";
+
+const currentYear = new Date().getFullYear();
+---
+<html lang="fr">
+    <Head />
+    <body>
+        <header>
+            <h1>Chambreasoi</h1>
+        </header>
+        <main>
+            <slot />
+        </main>
+        <footer>
+            <p>&copy; {currentYear} Chambreasoi</p>
+        </footer>
+    </body>
+</html>

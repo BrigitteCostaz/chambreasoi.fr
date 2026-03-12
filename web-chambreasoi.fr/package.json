@@ -3,29 +3,44 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "node --env-file-if-exists=.env node_modules/astro/astro.js dev",
-    "build": "node --env-file-if-exists=.env node_modules/astro/astro.js build",
+    "dev": "astro dev",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "deploy": "pnpm build && wrangler deploy",
-    "deploy:preview": "pnpm build && wrangler versions upload"
+    "deploy:preview": "pnpm build && wrangler versions upload",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/react": "^4.4.2",
     "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.2.11",
-    "@sanity/client": "^7.14.1",
-    "@sanity/image-url": "^2.0.3",
-    "@sanity/vision": "^5.8.1",
-    "astro": "^5.17.1",
+    "@sanity/client": "^7.16.0",
+    "@sanity/vision": "^5.13.0",
+    "astro": "^5.18.0",
+    "astro-icon": "^1.1.5",
+    "astro-seo-schema": "^5.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sanity": "^5.8.1",
-    "styled-components": "^6.3.9"
+    "sanity": "^5.13.0",
+    "schema-dts": "^1.1.5",
+    "sharp": "^0.34.5",
+    "styled-components": "^6.3.11"
   },
   "devDependencies": {
-    "@types/react": "^19.2.13",
-    "wrangler": "^4.64.0"
+    "@astrojs/check": "^0.9.6",
+    "@biomejs/biome": "^2.4.6",
+    "@types/react": "^19.2.14",
+    "@unocss/astro": "^66.6.6",
+    "@unocss/preset-web-fonts": "^66.6.6",
+    "typescript": "^5.9.3",
+    "unocss": "^66.6.6",
+    "wrangler": "^4.71.0"
   }
 }

@@ -1,9 +1,6 @@
 ---
-import {
-  fetchSanity,
-  buildSanityImageUrl,
-  TEST_CONTENT_LIST_QUERY,
-} from "../lib/sanity";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { buildSanityImageUrl, fetchSanity, TEST_CONTENT_LIST_QUERY } from "../lib/sanity";
 
 type TestContentListItem = {
   _id: string;
@@ -25,21 +22,11 @@ const items =
     TEST_CONTENT_LIST_QUERY,
     undefined,
     // SSR/build friendly: avoid CDN caching by default for freshness
-    { useCdn: false },
+    { useCdn: false }
   )) ?? [];
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Chambre à Soi — Test Content</title>
-  </head>
-
-  <body>
+<BaseLayout>
     <h1>Test Content (example)</h1>
 
     {items.length === 0 ? (
@@ -89,5 +76,4 @@ const items =
         })}
       </ul>
     )}
-  </body>
-</html>
+</BaseLayout>

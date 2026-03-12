@@ -25,25 +25,24 @@ export { sanityClient };
 // Shared package re-exports (workspace: @chambreasoi/sanity)
 // ---------------------------------------------------------------------------
 
-// Config
-export {
-  sanityConfig,
-  setWorkerEnv,
-  type SanityPublicConfig,
-} from "@chambreasoi/sanity/config";
-
 // Client factory (standalone — for scripts, API routes, etc.)
 export { getSanityClient } from "@chambreasoi/sanity/client";
+// Config
+export {
+  type SanityPublicConfig,
+  sanityConfig,
+  setWorkerEnv,
+} from "@chambreasoi/sanity/config";
 
 // Fetch wrapper with in-flight deduplication
-export { fetchSanity, devLog } from "@chambreasoi/sanity/fetch";
+export { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 
 // Image URL helpers
 export {
-  sanityImageUrl,
-  buildSanityImageUrl,
   buildSanityDprSrcSet,
+  buildSanityImageUrl,
   type SanityImageFormat,
+  sanityImageUrl,
 } from "@chambreasoi/sanity/image";
 
 // GROQ query constants
