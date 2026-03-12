@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Check (pnpm workspace)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 (with pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.15.4"
+          run_install: false
+
+      - name: Show versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Install (frozen lockfile)
+        working-directory: chambreasoi.fr
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit (non-blocking)
+        working-directory: chambreasoi.fr
+        run: pnpm audit || true
+
+      - name: Web - Astro check
+        working-directory: chambreasoi.fr
+        run: pnpm -C web-chambreasoi.fr astro check
+
+      - name: Web - Astro build
+        working-directory: chambreasoi.fr
+        env:
+          PUBLIC_SANITY_PROJECT_ID: vq8mnl17
+          PUBLIC_SANITY_DATASET: production
+          ENABLE_SANITY_STUDIO: "false"
+        run: pnpm -C web-chambreasoi.fr astro build
+
+      - name: Studio - Sanity build
+        working-directory: chambreasoi.fr
+        env:
+          SANITY_STUDIO_PROJECT_ID: vq8mnl17
+          SANITY_STUDIO_DATASET: production
+        run: pnpm -C studio-chambreasoi.fr build

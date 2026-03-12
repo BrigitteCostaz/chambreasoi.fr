@@ -3,13 +3,99 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import sanity from "@sanity/astro";
 import { defineConfig } from "astro/config";
+import fs from "node:fs";
+import path from "node:path";
 import icon from "astro-icon";
 import unocss from "unocss/astro";
 
-// Sanity config - hardcoded with env fallback for production deployments
-// In dev, these are read from .env at runtime via middleware
-const projectId = process.env.PUBLIC_SANITY_PROJECT_ID || "vq8mnl17";
-const dataset = process.env.PUBLIC_SANITY_DATASET || "production";
+/**
+ * Load `web-chambreasoi.fr/.env` into process.env for config-time evaluation.
+ *
+ * Why:
+ * - Astro config executes in Node.
+ * - In some environments (CI, certain Node versions, or non-standard runners),
+ *   `process.env` may not include `.env` at config evaluation time.
+ *
+ * Notes:
+ * - We only parse simple KEY=VALUE lines (no export, no multiline, no interpolation).
+ * - Existing process.env values win (platform-provided env should override local files).
+ */
+/** @param {string} filePath */
+function loadDotEnvFileIfExists(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return;
+
+    const raw = fs.readFileSync(filePath, "utf8");
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      const idx = trimmed.indexOf("=");
+      if (idx === -1) continue;
+
+      const key = trimmed.slice(0, idx).trim();
+      let value = trimmed.slice(idx + 1).trim();
+
+      // Strip surrounding quotes if present
+      if (
+        (value.startsWith("\"") && value.endsWith("\"")) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      if (key && process.env[key] === undefined) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // If dotenv loading fails, we still want config evaluation to proceed.
+    // Missing required vars will be caught by requireProcessEnv().
+  }
+}
+
+// Load local env for the web workspace (best-effort)
+loadDotEnvFileIfExists(path.resolve(process.cwd(), ".env"));
+
+/**
+ * Astro config runs in Node.
+ *
+ * - In local dev: Astro loads `.env` into `process.env` automatically.
+ * - In CI / Cloudflare Pages: env vars must be provided by the platform.
+ *
+ * We intentionally avoid hardcoded fallbacks for Sanity config so builds fail
+ * fast when env is missing (prod parity).
+ */
+/** @param {string} key */
+function requireProcessEnv(key) {
+  const v = process.env[key];
+  if (typeof v === "string" && v.trim() !== "") return v;
+  throw new Error(
+    `[astro.config] Missing required env var "${key}". ` +
+    `Set it in web-chambreasoi.fr/.env for local dev and in Cloudflare Pages environment variables for builds.`
+  );
+}
+
+const projectId =
+  process.env.PUBLIC_SANITY_PROJECT_ID ||
+  process.env.SANITY_PROJECT_ID ||
+  process.env.SANITY_STUDIO_PROJECT_ID ||
+  requireProcessEnv("PUBLIC_SANITY_PROJECT_ID");
+
+const dataset =
+  process.env.PUBLIC_SANITY_DATASET ||
+  process.env.SANITY_DATASET ||
+  process.env.SANITY_STUDIO_DATASET ||
+  "production";
+
+/**
+ * Default: do NOT enable Studio from the web app build.
+ * This keeps `astro build` stable on Pages and avoids bundling Studio unless you explicitly opt in.
+ *
+ * Enable by setting:
+ *   ENABLE_SANITY_STUDIO=true
+ */
+const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO === "true";
 
 export default defineConfig({
   site: "https://chambreasoi.fr",
@@ -17,6 +103,8 @@ export default defineConfig({
   adapter: cloudflare(),
 
   image: {
+    // Cloudflare Workers does not support sharp at runtime.
+    // Prefer compile-time optimization for prerendered pages.
     service: {
       entrypoint: "astro/assets/services/sharp",
       config: {},
@@ -29,19 +117,24 @@ export default defineConfig({
       configFile: "uno.config.ts",
     }),
     react(),
+
+    // Sanity integration:
+    // - Always configure the client (projectId/dataset), but only mount Studio routes when enabled.
     sanity({
       projectId,
       dataset,
-      useCdn: false,
       apiVersion: "2024-01-01",
-      studioBasePath: "/studio",
+      useCdn: import.meta.env.PROD,
+      studioBasePath: enableSanityStudio ? "/studio" : undefined,
     }),
+
     icon(),
   ],
 
   experimental: {
     svgo: true,
   },
+
   devToolbar: {
     enabled: false,
   },

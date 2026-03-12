@@ -3,6 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.18.0 <21",
+    "pnpm": "9.x"
+  },
+  "pnpm": {
+    "overrides": {
+      "wrangler": "4.71.0",
+      "tar": "7.5.11",
+      "undici": "7.18.2",
+      "prismjs": "1.30.0",
+      "lodash": "4.17.23"
+    }
+  },
   "scripts": {
     "dev:web": "pnpm --filter web-chambreasoi-fr dev",
     "dev:studio": "pnpm --filter chambreasoifr dev",

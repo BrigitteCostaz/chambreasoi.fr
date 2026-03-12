@@ -1,0 +1,38 @@
+name = "chambreasoi"
+main = "./dist/_worker.js/index.js"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Serve static assets emitted by Astro
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "404-page"
+
+# Public (non-secret) variables
+# - Prefer setting these in Cloudflare Pages/Workers environment variables.
+# - These defaults are safe to keep here (projectId/dataset are public).
+[vars]
+PUBLIC_SANITY_PROJECT_ID = "vq8mnl17"
+PUBLIC_SANITY_DATASET = "production"
+ENABLE_SANITY_STUDIO = "false"
+
+# Sessions KV binding expected by @astrojs/cloudflare when sessions are enabled
+# Replace these IDs with your actual Cloudflare KV namespace IDs.
+[[kv_namespaces]]
+binding = "SESSION"
+id = "REPLACE_WITH_PROD_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+
+# Preview environment (optional overrides)
+# Cloudflare uses this when deploying a preview environment via Wrangler.
+[env.preview]
+name = "chambreasoi-preview"
+
+[env.preview.vars]
+ENABLE_SANITY_STUDIO = "false"
+
+[[env.preview.kv_namespaces]]
+binding = "SESSION"
+id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"

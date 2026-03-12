@@ -2,7 +2,7 @@
 import { defineConfig, presetMini } from "unocss";
 import { presetWebFonts } from "unocss/preset-web-fonts";
 
-import { ColorData } from "./config/colors.ts";
+import { ColorData } from "./config/colors";
 
 type ThemeColors = typeof ColorData.colors;
 
