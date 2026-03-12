@@ -89,13 +89,20 @@ const dataset =
   "production";
 
 /**
- * Default: do NOT enable Studio from the web app build.
- * This keeps `astro build` stable on Pages and avoids bundling Studio unless you explicitly opt in.
+ * Studio is ENABLED by default (opt-out, not opt-in).
  *
- * Enable by setting:
- *   ENABLE_SANITY_STUDIO=true
+ * Why opt-out:
+ * - wrangler.toml [vars] are RUNTIME bindings only — they are NOT present in
+ *   process.env during `astro build`. An opt-in check (`=== "true"`) therefore
+ *   always evaluates to false at build time, so the /studio route is never
+ *   registered in the built artifact, causing a 404 in production.
+ * - Defaulting to enabled means the route is always compiled in; you can still
+ *   remove it from a specific build by explicitly passing the flag.
+ *
+ * To disable (e.g. in CI or lightweight preview builds):
+ *   ENABLE_SANITY_STUDIO=false pnpm build
  */
-const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO === "true";
+const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO !== "false";
 
 export default defineConfig({
   site: "https://chambreasoi.fr",

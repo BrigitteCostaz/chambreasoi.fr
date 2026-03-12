@@ -19,37 +19,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20 (with pnpm cache)
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
+      # pnpm MUST be installed before setup-node when using cache: "pnpm".
+      # setup-node with cache: "pnpm" needs pnpm on PATH to locate the lockfile.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: "9.15.4"
           run_install: false
 
+      - name: Setup Node.js 20 (with pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Show versions
         run: |
           node -v
           pnpm -v
 
+      # No working-directory override: after checkout, the working directory is
+      # the repo root, which IS the pnpm workspace root (contains package.json,
+      # pnpm-workspace.yaml, .npmrc). There is no nested chambreasoi.fr/ subfolder.
       - name: Install (frozen lockfile)
-        working-directory: chambreasoi.fr
         run: pnpm install --frozen-lockfile
 
       - name: Audit (non-blocking)
-        working-directory: chambreasoi.fr
         run: pnpm audit || true
 
       - name: Web - Astro check
-        working-directory: chambreasoi.fr
         run: pnpm -C web-chambreasoi.fr astro check
 
       - name: Web - Astro build
-        working-directory: chambreasoi.fr
+        # Studio is disabled in CI: avoids bundling the heavy Studio editor in
+        # a build that is only used to validate correctness, not to deploy.
+        # ENABLE_SANITY_STUDIO is a BUILD-TIME flag — it must be set here, not
+        # in wrangler.toml [vars] (which are runtime bindings, not build env).
         env:
           PUBLIC_SANITY_PROJECT_ID: vq8mnl17
           PUBLIC_SANITY_DATASET: production
@@ -57,7 +62,6 @@ jobs:
         run: pnpm -C web-chambreasoi.fr astro build
 
       - name: Studio - Sanity build
-        working-directory: chambreasoi.fr
         env:
           SANITY_STUDIO_PROJECT_ID: vq8mnl17
           SANITY_STUDIO_DATASET: production
