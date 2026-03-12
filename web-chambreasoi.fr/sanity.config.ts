@@ -4,60 +4,47 @@ import { defineConfig } from 'sanity'
  * Sanity Studio stub config for the web app.
  *
  * Why this exists:
- * - `@sanity/astro` tries to load `sanity.config.ts|js` from the web project root.
- * - This stub unblocks `astro check` / `astro build` even when the real Studio
- *   lives in `studio-chambreasoi.fr/`.
+ * - `@sanity/astro` requires a `sanity.config.ts|js` in the project root.
+ * - The real Studio lives in `studio-chambreasoi.fr/` and is deployed via
+ *   `pnpm -C studio-chambreasoi.fr deploy`. This file just satisfies the
+ *   integration's discovery requirement so `astro check` / `astro build`
+ *   don't fail.
  *
- * IMPORTANT:
- * - This is intentionally minimal and should not include schemas, plugins, or secrets.
- * - If you want to run the actual Studio, use the dedicated workspace:
- *   `pnpm -C studio-chambreasoi.fr dev`
+ * Why we use static import.meta.env references here (not dynamic):
+ * - This file is bundled into the client-side Studio chunk by Vite.
+ * - Vite can only statically inline `import.meta.env.PUBLIC_*` values when
+ *   the property name is a literal in the source.  Dynamic access like
+ *   `import.meta.env[variable]` is NOT inlined, so the value arrives as
+ *   `undefined` at runtime in the browser and the Studio fails to hydrate.
+ * - Using the literal form `import.meta.env.PUBLIC_SANITY_PROJECT_ID` makes
+ *   Vite replace the expression with the string value at build time, which
+ *   works correctly in both SSR (Cloudflare Worker) and browser contexts.
+ *
+ * Why we use hardcoded fallbacks instead of throwing:
+ * - projectId and dataset are PUBLIC, non-secret values — hardcoding is safe.
+ * - Throwing from module-level code in a client bundle causes the Astro
+ *   island hydration to fail with an uncaught error, breaking the whole
+ *   Studio page even when the value is actually available via another path.
  */
 
-function readPublicEnv(key: string): string | undefined {
-  // Prefer Vite/Astro env (PUBLIC_ vars). Fallback to Node env.
-  try {
-    const meta = import.meta as unknown as { env?: Record<string, string | undefined> }
-    const v = meta.env?.[key]
-    if (typeof v === 'string' && v.length > 0) return v
-  } catch {
-    // ignore
-  }
+// Use named static references so Vite can inline the values at build time.
+// Fallback to the known-safe public defaults so the Studio always has valid
+// config even in edge-case build environments.
+const projectId: string =
+  import.meta.env.PUBLIC_SANITY_PROJECT_ID || 'vq8mnl17'
 
-  if (typeof process !== 'undefined' && process.env) {
-    const v = process.env[key]
-    if (typeof v === 'string' && v.length > 0) return v
-  }
-
-  return undefined
-}
-
-const projectId =
-  readPublicEnv('PUBLIC_SANITY_PROJECT_ID') ??
-  readPublicEnv('SANITY_PROJECT_ID') ??
-  readPublicEnv('SANITY_STUDIO_PROJECT_ID')
-
-const dataset =
-  readPublicEnv('PUBLIC_SANITY_DATASET') ??
-  readPublicEnv('SANITY_DATASET') ??
-  readPublicEnv('SANITY_STUDIO_DATASET') ??
-  'production'
-
-if (!projectId) {
-  throw new Error(
-    '[web/sanity.config.ts] Missing PUBLIC_SANITY_PROJECT_ID (or SANITY_PROJECT_ID). ' +
-    'Set it in web-chambreasoi.fr/.env for local dev and in Cloudflare Pages env vars for builds.',
-  )
-}
+const dataset: string =
+  import.meta.env.PUBLIC_SANITY_DATASET || 'production'
 
 export default defineConfig({
   name: 'web-stub',
-  title: 'chambreasoi.fr (web stub)',
+  title: 'chambreasoi.fr',
 
   projectId,
   dataset,
 
-  // Keep this empty on purpose: this is not the real Studio.
+  // Intentionally empty: this is not the real Studio.
+  // Schema and plugins live in studio-chambreasoi.fr/sanity.config.ts.
   plugins: [],
   schema: { types: [] },
 })
