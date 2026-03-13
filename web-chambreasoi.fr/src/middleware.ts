@@ -1,23 +1,26 @@
-import { defineMiddleware } from 'astro:middleware'
-import { setWorkerEnv } from '@chambreasoi/sanity/config'
+import { defineMiddleware } from "astro:middleware";
+import { setWorkerEnv } from "@chambreasoi/sanity/config";
+import { getRuntimeEnv } from "@utils/runtime-env";
 
 /**
- * Ensure `@chambreasoi/sanity` can resolve env vars consistently across:
- * - Cloudflare runtime (context.locals.runtime.env)
- * - Local Astro dev (import.meta.env for PUBLIC_* variables)
+ * Middleware that provides a consistent env object to `@chambreasoi/sanity`.
  *
- * We only inject PUBLIC_* values from import.meta.env. Secrets should be
- * provided via Cloudflare bindings / process.env and never exposed to the client.
+ * Goal:
+ * - Use Cloudflare Workers bindings in production (when running on Workers)
+ * - Avoid importing `cloudflare:workers` in shared code so Node dev doesn't break
+ *
+ * How:
+ * - `getRuntimeEnv()` dynamically tries to load Cloudflare bindings via a CF-only module.
+ * - If unavailable (Node dev), it falls back to process.env.
+ * - We then overlay PUBLIC_* vars from import.meta.env for dev/build reliability.
  */
-export const onRequest = defineMiddleware((context, next) => {
-  const runtimeEnv = context.locals.runtime?.env ?? {}
+export const onRequest = defineMiddleware(async (_context, next) => {
+  const runtimeEnv = await getRuntimeEnv();
 
-  // Vite replaces `import.meta.env.PUBLIC_*` at build time. In dev this provides
-  // values from `.env` even when runtime.env is empty.
   const mergedEnv: Record<string, unknown> = {
     ...runtimeEnv,
 
-    // Provide the minimal set of PUBLIC_* vars we rely on.
+    // Provide the minimal set of PUBLIC_* vars we rely on (Vite replacement; reliable in dev/build).
     ...(import.meta.env.PUBLIC_SANITY_PROJECT_ID
       ? { PUBLIC_SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID }
       : {}),
@@ -25,7 +28,7 @@ export const onRequest = defineMiddleware((context, next) => {
       ? { PUBLIC_SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET }
       : {}),
 
-    // Also provide common aliases so downstream config resolution is robust.
+    // Provide common aliases so downstream config resolution is robust.
     ...(import.meta.env.PUBLIC_SANITY_PROJECT_ID
       ? {
         SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
@@ -38,9 +41,9 @@ export const onRequest = defineMiddleware((context, next) => {
         SANITY_STUDIO_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
       }
       : {}),
-  }
+  };
 
-  setWorkerEnv(mergedEnv)
+  setWorkerEnv(mergedEnv);
 
-  return next()
-})
+  return next();
+});

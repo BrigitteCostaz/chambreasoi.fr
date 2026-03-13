@@ -1,10 +1,11 @@
 ---
 import Head from "@layouts/Head.astro";
-
+import Header from "@components/header/Header.astro"
 const currentYear = new Date().getFullYear();
 ---
 <html lang="fr">
     <Head />
+    <Header />
     <body id="body" class="flex min-h-dvh flex-col">
         <main>
             <slot />

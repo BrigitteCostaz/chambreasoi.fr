@@ -1,5 +1,5 @@
 name = "chambreasoi"
-main = "./dist/_worker.js/index.js"
+# main = "@astrojs/cloudflare/entrypoints/server"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -10,8 +10,8 @@ binding = "ASSETS"
 not_found_handling = "404-page"
 
 # Public (non-secret) runtime variables.
-# - These are injected into Astro.locals.runtime.env at request time.
-# - They are NOT present in process.env during `astro build`.
+# - In Cloudflare Workers, read bindings using: `import { env } from "cloudflare:workers"`.
+# - These values are available at runtime (Worker bindings), not necessarily in process.env during `astro build`.
 # - Use them for values your SSR code needs at runtime (e.g. Sanity project config).
 #
 # NOTE: ENABLE_SANITY_STUDIO is intentionally absent here.

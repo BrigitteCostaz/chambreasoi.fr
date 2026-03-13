@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "packageManager": "pnpm@9.15.4",
   "engines": {
-    "node": ">=20.18.0 <21",
+    "node": ">=22.12.0",
     "pnpm": "9.x"
   },
   "pnpm": {
     "overrides": {
-      "wrangler": "4.71.0",
+      "wrangler": "4.73.0",
       "tar": "7.5.11",
       "undici": "7.18.2",
       "prismjs": "1.30.0",
@@ -23,5 +23,8 @@
     "build:studio": "pnpm --filter chambreasoifr build",
     "deploy:web": "pnpm --filter web-chambreasoi-fr deploy",
     "install:all": "pnpm install"
+  },
+  "devDependencies": {
+    "wrangler": "4.73.0"
   }
 }

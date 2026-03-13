@@ -1,0 +1,36 @@
+---
+import NavLink from "./NavLink.astro";
+import { headerNavigation } from "@config/navigation";
+import type { NavLinkItem } from "@config/types/navigation";
+
+export interface Props {
+  items?: NavLinkItem[];
+  variant?: "header" | "footer";
+  class?: string;
+}
+
+const {
+  items = headerNavigation,
+  variant = "header",
+  class: className = "",
+} = Astro.props;
+
+// Filter based on variant if needed
+const visibleItems = variant === "header" 
+  ? items.filter(item => item.showInDesktopNav !== false)
+  : items;
+---
+
+<nav class:list={["nav-links", className]} aria-label="Navigation principale">
+  <ul class="nav-links__list">
+    {visibleItems.map((navItem, index) => (
+      <li class="nav-links__item">
+        <NavLink
+          navItem={navItem}
+          variant={variant}
+          isLast={index === visibleItems.length - 1}
+        />
+      </li>
+    ))}
+  </ul>
+</nav>

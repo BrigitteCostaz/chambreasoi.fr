@@ -22,6 +22,9 @@
     "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
+    "types": [
+      "@cloudflare/workers-types"
+    ],
     "paths": {
       "@components/*": [
         "src/components/*"

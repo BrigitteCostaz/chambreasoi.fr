@@ -88,6 +88,7 @@ const dataset =
   process.env.SANITY_STUDIO_DATASET ||
   "production";
 
+const isDev = process.env.NODE_ENV !== "production";
 /**
  * Studio is ENABLED by default (opt-out, not opt-in).
  *
@@ -107,7 +108,9 @@ const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO !== "false";
 export default defineConfig({
   site: "https://chambreasoi.fr",
   output: "server",
-  adapter: cloudflare(),
+  adapter: isDev
+    ? (await import("@astrojs/node")).default({ mode: "standalone" })
+    : cloudflare(),
 
   image: {
     // Cloudflare Workers does not support sharp at runtime.

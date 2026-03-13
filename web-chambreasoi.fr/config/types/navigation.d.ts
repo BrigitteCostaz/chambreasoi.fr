@@ -10,13 +10,13 @@ export interface BaseLinkItem {
 
 // Navigation
 export interface NavLinkItem extends BaseLinkItem {
-  pageKey?: string;
+  pageKey?: keyof typeof sitemap;
   button?: "primary" | "secondary" | "ghost";
   showInDesktopNav?: boolean;
 }
 
 // Legal
-export interface LegalLinkItem extends BaseLinkItem {}
+export interface LegalLinkItem extends BaseLinkItem { }
 
 // Social
-export interface SocialLinkItem extends BaseLinkItem {}
+export interface SocialLinkItem extends BaseLinkItem { }
