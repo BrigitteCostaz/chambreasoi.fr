@@ -135,7 +135,10 @@ export default defineConfig({
       studioBasePath: enableSanityStudio ? "/studio" : undefined,
     }),
 
-    icon(),
+    icon({
+      iconDir: "src/icons",
+    }),
+
   ],
 
   experimental: {
@@ -159,6 +162,10 @@ export default defineConfig({
         "@layouts/": new URL("./src/layouts/", import.meta.url).pathname,
         "@utils": new URL("./src/utils", import.meta.url).pathname,
         "@utils/": new URL("./src/utils/", import.meta.url).pathname,
+        "@components": new URL("./src/components", import.meta.url).pathname,
+        "@components/": new URL("./src/components/", import.meta.url).pathname,
+        "@styles": new URL("./src/styles", import.meta.url).pathname,
+        "@styles/": new URL("./src/styles/", import.meta.url).pathname,
         "@config": new URL("./config", import.meta.url).pathname,
         "@config/": new URL("./config/", import.meta.url).pathname,
 

@@ -23,14 +23,20 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@layouts/*": [
-        "src/layouts/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
+      "@components/*": [
+        "src/components/*"
       ],
       "@config/*": [
         "config/*"
+      ],
+      "@layouts/*": [
+        "src/layouts/*"
+      ],
+      "@styles/*": [
+        "src/styles/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
       ]
     }
   }

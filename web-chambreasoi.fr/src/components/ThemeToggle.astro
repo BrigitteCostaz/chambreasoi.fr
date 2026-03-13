@@ -1,0 +1,191 @@
+---
+import { siteConfig } from "@config/site";
+import { Icon } from "astro-icon/components";
+
+/**
+ * ThemeToggle.astro
+ *
+ * - Respects configured default: siteConfig.themeConfig.colors.mode ('auto'|'light'|'dark')
+ * - Allows user to override via UI: cycles auto -> light -> dark
+ * - Persists user choice in localStorage
+ * - Applies mode by toggling classes on <html>: 'light' and 'dark'
+ *
+ * CSS variable system expectation (from your ColorStyles):
+ * - :root holds light vars
+ * - html.dark holds dark vars
+ * - @media (prefers-color-scheme: dark) applies dark vars when neither .light nor .dark is present
+ *
+ * Therefore:
+ * - mode 'auto'  => remove both 'light' and 'dark' classes (let media query decide)
+ * - mode 'light' => add 'light', remove 'dark'
+ * - mode 'dark'  => add 'dark', remove 'light'
+ */
+
+const defaultMode = siteConfig.themeConfig.colors.mode;
+const STORAGE_KEY = "theme:mode";
+---
+
+<button
+  type="button"
+  class="theme-toggle inline-flex items-center gap-2 rounded px-3 py-2"
+  aria-label="Toggle theme"
+  data-default-mode={defaultMode}
+>
+  <span class="theme-toggle__icons" aria-hidden="true">
+    <Icon name="phosphor/sun-dim-duotone" class="w-5 h-5 icon-sun" />
+    <Icon name="phosphor/moon-duotone" class="w-5 h-5 icon-moon" />
+    <Icon name="phosphor/circle-half-duotone" class="w-5 h-5 icon-auto" />
+  </span>
+  <span class="theme-toggle__label"></span>
+</button>
+
+<script is:inline>
+  (() => {
+    /** @typedef {"auto"|"light"|"dark"} ThemeMode */
+
+    const STORAGE_KEY = "theme:mode";
+
+    /** @param {ThemeMode} mode */
+    function applyMode(mode) {
+      const root = document.documentElement;
+      // Ensure mutual exclusivity and allow "auto" to mean "no explicit class".
+      root.classList.remove("light", "dark");
+      if (mode === "light") root.classList.add("light");
+      if (mode === "dark") root.classList.add("dark");
+      root.dataset.theme = mode;
+    }
+
+    /** @returns {ThemeMode | null} */
+    function readStoredMode() {
+      try {
+        const v = localStorage.getItem(STORAGE_KEY);
+        if (v === "auto" || v === "light" || v === "dark") return v;
+        return null;
+      } catch {
+        return null;
+      }
+    }
+
+    /** @param {ThemeMode} mode */
+    function storeMode(mode) {
+      try {
+        localStorage.setItem(STORAGE_KEY, mode);
+      } catch {
+        // ignore
+      }
+    }
+
+    /** @param {ThemeMode} mode */
+    function modeLabel(mode) {
+      if (mode === "auto") return "Auto";
+      if (mode === "light") return "Light";
+      return "Dark";
+    }
+
+    /** @param {ThemeMode} mode */
+    function nextMode(mode) {
+      if (mode === "auto") return "light";
+      if (mode === "light") return "dark";
+      return "auto";
+    }
+
+    const btn = document.querySelector(".theme-toggle");
+    if (!btn) return;
+
+    /** @type {ThemeMode} */
+    const defaultMode = (() => {
+      const v = btn.getAttribute("data-default-mode");
+      return (v === "light" || v === "dark" || v === "auto") ? v : "auto";
+    })();
+
+    /** @type {ThemeMode} */
+    let currentMode = readStoredMode() ?? defaultMode;
+
+    // Initial apply
+    applyMode(currentMode);
+
+    // Render label
+    const labelEl = btn.querySelector(".theme-toggle__label");
+
+    function render() {
+      const label = modeLabel(currentMode);
+
+      if (labelEl) labelEl.textContent = label;
+
+      btn.setAttribute("aria-pressed", currentMode === "dark" ? "true" : "false");
+      btn.setAttribute("data-mode", currentMode);
+      btn.setAttribute("title", `Theme: ${label} (click to change)`);
+    }
+
+    render();
+
+    btn.addEventListener("click", () => {
+      currentMode = nextMode(currentMode);
+      storeMode(currentMode);
+      applyMode(currentMode);
+      render();
+    });
+
+    // If you're in auto mode, and system preference changes, the CSS will react
+    // (because we remove explicit classes). We only need to update the UI label.
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    if (media) {
+      media.addEventListener("change", () => {
+        if (currentMode === "auto") render();
+      });
+    }
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    cursor: pointer;
+    border: 1px solid var(--color-bgAlt);
+    background: var(--color-bgCard);
+    color: var(--color-txtPri);
+    font: inherit;
+    line-height: 1;
+    transition: background-color 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--color-bgAlt);
+  }
+
+  .theme-toggle:focus {
+    outline: 2px solid var(--color-accentStone);
+    outline-offset: 2px;
+  }
+
+  .theme-toggle__icons {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Hide all icons by default */
+  .theme-toggle__icons > :global(svg) {
+    display: none;
+    position: absolute;
+  }
+
+  /* Show the appropriate icon based on data-mode */
+  .theme-toggle[data-mode="light"] .icon-sun {
+    display: block;
+  }
+
+  .theme-toggle[data-mode="dark"] .icon-moon {
+    display: block;
+  }
+
+  .theme-toggle[data-mode="auto"] .icon-auto {
+    display: block;
+  }
+
+  .theme-toggle__label {
+    font-size: 0.95rem;
+  }
+</style>

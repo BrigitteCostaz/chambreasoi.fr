@@ -1,0 +1,24 @@
+---
+import { ColorData, paletteToCSSVars } from '@config/colors'
+
+const lightVars = paletteToCSSVars(ColorData.colors.light)
+const darkVars = paletteToCSSVars(ColorData.colors.dark)
+
+const css = `
+:root {
+${lightVars}
+}
+
+html.dark {
+${darkVars}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+${darkVars}
+  }
+}
+`
+---
+
+<style is:global set:html={css} />

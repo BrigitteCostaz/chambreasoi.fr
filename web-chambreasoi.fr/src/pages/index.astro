@@ -1,7 +1,8 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { buildSanityImageUrl, fetchSanity, TEST_CONTENT_LIST_QUERY } from "../lib/sanity";
-
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
+import ThemeToogle from "@components/ThemeToggle.astro";
 type TestContentListItem = {
   _id: string;
   title?: string;
@@ -27,53 +28,6 @@ const items =
 ---
 
 <BaseLayout>
-    <h1>Test Content (example)</h1>
-
-    {items.length === 0 ? (
-      <p>
-        No <code>testContent</code> documents found. Create one in the Studio,
-        then refresh this page.
-      </p>
-    ) : (
-      <ul>
-        {items.map((doc) => {
-          const imgUrl = doc.image
-            ? buildSanityImageUrl({
-                source: doc.image,
-                width: 800,
-                quality: 80,
-              })
-            : null;
-
-          return (
-            <li>
-              <h2>{doc.title ?? "(untitled)"}</h2>
-
-              {doc.slug ? (
-                <p>
-                  Slug: <code>{doc.slug}</code>
-                </p>
-              ) : null}
-
-              {imgUrl ? (
-                <figure>
-                  <img
-                    src={imgUrl}
-                    alt={doc.image?.alt ?? doc.title ?? ""}
-                    loading="lazy"
-                  />
-                  {doc.image?.alt ? <figcaption>{doc.image.alt}</figcaption> : null}
-                </figure>
-              ) : null}
-
-              {doc.excerpt ? <p>{doc.excerpt}</p> : null}
-
-              <p>
-                <small>ID: <code>{doc._id}</code></small>
-              </p>
-            </li>
-          );
-        })}
-      </ul>
-    )}
+    <SiteLogo/>
+    <ThemeToogle/>
 </BaseLayout>

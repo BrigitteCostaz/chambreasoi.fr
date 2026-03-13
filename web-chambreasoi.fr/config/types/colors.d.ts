@@ -1,22 +1,20 @@
 /* config/types/color.d.ts */
 
-export interface ColorPalette {
-  bgBase: string;
-  bgAlt: string;
-  bgCard: string;
+export type ColorToken =
+  | "bgBase"
+  | "bgAlt"
+  | "bgCard"
+  | "txtPri"
+  | "txtMuted"
+  | "accentForest"
+  | "accentStone"
+  | "accentTerra"
+  | "info"
+  | "warning"
+  | "alert"
+  | "success";
 
-  txtPri: string;
-  txtMuted: string;
-
-  accentForest: string;
-  accentStone: string;
-  accentTerra: string;
-
-  info: string;
-  warning: string;
-  alert: string;
-  success: string;
-}
+export type ColorPalette = Record<ColorToken, string>;
 
 export type ColorMode = "light" | "dark" | "auto";
 

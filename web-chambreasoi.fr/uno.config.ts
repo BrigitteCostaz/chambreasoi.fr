@@ -27,34 +27,28 @@ export default defineConfig({
       provider: "bunny",
       inlineImports: false,
       fonts: {
-        sans: [
-          {
-            name: "Karla",
-            weights: [400, 500],
-          },
-          "sans-serif",
-        ],
-        mono: [
-          {
-            name: "Fira Code",
-            weights: [400, 700],
-          },
-          "monospace",
-        ],
+        sans: {
+          name: "Karla",
+          weights: [400, 500],
+        },
+        mono: {
+          name: "Fira Code",
+          weights: [400, 700],
+        },
         // General Sans (self-hosted)
-        serif: [
-          {
-            name: "General Sans",
-            provider: "none",
-          },
-        ],
+        display: {
+          name: "General Sans",
+          provider: "none",
+        },
       },
     }),
   ],
   theme: {
     colors: flattenColors(ColorData.colors),
     fontFamily: {
-      serif: "var(--font-serif)",
+      sans: '"Karla", sans-serif',
+      mono: '"Fira Code", monospace',
+      display: "var(--font-display)",
     },
   },
 });

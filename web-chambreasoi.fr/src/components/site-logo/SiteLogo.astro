@@ -1,8 +1,26 @@
 ---
+import {getOrgData} from '@config/organization'
+const orgData = await getOrgData()
 
 ---
-<a class="" href="/">
-  <p class="">
-    <span class="">{}</span>
+<a class="block no-underline" href="/">
+  <p class="logo-text">
+    <span class="">{orgData.legal.brandName}</span>
   </p>
 </a>
+
+<style>
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: var(--font-display-tracking);
+  text-transform: lowercase;
+  color: var(--color-accentStone);
+}
+
+.logo-text > span {
+  line-height: 1;
+}
+</style>

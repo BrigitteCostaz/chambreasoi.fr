@@ -1,11 +1,11 @@
 // ./config/organization.ts
-import {devLog, fetchSanity} from '@chambreasoi/sanity/fetch'
+import { devLog, fetchSanity } from '@chambreasoi/sanity/fetch'
 import {
   ORGANIZATION_SETTINGS_QUERY,
   type OrganizationSettingsResult,
 } from '@chambreasoi/sanity/queries'
-import type {OrganizationConfig} from '@config/types'
-import {resolveNumber, resolveString, resolveStringArray} from '@utils/config-resolvers'
+import type { OrganizationConfig } from '@config/types'
+import { resolveNumber, resolveString, resolveStringArray } from '@utils/config-resolvers'
 
 const ORG_DEFAULTS: OrganizationConfig = {
   contact: {
@@ -29,7 +29,7 @@ const ORG_DEFAULTS: OrganizationConfig = {
 
   legal: {
     name: 'BRIGITTE COSTAZ',
-    brandName: 'UNE CHAMBRE A SOI',
+    brandName: 'UNE CHAMBRE À SOI',
     legalName: 'COSTAZ BRIGITTE EI',
     legalForm: 'Entrepreneur individuel',
 

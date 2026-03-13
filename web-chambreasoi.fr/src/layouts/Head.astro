@@ -5,6 +5,8 @@ import {getOrgData} from '@config/organization'
 import {sitemap} from '@config/pages'
 import {getGlobalSchema} from '@config/schema/global-schema'
 import type {JsonLdNode} from '@config/types/page-meta'
+import '@styles/global.css'
+import ColorStyles from '@components/ColorStyles.astro'
 
 const globalSchema = await getGlobalSchema()
 const HeadData = await getHeadData()
@@ -60,6 +62,7 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields]
 ---
 
 <head>
+     <ColorStyles />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
