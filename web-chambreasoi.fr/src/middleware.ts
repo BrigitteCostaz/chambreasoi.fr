@@ -31,15 +31,15 @@ export const onRequest = defineMiddleware(async (_context, next) => {
     // Provide common aliases so downstream config resolution is robust.
     ...(import.meta.env.PUBLIC_SANITY_PROJECT_ID
       ? {
-        SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-        SANITY_STUDIO_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-      }
+          SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
+          SANITY_STUDIO_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
+        }
       : {}),
     ...(import.meta.env.PUBLIC_SANITY_DATASET
       ? {
-        SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
-        SANITY_STUDIO_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
-      }
+          SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
+          SANITY_STUDIO_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
+        }
       : {}),
   };
 

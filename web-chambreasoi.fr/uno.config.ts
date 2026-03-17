@@ -18,7 +18,43 @@ const flattenColors = (colors: ThemeColors) => {
 };
 
 export default defineConfig({
+  theme: {
+    colors: flattenColors(ColorData.colors),
+    fontFamily: {
+      sans: '"Karla", sans-serif',
+      mono: '"Fira Code", monospace',
+      display: "var(--font-display)",
+    },
+    extend: {
+      letterSpacing: {
+        display: "var(--font-display-tracking)",
+      },
+    },
+  },
   safelist: ["font-sans", "font-serif", "font-mono"],
+  shortcuts: {
+    "heading-1":
+      "text-[clamp(24px,calc(24px+32*(100vw-375px)/1225),48px)] font-[var(--font-display)] font-medium leading-[1.17] text- max-w-full",
+    "heading-2":
+      "text-[clamp(1.875rem,1.6534rem+0.9848vw,2.4414rem)] font-sans font-semibold leading-[1.25] text-foreground max-w-full",
+    "heading-3":
+      "text-[clamp(1.5625rem,1.3996rem+0.7235vw,1.9531rem)] font-sans font-semibold leading-[1.33] text-foreground max-w-full",
+    "heading-4":
+      "text-[clamp(1rem,1.331rem+0.7235vw,1.331rem)] font-sans leading-[1.24] text-foreground max-w-full",
+  },
+  rules: [
+    [
+      "header-nav",
+      {
+        "font-family": "var(--font-display)",
+        "font-weight": "500",
+        "letter-spacing": "var(--font-display-tracking)",
+        "text-transform": "lowercase",
+        "line-height": "1.4",
+        "font-size": "clamp(16px,calc(16*1px + 2*(100vw-375*1px)/1225),18px)",
+      },
+    ],
+  ],
   presets: [
     presetMini({
       dark: "class",
@@ -43,12 +79,4 @@ export default defineConfig({
       },
     }),
   ],
-  theme: {
-    colors: flattenColors(ColorData.colors),
-    fontFamily: {
-      sans: '"Karla", sans-serif',
-      mono: '"Fira Code", monospace',
-      display: "var(--font-display)",
-    },
-  },
 });

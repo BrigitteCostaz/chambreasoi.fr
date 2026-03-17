@@ -1,6 +1,36 @@
 ---
 import NavLinks from "@components/navigation/NavLinks.astro";
-import { headerNavigation, footerNavigation } from "@config/navigation";
+import { footerNavigation, headerNavigation } from "@config/navigation";
 ---
 
-<NavLinks items={headerNavigation} variant="header" />
+<header
+  class="sticky top-0 z-4 hidden bg-bgBase px-[.8rem] lg:block border-txtMuted/20 divide-txtMuted/20"
+>
+  <div class="relative isolate">
+    <div class="pointer-events-none absolute inset-0">
+      <div class="hidden size-full grid-cols-5 [gap-0.3rem] lg:grid">
+        <div
+          class="relative h-full origin-top after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px"
+        >
+        </div>
+        <div
+          class="relative h-full origin-top after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px"
+        >
+        </div>
+        <div
+          class="relative h-full origin-top after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px"
+        >
+        </div>
+        <div
+          class="relative h-full origin-top after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px"
+        >
+        </div>
+        <div
+          class="relative h-full origin-top after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px"
+        >
+        </div>
+      </div>
+    </div>
+    <NavLinks items={headerNavigation} variant="header" />
+  </div>
+</header>

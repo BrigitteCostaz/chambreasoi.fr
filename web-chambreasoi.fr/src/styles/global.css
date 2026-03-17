@@ -2,6 +2,10 @@
 
 @import "./fonts.css";
 
+:root {
+    --header-height: 48px;
+    /* Will be set by JS if header is sticky */
+}
 
 html,
 body {
@@ -9,4 +13,15 @@ body {
     padding: 0;
     background-color: var(--color-bgBase);
     color: var(--color-txtPri);
+}
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    margin: 0;
+    padding: 0;
 }

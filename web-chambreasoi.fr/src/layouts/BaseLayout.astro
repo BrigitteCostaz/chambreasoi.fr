@@ -1,17 +1,19 @@
 ---
+import Header from "@components/header/Header.astro";
 import Head from "@layouts/Head.astro";
-import Header from "@components/header/Header.astro"
+import ThemeToggle from "@components/ThemeToggle.astro";
+
 const currentYear = new Date().getFullYear();
 ---
+
 <html lang="fr">
-    <Head />
-    <Header />
-    <body id="body" class="flex min-h-dvh flex-col">
-        <main>
-            <slot />
-        </main>
-        <footer>
-            <p>&copy; {currentYear} Chambreasoi</p>
-        </footer>
-    </body>
+  <Head />
+  <Header />
+  <body id="body" class="flex min-h-dvh flex-col">
+    <main class="px-[.8rem]">
+      <slot />
+    </main>
+    <ThemeToggle />
+    <footer></footer>
+  </body>
 </html>

@@ -1,8 +1,8 @@
 ---
-import { ColorData, paletteToCSSVars } from '@config/colors'
+import { ColorData, paletteToCSSVars } from "@config/colors";
 
-const lightVars = paletteToCSSVars(ColorData.colors.light)
-const darkVars = paletteToCSSVars(ColorData.colors.dark)
+const lightVars = paletteToCSSVars(ColorData.colors.light);
+const darkVars = paletteToCSSVars(ColorData.colors.dark);
 
 const css = `
 :root {
@@ -18,7 +18,7 @@ ${darkVars}
 ${darkVars}
   }
 }
-`
+`;
 ---
 
 <style is:global set:html={css} />

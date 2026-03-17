@@ -169,7 +169,9 @@
             "noSetterReturn": "off",
             "noUndeclaredVariables": "off",
             "noUnreachable": "off",
-            "noUnreachableSuper": "off"
+            "noUnreachableSuper": "off",
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
           },
           "style": {
             "useConst": "off",

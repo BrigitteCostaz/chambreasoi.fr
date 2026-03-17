@@ -1,6 +1,6 @@
-import type {Offer, UnitPriceSpecification} from 'schema-dts'
-import type {PricingCatalog, PublicRate} from '@config/types/pricing'
-import {formatMoneyCentsForSchema} from '@config/pricing'
+import { formatMoneyCentsForSchema } from "@config/pricing";
+import type { PricingCatalog, PublicRate } from "@config/types/pricing";
+import type { Offer, UnitPriceSpecification } from "schema-dts";
 
 /**
  * Builds schema.org Offer nodes from the centralized pricing catalog.
@@ -12,50 +12,50 @@ import {formatMoneyCentsForSchema} from '@config/pricing'
  * Returns schema-dts `Offer[]` (strict typing compatible with `BedAndBreakfast.makesOffer`).
  */
 export function buildOffersFromPricing(params: {
-  pricing: PricingCatalog
+  pricing: PricingCatalog;
   /**
    * Canonical booking URL for offers (where you want Google/users to end up).
    * Example: "https://chambreasoi.fr/tarifs-et-reservation"
    */
-  bookingUrl: string
+  bookingUrl: string;
 }): readonly Offer[] {
-  const {pricing, bookingUrl} = params
+  const { pricing, bookingUrl } = params;
 
   return pricing.publicRates.map((rate) =>
     publicRateToOffer({
       rate,
       roomId: pricing.roomId,
       bookingUrl,
-    }),
-  )
+    })
+  );
 }
 
 function publicRateToOffer(params: {
-  rate: PublicRate
-  roomId: PricingCatalog['roomId']
-  bookingUrl: string
+  rate: PublicRate;
+  roomId: PricingCatalog["roomId"];
+  bookingUrl: string;
 }): Offer {
-  const {rate, roomId, bookingUrl} = params
+  const { rate, roomId, bookingUrl } = params;
 
-  const price = formatMoneyCentsForSchema(rate.priceCents)
+  const price = formatMoneyCentsForSchema(rate.priceCents);
 
   const priceSpecification: UnitPriceSpecification = {
-    '@type': 'UnitPriceSpecification',
+    "@type": "UnitPriceSpecification",
     priceCurrency: rate.currency,
     price,
-    unitText: 'Nuit',
-  }
+    unitText: "Nuit",
+  };
 
   const offer: Offer = {
-    '@type': 'Offer',
-    '@id': rate.offerId,
+    "@type": "Offer",
+    "@id": rate.offerId,
     name: rate.name,
     priceCurrency: rate.currency,
     price,
-    itemOffered: {'@id': roomId},
+    itemOffered: { "@id": roomId },
     url: bookingUrl,
     priceSpecification,
-  }
+  };
 
-  return offer
+  return offer;
 }

@@ -1,5 +1,5 @@
-import type { NavLinkItem, LegalLinkItem } from "@config/types/navigation";
 import { sitemap } from "@config/pages";
+import type { LegalLinkItem, NavLinkItem } from "@config/types/navigation";
 
 export const headerNavigation: NavLinkItem[] = [
   {
@@ -7,39 +7,43 @@ export const headerNavigation: NavLinkItem[] = [
     text: "Accueil",
     link: sitemap.home.path,
     icon: "tabler/home",
-    showInDesktopNav: true,
+    showInDesktopNav: false,
   },
   {
     pageKey: "room",
     text: sitemap.room.title,
     link: sitemap.room.path,
-    icon: "tabler/bed",
+    icon: "ion/bed-sharp",
     showInDesktopNav: true,
+    accentColor: "Stone",
   },
   {
     pageKey: "reservations",
     text: sitemap.reservations.title,
     link: sitemap.reservations.path,
-    icon: "tabler/calendar",
+    icon: "ion/calendar-sharp",
     showInDesktopNav: true,
+    accentColor: "Stone",
   },
   {
     pageKey: "location",
     text: sitemap.location.title,
     link: sitemap.location.path,
-    icon: "tabler/map-pin",
+    icon: "ion/navigate-sharp",
     showInDesktopNav: true,
+    accentColor: "Stone",
   },
   {
     pageKey: "surroundings",
     text: sitemap.surroundings.title,
     link: sitemap.surroundings.path,
-    icon: "tabler/compass",
+    icon: "ion/binocular-sharp",
     showInDesktopNav: true,
+    accentColor: "Bistre",
   },
 ];
 
 export const footerNavigation: NavLinkItem[] = [
   // Can be a subset or different ordering
-  ...headerNavigation.map(item => ({ ...item, icon: undefined })),
+  ...headerNavigation.map((item) => ({ ...item, icon: undefined })),
 ];

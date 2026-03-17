@@ -1,0 +1,121 @@
+---
+// Color configurations - full class names for UnoCSS static analysis
+const mobileColors = ["bg-accentStone/25", "bg-accentBistre/20"];
+
+const desktopColors = [
+  "bg-accentStone/25",
+  "bg-accentForest/20",
+  "bg-bgAlt/60",
+  "bg-accentBistre/25",
+  "bg-accentTerra/20",
+];
+
+const desktopColorsReversed = [...desktopColors].reverse();
+const mobileColorsReversed = [...mobileColors].reverse();
+
+// Separator classes (reusable)
+const separatorClasses =
+  "after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px after:bg-txtMuted/30";
+---
+
+<div
+  class="relative flex min-h-[calc(100svh-var(--header-height,0px))] gap-[0.4rem] w-full flex-col overflow-hidden"
+>
+  <!-- Row 1: Square columns -->
+  <div class="relative w-full">
+    <!-- Column bands: solid colors + separators -->
+    <div class="pointer-events-none absolute inset-0">
+      <!-- Mobile: 2 cols -->
+      <div class="grid h-full grid-cols-2 gap-[8rem] lg:hidden">
+        {
+          mobileColors.map((bgColor, index) => (
+            <div class:list={["relative", bgColor, index < mobileColors.length - 1]} />
+          ))
+        }
+      </div>
+      <!-- Desktop: 5 cols -->
+      <div class="hidden h-full grid-cols-5 gap-[0.4rem] lg:grid">
+        {
+          desktopColors.map((bgColor, index) => (
+            <div class:list={["relative", bgColor, index < desktopColors.length - 1]} />
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Content grid: squares -->
+    <div class="relative z-10 grid w-full grid-cols-1 gap-[0.4rem] lg:grid-cols-5">
+      <!-- Mobile: 2 square cols -->
+      {mobileColors.map(() => <div class="aspect-square lg:hidden" />)}
+
+      <!-- Desktop: 5 square cols -->
+      {desktopColors.map(() => <div class="hidden aspect-square lg:block" />)}
+    </div>
+  </div>
+
+  <!-- Row 2: Remaining height with reversed colors -->
+  <div class="relative flex flex-1">
+    <!-- Column bands: reversed colors + separators -->
+    <div class="pointer-events-none absolute inset-0">
+      <!-- Mobile: 2 cols -->
+      <div class="grid h-full grid-cols-2 gap-[0.4rem] lg:hidden">
+        {
+          mobileColorsReversed.map((bgColor, index) => (
+            <div class:list={["relative", bgColor, index < mobileColorsReversed.length - 1]} />
+          ))
+        }
+      </div>
+      <!-- Desktop: 5 cols (reversed) -->
+      <div class="hidden h-full grid-cols-5 gap-[0.4rem] lg:grid">
+        {
+          desktopColorsReversed.map((bgColor, index) => (
+            <div class:list={["relative", bgColor, index < desktopColorsReversed.length - 1]} />
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Content grid -->
+    <div class="relative z-10 grid w-full grid-cols-1 gap-[0.4rem] lg:grid-cols-5">
+      <!-- Col 1: spacer -->
+      <div class="hidden lg:block"></div>
+
+      <!-- Col 2: heading + mobile CTA -->
+      <div
+        class="flex flex-col items-center justify-center gap-6 p-6 text-center lg:items-start lg:justify-start lg:p-6 lg:text-left"
+      >
+        <h1 class="heading-1">
+          Une chambre à soi<br />
+          en Savoie<br />
+          à Challes les Eaux
+        </h1>
+        <div class="w-full lg:hidden">
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex w-full items-center justify-center h-12 bg-txtPri px-6 text-bgBase text-caption-30 uppercase tracking-wider"
+            href="https://calendly.com/anuchome-info"
+          >
+            Agendar consulta
+          </a>
+        </div>
+      </div>
+
+      <!-- Col 3 & 4: spacers -->
+      <div class="hidden lg:block"></div>
+      <div class="hidden lg:block"></div>
+
+      <!-- Col 5: desktop CTA at bottom -->
+      <div class="hidden items-end p-8 lg:flex">
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex w-full items-center justify-center h-16 bg-txtPri px-6 text-bgBase text-caption-30 uppercase tracking-wider"
+          href="https://calendly.com/anuchome-info"
+        >
+          Agendar consulta
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

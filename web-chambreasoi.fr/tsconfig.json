@@ -1,46 +1,24 @@
 {
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-  ],
-  "exclude": [
-    "dist",
-    "docs/**"
-  ],
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "docs/**"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
     "jsx": "preserve",
     "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
-    "types": [
-      "@cloudflare/workers-types"
-    ],
+    "types": ["@cloudflare/workers-types"],
     "paths": {
-      "@components/*": [
-        "src/components/*"
-      ],
-      "@config/*": [
-        "config/*"
-      ],
-      "@layouts/*": [
-        "src/layouts/*"
-      ],
-      "@styles/*": [
-        "src/styles/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ]
+      "@components/*": ["src/components/*"],
+      "@config/*": ["config/*"],
+      "@layouts/*": ["src/layouts/*"],
+      "@styles/*": ["src/styles/*"],
+      "@utils/*": ["src/utils/*"]
     }
   }
 }

@@ -1,19 +1,19 @@
 ---
-import {getAccommodation} from '@config/accomodation'
-import {getHeadData} from '@config/head'
-import {getOrgData} from '@config/organization'
-import {getPricing} from '@config/pricing'
+import { getAccommodation } from "@config/accomodation";
+import { getHeadData } from "@config/head";
+import { getOrgData } from "@config/organization";
+import { getPricing } from "@config/pricing";
 
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env.DEV;
 
 if (!isDev) {
-  return Astro.redirect('/')
+  return Astro.redirect("/");
 }
 
-const orgData = await getOrgData()
-const pricing = await getPricing()
-const accommodation = await getAccommodation()
-const headData = await getHeadData()
+const orgData = await getOrgData();
+const pricing = await getPricing();
+const accommodation = await getAccommodation();
+const headData = await getHeadData();
 ---
 
 <html lang="fr">

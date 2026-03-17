@@ -1,4 +1,4 @@
-import { defineConfig } from 'sanity'
+import { defineConfig } from "sanity";
 
 /**
  * Sanity Studio stub config for the web app.
@@ -30,15 +30,13 @@ import { defineConfig } from 'sanity'
 // Use named static references so Vite can inline the values at build time.
 // Fallback to the known-safe public defaults so the Studio always has valid
 // config even in edge-case build environments.
-const projectId: string =
-  import.meta.env.PUBLIC_SANITY_PROJECT_ID || 'vq8mnl17'
+const projectId: string = import.meta.env.PUBLIC_SANITY_PROJECT_ID || "vq8mnl17";
 
-const dataset: string =
-  import.meta.env.PUBLIC_SANITY_DATASET || 'production'
+const dataset: string = import.meta.env.PUBLIC_SANITY_DATASET || "production";
 
 export default defineConfig({
-  name: 'web-stub',
-  title: 'chambreasoi.fr',
+  name: "web-stub",
+  title: "chambreasoi.fr",
 
   projectId,
   dataset,
@@ -47,4 +45,4 @@ export default defineConfig({
   // Schema and plugins live in studio-chambreasoi.fr/sanity.config.ts.
   plugins: [],
   schema: { types: [] },
-})
+});

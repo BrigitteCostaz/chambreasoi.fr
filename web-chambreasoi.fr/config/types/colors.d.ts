@@ -9,6 +9,8 @@ export type ColorToken =
   | "accentForest"
   | "accentStone"
   | "accentTerra"
+  | "accentBistre"
+  | "accentBurgundy"
   | "info"
   | "warning"
   | "alert"

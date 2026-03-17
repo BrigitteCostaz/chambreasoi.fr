@@ -42,11 +42,7 @@ export type PublicRateOfferId =
  * Internal key for rate combinations exposed publicly.
  * This is used in the app for lookups and UI.
  */
-export type PublicRateKey =
-  | "1p-no-breakfast"
-  | "1p-breakfast"
-  | "2p-no-breakfast"
-  | "2p-breakfast";
+export type PublicRateKey = "1p-no-breakfast" | "1p-breakfast" | "2p-no-breakfast" | "2p-breakfast";
 
 export type BreakfastMode = "NONE" | "INCLUDED";
 

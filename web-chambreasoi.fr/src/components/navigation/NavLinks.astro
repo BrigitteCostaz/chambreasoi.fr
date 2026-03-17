@@ -1,7 +1,8 @@
 ---
-import NavLink from "./NavLink.astro";
 import { headerNavigation } from "@config/navigation";
 import type { NavLinkItem } from "@config/types/navigation";
+import NavLink from "./NavLink.astro";
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
 
 export interface Props {
   items?: NavLinkItem[];
@@ -12,25 +13,37 @@ export interface Props {
 const {
   items = headerNavigation,
   variant = "header",
-  class: className = "",
-} = Astro.props;
+  class: className = "header-nav",
+} = Astro.props as Props;
 
 // Filter based on variant if needed
-const visibleItems = variant === "header" 
-  ? items.filter(item => item.showInDesktopNav !== false)
-  : items;
+const visibleItems: NavLinkItem[] =
+  variant === "header"
+    ? items.filter((item: NavLinkItem) => item.showInDesktopNav !== false)
+    : items;
 ---
 
 <nav class:list={["nav-links", className]} aria-label="Navigation principale">
-  <ul class="nav-links__list">
-    {visibleItems.map((navItem, index) => (
-      <li class="nav-links__item">
-        <NavLink
-          navItem={navItem}
-          variant={variant}
-          isLast={index === visibleItems.length - 1}
-        />
-      </li>
-    ))}
+  <ul class="nav-links__list grid grid-cols-5 gap-[0.4rem] list-none m-0 p-0">
+    <li
+      class="nav-links__item m-0 p-0 flex items-center
+        group relative overflow-hidden
+        after:content-['']
+        after:absolute after:inset-y-0 after:left-0
+        after:w-0 hover:after:w-full
+        after:bg-[var(--color-accentForest)]
+        after:transition-all after:duration-600 after:ease-in-out"
+    >
+      <div class="relative z-10 min-w-0">
+        <SiteLogo />
+      </div>
+    </li>
+    {
+      visibleItems.map((navItem, index) => (
+        <li class="nav-links__item  m-0 p-0">
+          <NavLink navItem={navItem} variant={variant} isLast={index === visibleItems.length - 1} />
+        </li>
+      ))
+    }
   </ul>
 </nav>

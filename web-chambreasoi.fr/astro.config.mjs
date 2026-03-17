@@ -1,10 +1,11 @@
 // @ts-check
+
+import fs from "node:fs";
+import path from "node:path";
 import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import sanity from "@sanity/astro";
 import { defineConfig } from "astro/config";
-import fs from "node:fs";
-import path from "node:path";
 import icon from "astro-icon";
 import unocss from "unocss/astro";
 
@@ -38,7 +39,7 @@ function loadDotEnvFileIfExists(filePath) {
 
       // Strip surrounding quotes if present
       if (
-        (value.startsWith("\"") && value.endsWith("\"")) ||
+        (value.startsWith('"') && value.endsWith('"')) ||
         (value.startsWith("'") && value.endsWith("'"))
       ) {
         value = value.slice(1, -1);
@@ -72,7 +73,7 @@ function requireProcessEnv(key) {
   if (typeof v === "string" && v.trim() !== "") return v;
   throw new Error(
     `[astro.config] Missing required env var "${key}". ` +
-    `Set it in web-chambreasoi.fr/.env for local dev and in Cloudflare Pages environment variables for builds.`
+      `Set it in web-chambreasoi.fr/.env for local dev and in Cloudflare Pages environment variables for builds.`
   );
 }
 
@@ -108,9 +109,7 @@ const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO !== "false";
 export default defineConfig({
   site: "https://chambreasoi.fr",
   output: "server",
-  adapter: isDev
-    ? (await import("@astrojs/node")).default({ mode: "standalone" })
-    : cloudflare(),
+  adapter: isDev ? (await import("@astrojs/node")).default({ mode: "standalone" }) : cloudflare(),
 
   image: {
     // Cloudflare Workers does not support sharp at runtime.
@@ -123,7 +122,7 @@ export default defineConfig({
 
   integrations: [
     unocss({
-      //injectReset: true,
+      // injectReset: true,
       configFile: "uno.config.ts",
     }),
     react(),
@@ -141,7 +140,6 @@ export default defineConfig({
     icon({
       iconDir: "src/icons",
     }),
-
   ],
 
   experimental: {

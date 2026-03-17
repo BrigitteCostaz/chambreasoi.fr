@@ -19,10 +19,7 @@ export class MissingEnvError extends Error {
   public readonly key: string;
 
   constructor(key: string, hint?: string) {
-    super(
-      `[env] Missing required environment variable "${key}".` +
-      (hint ? ` ${hint}` : "")
-    );
+    super(`[env] Missing required environment variable "${key}".` + (hint ? ` ${hint}` : ""));
     this.name = "MissingEnvError";
     this.key = key;
   }
@@ -103,7 +100,7 @@ export function getPublicSanityEnv(env?: EnvLike): {
   if (!projectId) {
     throw new MissingEnvError(
       "PUBLIC_SANITY_PROJECT_ID",
-      'Set PUBLIC_SANITY_PROJECT_ID (recommended) or SANITY_PROJECT_ID / SANITY_STUDIO_PROJECT_ID.'
+      "Set PUBLIC_SANITY_PROJECT_ID (recommended) or SANITY_PROJECT_ID / SANITY_STUDIO_PROJECT_ID."
     );
   }
 
