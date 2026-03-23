@@ -1,121 +1,404 @@
 ---
-// Color configurations - full class names for UnoCSS static analysis
+/* =========================
+ * Imports
+ * ========================= */
+import { Image } from "astro:assets";
+import Button from "@components/button/Button.astro";
+import { getPricing } from "@config/pricing";
+import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
+import { resolveImage } from "@utils/imageUtils";
+
+/* =========================
+ * Types / Props
+ * ========================= */
+
+/** Sanity image field shape (asset ref + optional alt) */
+interface SanityImageSource {
+  asset?: { _ref?: string; _id?: string; url?: string };
+  alt?: string;
+}
+
+interface Props {
+  /** Sanity image source (preferred) */
+  image?: SanityImageSource | null;
+  /** Alt text override (defaults to image.alt or empty string) */
+  imageAlt?: string;
+  /** Local fallback image path (e.g., "@images/fold-fallback.webp") */
+  fallbackImagePath?: string;
+}
+
+/* =========================
+ * Props
+ * ========================= */
+const {
+  image: sanityImageSource = null,
+  imageAlt: altOverride,
+  fallbackImagePath = "@images/test.webp",
+} = Astro.props;
+
+/* =========================
+ * Image handling: Sanity CDN with local fallback
+ * ========================= */
+
+// Target display size (CSS pixels) for the fold cover
+// The image fills ~40% of viewport width, so 800px covers up to 2000px viewports at 1x
+const coverWidth = 800;
+const coverHeight = 1200;
+
+const imageAlt = altOverride ?? sanityImageSource?.alt ?? "";
+
+const sanitySrc = buildSanityImageUrl({
+  source: sanityImageSource,
+  width: coverWidth,
+  height: coverHeight,
+  quality: 80,
+  format: "webp",
+  fit: "crop",
+});
+
+const sanitySrcSet = buildSanityDprSrcSet({
+  source: sanityImageSource,
+  width: coverWidth,
+  height: coverHeight,
+  dprs: [1, 1.5, 2],
+  quality: 80,
+  format: "webp",
+  fit: "crop",
+});
+
+const shouldRenderSanityImage = !!sanitySrc;
+const fallbackImage = resolveImage(fallbackImagePath);
+const shouldRenderFallback = !shouldRenderSanityImage && !!fallbackImage;
+
+/* =========================
+ * Static Config
+ * ========================= */
 const mobileColors = ["bg-accentStone/25", "bg-accentBistre/20"];
 
 const desktopColors = [
   "bg-accentStone/25",
   "bg-accentForest/20",
-  "bg-bgAlt/60",
+  "bg-accentTerra/20",
   "bg-accentBistre/25",
   "bg-accentTerra/20",
 ];
 
+const squareCells = [
+  { align: "items-end", type: "heading" },
+  { align: "items-start", type: null },
+  { align: "items-start", type: "accommodations" },
+];
+
+/* =========================
+ * Derived Config
+ * ========================= */
 const desktopColorsReversed = [...desktopColors].reverse();
 const mobileColorsReversed = [...mobileColors].reverse();
 
-// Separator classes (reusable)
+// LEFT BLOCK
+const leftColors = desktopColors.slice(0, 3);
+const leftColorsReversed = desktopColorsReversed.slice(2, 5).reverse();
+
+// RIGHT BLOCK
+const rightColors = desktopColors.slice(3, 5);
+const rightColorsReversed = desktopColorsReversed.slice(0, 2).reverse();
+
+/* =========================
+ * Styling helpers
+ * ========================= */
 const separatorClasses =
   "after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px after:bg-txtMuted/30";
+
+/* =========================
+ * Data fetching
+ * ========================= */
+const pricing = await getPricing();
+
+/* =========================
+ * Utils
+ * ========================= */
+function formatEuroFR(cents: number): string {
+  const euros = cents / 100;
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(euros);
+}
+
+/* =========================
+ * Final computed values
+ * ========================= */
+const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
 ---
 
+<h1 class="sr-only hidden">Une chambre d'hôtes à Challes-les-Eaux en Savoie</h1>
 <div
-  class="relative flex min-h-[calc(100svh-var(--header-height,0px))] gap-[0.4rem] w-full flex-col overflow-hidden"
+  class="relative flex min-h-[calc(100svh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
 >
-  <!-- Row 1: Square columns -->
-  <div class="relative w-full">
-    <!-- Column bands: solid colors + separators -->
-    <div class="pointer-events-none absolute inset-0">
-      <!-- Mobile: 2 cols -->
-      <div class="grid h-full grid-cols-2 gap-[8rem] lg:hidden">
-        {
-          mobileColors.map((bgColor, index) => (
-            <div class:list={["relative", bgColor, index < mobileColors.length - 1]} />
-          ))
-        }
+  <div class="mt-[-0.8rem] flex w-full flex-col flex-1 lg:hidden">
+    <!-- Part 1: 2×2 Square Grid -->
+    <div class="grid grid-cols-2 gap-[0.4rem]">
+      <!-- Cell [0,0]: Heading -->
+      <div
+        class:list={["aspect-square flex flex-col p-3 items-start justify-start", desktopColors[0]]}
+      >
+        <span aria-hidden="true" class="heading-1 text-[clamp(24px_6vw_36px)]">
+          une chambre d'hôtes
+        </span>
       </div>
-      <!-- Desktop: 5 cols -->
-      <div class="hidden h-full grid-cols-5 gap-[0.4rem] lg:grid">
-        {
-          desktopColors.map((bgColor, index) => (
-            <div class:list={["relative", bgColor, index < desktopColors.length - 1]} />
-          ))
-        }
+
+      <!-- Cell [0,1]: Location -->
+      <div
+        class:list={[
+          "aspect-square flex flex-col p-3 items-start justify-end text-right",
+          desktopColors[1],
+        ]}
+      >
+        <span class="heading-1 text-[clamp(24px_6vw_36px)]">à Challes-les-Eaux</span>
+        <span class="heading-1 text-[clamp(24px_6vw_36px)] text-txtMuted">en Savoie</span>
+      </div>
+
+      <!-- Cell [1,0]: Accommodations -->
+      <div
+        class:list={["aspect-square flex flex-col p-3 items-end justify-start", desktopColors[2]]}
+      >
+        <ul
+          class="flex flex-col font-medium leading-none text-txtPri text-[clamp(14px_4vw_18px)] list-inside"
+        >
+          <li class="pb-1">avec</li>
+          <li class="text-txtMuted">un lit double</li>
+          <li class="text-txtMuted">une salle de bain privative</li>
+        </ul>
+      </div>
+
+      <!-- Cell [1,1]: Pricing -->
+      <div
+        class:list={[
+          "aspect-square flex flex-col p-3 items-start justify-end text-right",
+          desktopColors[3],
+        ]}
+      >
+        <p class="text-txtPri leading-none text-[clamp(14px_4vw_18px)] font-medium">
+          à partir de {baseNightly1PersonEuroFR} la nuitée
+        </p>
+        <p
+          class="text-txtMuted uppercase tracking-wider leading-tight text-[clamp(10px_2.5vw_12px)] pt-1"
+        >
+          réservations par téléphone uniquement
+        </p>
       </div>
     </div>
 
-    <!-- Content grid: squares -->
-    <div class="relative z-10 grid w-full grid-cols-1 gap-[0.4rem] lg:grid-cols-5">
-      <!-- Mobile: 2 square cols -->
-      {mobileColors.map(() => <div class="aspect-square lg:hidden" />)}
+    <!-- Part 2: Photo + CTA -->
+    <div class="relative overflow-hidden flex-1 min-h-[240px] mt-[0.4rem]">
+      {
+        shouldRenderSanityImage ? (
+          <img
+            src={sanitySrc}
+            srcset={sanitySrcSet ?? undefined}
+            sizes="100vw"
+            alt={imageAlt}
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            class="absolute inset-0 w-full h-full"
+            style="object-fit: cover; object-position: center;"
+          />
+        ) : shouldRenderFallback ? (
+          <Image
+            src={fallbackImage!}
+            alt={imageAlt}
+            width={coverWidth}
+            height={coverHeight}
+            densities={[1, 1.5, 2]}
+            loading="eager"
+            decoding="async"
+            class="absolute inset-0 w-full h-full"
+            style="object-fit: cover; object-position: center;"
+          />
+        ) : null
+      }
 
-      <!-- Desktop: 5 square cols -->
-      {desktopColors.map(() => <div class="hidden aspect-square lg:block" />)}
+      <!-- CTA -->
+      <div class="absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10">
+        <Button
+          class="inline-flex font-sans w-full items-center justify-center"
+          variant="primary"
+          size="sm"
+          href="/la-chambre"
+        >
+          Découvrir la chambre
+        </Button>
+      </div>
     </div>
   </div>
 
-  <!-- Row 2: Remaining height with reversed colors -->
-  <div class="relative flex flex-1">
-    <!-- Column bands: reversed colors + separators -->
-    <div class="pointer-events-none absolute inset-0">
-      <!-- Mobile: 2 cols -->
-      <div class="grid h-full grid-cols-2 gap-[0.4rem] lg:hidden">
-        {
-          mobileColorsReversed.map((bgColor, index) => (
-            <div class:list={["relative", bgColor, index < mobileColorsReversed.length - 1]} />
-          ))
-        }
-      </div>
-      <!-- Desktop: 5 cols (reversed) -->
-      <div class="hidden h-full grid-cols-5 gap-[0.4rem] lg:grid">
-        {
-          desktopColorsReversed.map((bgColor, index) => (
-            <div class:list={["relative", bgColor, index < desktopColorsReversed.length - 1]} />
-          ))
-        }
-      </div>
-    </div>
+  <!-- Desktop: Refactored 2-block layout -->
+  <div class="hidden w-full flex-row gap-[0.4rem] lg:flex lg:flex-1">
+    <!-- LEFT BLOCK: 3×2 grid -->
+    <div class="relative flex flex-1 flex-col gap-[0.4rem]">
+      <!-- Row 1: 3 square columns -->
+      <div class="relative w-full">
+        <!-- Column bands: solid colors -->
+        <div class="pointer-events-none absolute inset-0">
+          <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+            {leftColors.map((bgColor, index) => <div class:list={["relative", bgColor]} />)}
+          </div>
+        </div>
 
-    <!-- Content grid -->
-    <div class="relative z-10 grid w-full grid-cols-1 gap-[0.4rem] lg:grid-cols-5">
-      <!-- Col 1: spacer -->
-      <div class="hidden lg:block"></div>
+        <!-- Content grid: squares -->
+        <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+          {
+            squareCells.map((cell) => (
+              <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
+                {cell.type === "heading" && (
+                  <span aria-hidden="true" class="heading-1">
+                    une chambre d'hôtes
+                  </span>
+                )}
 
-      <!-- Col 2: heading + mobile CTA -->
-      <div
-        class="flex flex-col items-center justify-center gap-6 p-6 text-center lg:items-start lg:justify-start lg:p-6 lg:text-left"
-      >
-        <h1 class="heading-1">
-          Une chambre à soi<br />
-          en Savoie<br />
-          à Challes les Eaux
-        </h1>
-        <div class="w-full lg:hidden">
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex w-full items-center justify-center h-12 bg-txtPri px-6 text-bgBase text-caption-30 uppercase tracking-wider"
-            href="https://calendly.com/anuchome-info"
-          >
-            Agendar consulta
-          </a>
+                {cell.type === "accommodations" && (
+                  <ul class="flex flex-col font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside">
+                    <li class="pb-2">avec</li>
+                    <li class="text-txtMuted">un lit double</li>
+                    <li class="text-txtMuted">une salle de bain privative</li>
+                  </ul>
+                )}
+              </div>
+            ))
+          }
         </div>
       </div>
 
-      <!-- Col 3 & 4: spacers -->
-      <div class="hidden lg:block"></div>
-      <div class="hidden lg:block"></div>
+      <!-- Row 2: 3 adaptive columns -->
+      <div class="relative flex flex-1">
+        <!-- Column bands: reversed colors -->
+        <div class="pointer-events-none absolute inset-0">
+          <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+            {leftColorsReversed.map((bgColor, index) => <div class:list={["relative", bgColor]} />)}
+          </div>
+        </div>
 
-      <!-- Col 5: desktop CTA at bottom -->
-      <div class="hidden items-end p-8 lg:flex">
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex w-full items-center justify-center h-16 bg-txtPri px-6 text-bgBase text-caption-30 uppercase tracking-wider"
-          href="https://calendly.com/anuchome-info"
-        >
-          Agendar consulta
-        </a>
+        <!-- Content grid -->
+        <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+          <!-- Col 1: spacer -->
+          <div></div>
+
+          <!-- Col 2: heading -->
+          <div class="flex flex-col items-start p-[0.8rem] text-left">
+            <span aria-hidden="true" class="heading-1 pb-2">à Challes-les-Eaux</span>
+            <span aria-hidden="true" class="heading-1 text-txtMuted">en Savoie</span>
+          </div>
+
+          <!-- Col 3: details -->
+          <div
+            class="flex flex-col justify-end font-medium gap-3 p-6 text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
+          >
+            <p class="text-txtPri leading-none">
+              à partir de {baseNightly1PersonEuroFR} la nuitée
+            </p>
+
+            <p class="text-txtMuted uppercase tracking-wider leading-tight">
+              réservations par téléphone uniquement
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT BLOCK: 2×2 grid (cols 4-5) -->
+    <div class="relative flex flex-col" style="flex: 0 0 calc(40% - 0.2rem);">
+      <!-- Image: Sanity CDN with local fallback -->
+      <div class="fold-image-container">
+        {
+          shouldRenderSanityImage ? (
+            <img
+              src={sanitySrc}
+              srcset={sanitySrcSet ?? undefined}
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              alt={imageAlt}
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+              class="fold-image"
+            />
+          ) : shouldRenderFallback ? (
+            <Image
+              src={fallbackImage!}
+              alt={imageAlt}
+              width={coverWidth}
+              height={coverHeight}
+              densities={[1, 1.5, 2]}
+              loading="eager"
+              decoding="async"
+              class="fold-image"
+            />
+          ) : null
+        }
+      </div>
+
+      <!-- Vertical separator -->
+      <div
+        class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1"
+      >
+      </div>
+      <!-- Horizontal separator -->
+
+      <!-- Row 1 -->
+      <!-- Row 1 -->
+      <div class="relative w-full border-b-[0.4rem] border-bgBase box-content object-cover">
+        <div class="relative z-10 grid w-full grid-cols-2 gap-[0.4rem]">
+          <div class="aspect-square"></div>
+          <div class="aspect-square"></div>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="relative flex-1">
+        <div class="relative z-10 grid w-full h-full grid-cols-2">
+          <div></div>
+
+          <div class="flex items-end p-8">
+            <Button
+              class="inline-flex font-sans w-full items-center justify-center"
+              variant="primary"
+              size="sm"
+              href="/la-chambre">Découvrir la chambre</Button
+            >
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
+<div class="grid grid-cols-5">
+  <div class="col-span-full flex flex-col col-start-2 px-[.4rem]">
+    <span class="block" style="opacity: 1; transform: none;"
+      ><h2 class="text-balance heading-3">
+        Dans une maison individuelle de plain-pied, au calme et dans un environnement de verdure.
+        Vous serez attendu.e.s et accueilli.e.s par au moins une personne qui aura à coeur de rendre
+        votre séjour chez nous agréable.
+      </h2></span
+    >
+  </div>
+
+  <style>
+    .fold-image-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .fold-image-container :global(img),
+    .fold-image-container :global(.fold-image) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+  </style>
 </div>

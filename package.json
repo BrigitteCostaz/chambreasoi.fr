@@ -25,6 +25,6 @@
     "install:all": "pnpm install"
   },
   "devDependencies": {
-    "wrangler": "4.73.0"
+    "wrangler": "4.76.0"
   }
 }

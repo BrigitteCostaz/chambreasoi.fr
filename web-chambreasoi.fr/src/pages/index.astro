@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Fold from "@components/fold/Fold.astro";
-import { buildSanityImageUrl, fetchSanity, TEST_CONTENT_LIST_QUERY } from "../lib/sanity";
+import { fetchSanity, TEST_CONTENT_LIST_QUERY } from "@lib/sanity";
 
 type TestContentListItem = {
   _id: string;
@@ -19,14 +19,15 @@ type TestContentListItem = {
 };
 
 const items =
-  (await fetchSanity<TestContentListItem[]>(
-    TEST_CONTENT_LIST_QUERY,
-    undefined,
-    // SSR/build friendly: avoid CDN caching by default for freshness
-    { useCdn: false }
-  )) ?? [];
+  (await fetchSanity<TestContentListItem[]>(TEST_CONTENT_LIST_QUERY, undefined, {
+    useCdn: false,
+  })) ?? [];
+
+// Use the first test content image if available, otherwise Fold uses its fallback
+const foldImage = items[0]?.image ?? null;
 ---
 
 <BaseLayout>
-  <Fold />
+  <!-- Pass Sanity image source; Fold handles CDN URL building + local fallback -->
+  <Fold image={foldImage} fallbackImagePath="@images/test.webp" />
 </BaseLayout>

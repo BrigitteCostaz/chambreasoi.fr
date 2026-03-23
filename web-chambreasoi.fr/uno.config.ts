@@ -34,11 +34,14 @@ export default defineConfig({
   safelist: ["font-sans", "font-serif", "font-mono"],
   shortcuts: {
     "heading-1":
-      "text-[clamp(24px,calc(24px+32*(100vw-375px)/1225),48px)] font-[var(--font-display)] font-medium leading-[1.17] text- max-w-full",
+      "text-[clamp(24px,calc(24px+32*(100vw-375px)/1225),32px)] font-[var(--font-display)] font-medium tracking-[var(--font-display-tracking)] leading-[1.1] max-w-full",
+    "body":
+      "text-[clamp(16px,calc(16*1px+2*(100vw-375*1px)/1225),18px)] font-[var(--font-sans)] font-normal leading-[1.5] max-w-full",
+
     "heading-2":
       "text-[clamp(1.875rem,1.6534rem+0.9848vw,2.4414rem)] font-sans font-semibold leading-[1.25] text-foreground max-w-full",
     "heading-3":
-      "text-[clamp(1.5625rem,1.3996rem+0.7235vw,1.9531rem)] font-sans font-semibold leading-[1.33] text-foreground max-w-full",
+      "text-[clamp(1.5625rem,1.3996rem+0.7235vw,1.9531rem)] font-display font-medium leading-[1.33] text-foreground max-w-full",
     "heading-4":
       "text-[clamp(1rem,1.331rem+0.7235vw,1.331rem)] font-sans leading-[1.24] text-foreground max-w-full",
   },

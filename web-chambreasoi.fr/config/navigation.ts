@@ -8,6 +8,7 @@ export const headerNavigation: NavLinkItem[] = [
     link: sitemap.home.path,
     icon: "tabler/home",
     showInDesktopNav: false,
+    accentColor: "Forest",
   },
   {
     pageKey: "room",

@@ -169,6 +169,8 @@ export default defineConfig({
         "@styles/": new URL("./src/styles/", import.meta.url).pathname,
         "@config": new URL("./config", import.meta.url).pathname,
         "@config/": new URL("./config/", import.meta.url).pathname,
+        "@lib": new URL("./src/lib", import.meta.url).pathname,
+        "@lib/": new URL("./src/lib", import.meta.url).pathname,
 
         ...(process.env.NODE_ENV === "production"
           ? { "react-dom/server": "react-dom/server.edge" }

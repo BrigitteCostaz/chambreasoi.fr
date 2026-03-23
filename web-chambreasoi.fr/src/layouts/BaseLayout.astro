@@ -2,8 +2,19 @@
 import Header from "@components/header/Header.astro";
 import Head from "@layouts/Head.astro";
 import ThemeToggle from "@components/ThemeToggle.astro";
+import MobileNav from "@components/navigation/MobileNav.astro";
+import { headerNavigation } from "@config/navigation";
 
 const currentYear = new Date().getFullYear();
+
+// Transform headerNavigation to MobileNav's expected format
+const mobileNavLinks = headerNavigation
+  .filter((item) => item.text) // Only include items with text
+  .map((item) => ({
+    href: item.link,
+    label: item.text!, // Non-null assertion safe due to filter above
+    accentColor: item.accentColor,
+  }));
 ---
 
 <html lang="fr">
@@ -15,5 +26,6 @@ const currentYear = new Date().getFullYear();
     </main>
     <ThemeToggle />
     <footer></footer>
+    <MobileNav links={mobileNavLinks} />
   </body>
 </html>

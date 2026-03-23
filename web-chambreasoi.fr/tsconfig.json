@@ -18,7 +18,8 @@
       "@config/*": ["config/*"],
       "@layouts/*": ["src/layouts/*"],
       "@styles/*": ["src/styles/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@lib/*": ["src/lib/*"]
     }
   }
 }

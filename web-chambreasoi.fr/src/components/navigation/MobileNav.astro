@@ -1,0 +1,235 @@
+---
+/**
+ * MobileNav - Fixed bottom mobile navigation bar
+ * Visible only below `lg` breakpoint, hidden on `lg+`
+ */
+import { Icon } from "astro-icon/components";
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
+
+interface Link {
+  href: string;
+  label: string;
+  accentColor?: string;
+}
+
+interface Props {
+  links: Link[];
+}
+
+const { links } = Astro.props;
+
+const comparePathsWithTrailingSlash = (path1: string, path2: string): boolean => {
+  const ensureTrailingSlash = (path: string): string => (path.endsWith("/") ? path : `${path}/`);
+  return ensureTrailingSlash(path1) === ensureTrailingSlash(path2);
+};
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed inset-x-0 bottom-0 z-40 px-.8rem pb-.8rem lg:hidden" data-mobile-nav>
+  <nav class="grid grid-cols-[1fr_auto] bg-bgBase border border-txtMuted/10">
+    <!-- Logo -->
+    <div class="flex items-center h-12 mobile-nav-logo">
+      <SiteLogo />
+    </div>
+
+    <!-- Toggle button -->
+    <button
+      type="button"
+      id="mobile-nav-toggle"
+      class="mobile-nav-toggle relative flex items-center justify-center w-12 h-12 border-l border-txtMuted/20"
+      aria-label="Ouvrir le menu"
+      aria-haspopup="true"
+      aria-expanded="false"
+      aria-controls="mobile-nav-dropdown"
+      data-mobile-nav-toggle
+    >
+      <Icon
+        name="ion/menu-sharp"
+        class="h-6 w-6 transition-opacity duration-200"
+        aria-hidden="true"
+        data-icon-menu
+      />
+      <Icon
+        name="ion/close-sharp"
+        class="absolute h-6 w-6 opacity-0 transition-opacity duration-200"
+        aria-hidden="true"
+        data-icon-close
+      />
+    </button>
+
+    <!-- Dropdown -->
+    <div
+      id="mobile-nav-dropdown"
+      class="col-span-full overflow-hidden transition-[height] duration-300 ease-in-out"
+      style="height: 0px;"
+      data-mobile-nav-dropdown
+    >
+      <ul class="divide-y divide-txtMuted/20">
+        {
+          links.map((link) => {
+            const isActive = comparePathsWithTrailingSlash(currentPath, link.href);
+            const accentColor = link.accentColor ?? "Stone";
+            const accentColorVar = `var(--color-accent${accentColor})`;
+
+            return (
+              <li class="relative h-12">
+                <a
+                  href={link.href}
+                  class="mobile-nav-link flex items-center h-12 px-4 text-caption-30-fixed uppercase tracking-wider transition-colors duration-200"
+                  style={`--link-accent-color: ${accentColorVar}`}
+                  aria-current={isActive ? "page" : undefined}
+                  data-active={isActive ? "true" : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<style>
+  /* Logo area focus/active states */
+  .mobile-nav-logo:has(a:focus-visible),
+  .mobile-nav-logo:has(a:active) {
+    background-color: var(--color-accentForest);
+  }
+
+  .mobile-nav-logo:has(a:focus-visible) :global(.logo-text),
+  .mobile-nav-logo:has(a:active) :global(.logo-text) {
+    color: var(--color-bgBase);
+  }
+
+  /* Toggle button focus/active states */
+  .mobile-nav-toggle:focus-visible,
+  .mobile-nav-toggle:active {
+    background-color: var(--color-accentStone);
+    color: var(--color-bgBase);
+    outline: none;
+  }
+
+  /* Nav link states */
+  .mobile-nav-link {
+    color: var(--color-txtPri);
+  }
+
+  /* Current page (always shows accent style) */
+  .mobile-nav-link[aria-current="page"] {
+    background-color: oklch(from var(--link-accent-color) l c h / 1);
+    color: var(--color-bgBase);
+  }
+
+  /* Focus & active states (for non-current pages) */
+  .mobile-nav-link:not([aria-current="page"]):focus-visible,
+  .mobile-nav-link:not([aria-current="page"]):active {
+    background-color: oklch(from var(--link-accent-color) l c h / 1);
+    color: var(--color-bgBase);
+    outline: none;
+  }
+</style>
+
+<script>
+  class MobileNavController {
+    private header: HTMLElement;
+    private toggle: HTMLButtonElement;
+    private dropdown: HTMLElement;
+    private iconMenu: HTMLElement;
+    private iconClose: HTMLElement;
+    private abortController: AbortController;
+
+    constructor(header: HTMLElement) {
+      this.header = header;
+      this.toggle = header.querySelector("[data-mobile-nav-toggle]")!;
+      this.dropdown = header.querySelector("[data-mobile-nav-dropdown]")!;
+      this.iconMenu = header.querySelector("[data-icon-menu]")!;
+      this.iconClose = header.querySelector("[data-icon-close]")!;
+      this.abortController = new AbortController();
+    }
+
+    init() {
+      const { signal } = this.abortController;
+
+      // Toggle dropdown on button click
+      this.toggle.addEventListener("click", () => this.toggleMenu(), { signal });
+
+      // Close on Escape key
+      document.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.key === "Escape" && this.isExpanded()) {
+            this.closeMenu();
+            this.toggle.focus();
+          }
+        },
+        { signal }
+      );
+
+      // Close when clicking outside
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (this.isExpanded() && !this.header.contains(e.target as Node)) {
+            this.closeMenu();
+          }
+        },
+        { signal }
+      );
+    }
+
+    private isExpanded(): boolean {
+      return this.toggle.getAttribute("aria-expanded") === "true";
+    }
+
+    private toggleMenu() {
+      if (this.isExpanded()) {
+        this.closeMenu();
+      } else {
+        this.openMenu();
+      }
+    }
+
+    private openMenu() {
+      this.dropdown.style.height = `${this.dropdown.scrollHeight}px`;
+      this.toggle.setAttribute("aria-expanded", "true");
+      this.toggle.setAttribute("aria-label", "Fermer le menu");
+      this.iconMenu.style.opacity = "0";
+      this.iconClose.style.opacity = "1";
+    }
+
+    private closeMenu() {
+      this.dropdown.style.height = "0px";
+      this.toggle.setAttribute("aria-expanded", "false");
+      this.toggle.setAttribute("aria-label", "Ouvrir le menu");
+      this.iconMenu.style.opacity = "1";
+      this.iconClose.style.opacity = "0";
+    }
+
+    destroy() {
+      this.abortController.abort();
+    }
+  }
+
+  // Store controller instance for cleanup
+  let mobileNavController: MobileNavController | null = null;
+
+  function initMobileNav() {
+    // Cleanup previous instance
+    mobileNavController?.destroy();
+
+    const header = document.querySelector("[data-mobile-nav]") as HTMLElement | null;
+    if (!header) return;
+
+    mobileNavController = new MobileNavController(header);
+    mobileNavController.init();
+  }
+
+  // Initialize on page load
+  initMobileNav();
+
+  // Re-initialize on Astro view transitions
+  document.addEventListener("astro:after-swap", initMobileNav);
+</script>
