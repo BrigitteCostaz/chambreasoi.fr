@@ -9,7 +9,6 @@
   },
   "pnpm": {
     "overrides": {
-      "wrangler": "4.73.0",
       "tar": "7.5.11",
       "undici": "7.18.2",
       "prismjs": "1.30.0",
