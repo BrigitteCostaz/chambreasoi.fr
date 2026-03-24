@@ -31,7 +31,7 @@ export default defineConfig({
       },
     },
   },
-  safelist: ["font-sans", "font-serif", "font-mono"],
+  safelist: ["font-sans", "font-serif", "font-mono, sr-only"],
   shortcuts: {
     "heading-1":
       "text-[clamp(24px,calc(24px+32*(100vw-375px)/1225),32px)] font-[var(--font-display)] font-medium tracking-[var(--font-display-tracking)] leading-[1.1] max-w-full",
