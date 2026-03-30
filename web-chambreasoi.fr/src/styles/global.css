@@ -13,6 +13,7 @@ body {
     padding: 0;
     background-color: var(--color-bgBase);
     color: var(--color-txtPri);
+    font-family: "Karla", sans-serif;
 }
 
 ul,

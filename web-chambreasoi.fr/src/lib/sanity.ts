@@ -47,3 +47,25 @@ export {
 
 // GROQ query constants
 export * from "@chambreasoi/sanity/queries";
+
+// ---------------------------------------------------------------------------
+// Fold content
+// ---------------------------------------------------------------------------
+
+import { fetchSanity } from "@chambreasoi/sanity/fetch";
+import { FOLD_CONTENT_QUERY, HEADLINE_CONTENT_QUERY, type FoldContentResult, type HeadlineContentResult } from "@chambreasoi/sanity/queries";
+
+/**
+ * Fetch the single foldContent document from Sanity.
+ * Returns null if the document has not been created yet — callers must
+ * provide their own fallback strings.
+ */
+export async function getFoldContent(): Promise<FoldContentResult | null> {
+  return fetchSanity<FoldContentResult>(FOLD_CONTENT_QUERY);
+}
+/**
+ * Fetch the single headlineContent document from Sanity.
+ */
+export async function getHeadlineContent(): Promise<HeadlineContentResult | null> {
+  return fetchSanity<HeadlineContentResult>(HEADLINE_CONTENT_QUERY);
+}

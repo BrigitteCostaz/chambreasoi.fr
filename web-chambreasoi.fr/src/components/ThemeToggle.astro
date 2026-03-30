@@ -95,7 +95,7 @@ const STORAGE_KEY = "theme:mode";
     /** @type {ThemeMode} */
     const defaultMode = (() => {
       const v = btn.getAttribute("data-default-mode");
-      return (v === "light" || v === "dark" || v === "auto") ? v : "auto";
+      return v === "light" || v === "dark" || v === "auto" ? v : "auto";
     })();
 
     /** @type {ThemeMode} */

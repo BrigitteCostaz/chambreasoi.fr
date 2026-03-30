@@ -63,7 +63,7 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
 ---
 
 <head>
-     <ColorStyles />
+  <ColorStyles />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
@@ -92,31 +92,32 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
   {pageDescription ? <meta name="twitter:description" content={pageDescription} /> : null}
   <meta name="twitter:image" content={ogImageURL} />
 
-  {HeadData.favicons?.faviconIco
-    ? <link rel="icon" href={HeadData.favicons.faviconIco} />
-    : null}
-  {HeadData.favicons?.faviconPng
-    ? <link rel="icon" type="image/png" href={HeadData.favicons.faviconPng} />
-    : null}
-  {HeadData.favicons?.faviconPng96
-    ? (
-      <link
-        rel="icon"
-        type="image/png"
-        sizes="96x96"
-        href={HeadData.favicons.faviconPng96}
-      />
-    )
-    : null}
-  {HeadData.favicons?.faviconSvg
-    ? <link rel="icon" type="image/svg+xml" href={HeadData.favicons.faviconSvg} />
-    : null}
-  {HeadData.favicons?.appleTouchIcon
-    ? <link rel="apple-touch-icon" href={HeadData.favicons.appleTouchIcon} />
-    : null}
-  {HeadData.favicons?.webManifest
-    ? <link rel="manifest" href={HeadData.favicons.webManifest} />
-    : null}
+  {HeadData.favicons?.faviconIco ? <link rel="icon" href={HeadData.favicons.faviconIco} /> : null}
+  {
+    HeadData.favicons?.faviconPng ? (
+      <link rel="icon" type="image/png" href={HeadData.favicons.faviconPng} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.faviconPng96 ? (
+      <link rel="icon" type="image/png" sizes="96x96" href={HeadData.favicons.faviconPng96} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.faviconSvg ? (
+      <link rel="icon" type="image/svg+xml" href={HeadData.favicons.faviconSvg} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.appleTouchIcon ? (
+      <link rel="apple-touch-icon" href={HeadData.favicons.appleTouchIcon} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.webManifest ? (
+      <link rel="manifest" href={HeadData.favicons.webManifest} />
+    ) : null
+  }
 
   <link
     rel="preload"
@@ -128,10 +129,7 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
 
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
 
-  <link
-    rel="stylesheet"
-    href="https://fonts.bunny.net/css?family=karla:400&display=swap"
-  />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=karla:400,500,600&display=swap" />
 
-  <Schema item={{'@context': 'https://schema.org', '@graph': graph}} />
+  <Schema item={{ "@context": "https://schema.org", "@graph": graph }} />
 </head>

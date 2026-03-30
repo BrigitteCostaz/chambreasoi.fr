@@ -52,41 +52,6 @@ export interface AccommodationSettingsResult {
 }
 
 // ---------------------------------------------------------------------------
-// testContent
-// ---------------------------------------------------------------------------
-
-/** Fetch all testContent documents (list view). */
-export const TEST_CONTENT_LIST_QUERY = /* groq */ `
-  *[_type == "testContent"] | order(_createdAt desc) {
-    _id,
-    _type,
-    title,
-    "slug": slug.current,
-    excerpt,
-    image {
-      asset->,
-      alt
-    }
-  }
-`
-
-/** Fetch a single testContent document by slug. */
-export const TEST_CONTENT_BY_SLUG_QUERY = /* groq */ `
-  *[_type == "testContent" && slug.current == $slug][0] {
-    _id,
-    _type,
-    title,
-    "slug": slug.current,
-    excerpt,
-    body,
-    image {
-      asset->,
-      alt
-    }
-  }
-`
-
-// ---------------------------------------------------------------------------
 // Singleton settings
 // ---------------------------------------------------------------------------
 
@@ -135,4 +100,43 @@ export const ACCOMMODATION_SETTINGS_QUERY = /* groq */ `
     checkoutTime,
     amenities
   }
+`
+
+// ---------------------------------------------------------------------------
+// foldContent
+// ---------------------------------------------------------------------------
+
+export interface FoldContentResult {
+  seoTitle: string | null
+  mosaicTile1Text: string | null
+  mosaicTile2Line1: string | null
+  mosaicTile2Line2: string | null
+  amenitiesLabel: string | null
+  amenities: string[] | null
+  bookingNote: string | null
+}
+
+export const FOLD_CONTENT_QUERY = /* groq */ `
+  *[_type == "foldContent"][0]{
+    seoTitle,
+    mosaicTile1Text,
+    mosaicTile2Line1,
+    mosaicTile2Line2,
+    amenitiesLabel,
+    amenities,
+    bookingNote
+  }
+`
+// ---------------------------------------------------------------------------
+// headlineContent
+// ---------------------------------------------------------------------------
+
+export interface HeadlineContentResult {
+  headLineText: string | null
+}
+
+export const HEADLINE_CONTENT_QUERY = /* groq */ `
+    *[_type == "headlineContent"][0]{
+    headLineText,
+    }
 `

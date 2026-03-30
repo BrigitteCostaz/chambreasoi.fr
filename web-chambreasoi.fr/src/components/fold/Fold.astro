@@ -5,6 +5,8 @@
 import { Image } from "astro:assets";
 import Button from "@components/button/Button.astro";
 import { getPricing } from "@config/pricing";
+import { getOrgData } from "@config/organization";
+import { getFoldContent } from "@lib/sanity";
 import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
 import { resolveImage } from "@utils/imageUtils";
 
@@ -78,15 +80,15 @@ const mobileColors = ["bg-accentStone/25", "bg-accentBistre/20"];
 const desktopColors = [
   "bg-accentStone/25",
   "bg-accentForest/20",
-  "bg-accentTerra/20",
   "bg-accentBistre/25",
+  "bg-accentTerra/20",
   "bg-accentTerra/20",
 ];
 
 const squareCells = [
   { align: "items-end", type: "heading" },
   { align: "items-start", type: null },
-  { align: "items-start", type: "availability" },
+  { align: "items-start", type: "amenities" },
 ];
 
 /* =========================
@@ -113,6 +115,9 @@ const separatorClasses =
  * Data fetching
  * ========================= */
 const pricing = await getPricing();
+const org = await getOrgData();
+const phoneDisplay = org.contact.phone.display;
+const phoneLink = org.contact.phone.link;
 
 /* =========================
  * Utils
@@ -131,65 +136,84 @@ function formatEuroFR(cents: number): string {
  * Final computed values
  * ========================= */
 const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
+
+const fold = await getFoldContent();
+
+// Fallback strings mirror the original hardcoded content
+// and are used whenever the Sanity document has not been created yet.
+const f = {
+  seoTitle: fold?.seoTitle ?? "Une chambre d'hôtes à Challes-les-Eaux en Savoie",
+  mosaicTile1Text: fold?.mosaicTile1Text ?? "Une chambre d'hôtes",
+  mosaicTile2Line1: fold?.mosaicTile2Line1 ?? "à Challes-les-Eaux",
+  mosaicTile2Line2: fold?.mosaicTile2Line2 ?? "en Savoie",
+  amenitiesLabel: fold?.amenitiesLabel ?? "avec",
+  amenities: fold?.amenities ?? ["un lit double", "une salle de bain privative"],
+  bookingNote: fold?.bookingNote ?? "réservations par téléphone uniquement",
+};
 ---
 
 <div
   class="relative flex min-h-[calc(100svh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
 >
   <!-- Single semantic H1 (accessible, not duplicated) -->
-  <h1 class="sr-only">Une chambre d'hôtes à Challes-les-Eaux en Savoie</h1>
+  <h1 class="sr-only">{f.seoTitle}</h1>
 
-  <div class="mt-[0.8rem] flex w-full flex-col flex-1 lg:hidden">
+  <!-- Mobile -->
+  <div class="mt-[0.8rem] flex w-full flex-col flex-1 xl:hidden">
     <!-- Part 1: 2×2 Square Grid -->
     <div class="grid grid-cols-2 gap-[0.4rem]">
       <!-- Visual title (aria-hidden to avoid duplication) -->
       <div class="heading-1 col-span-2 grid grid-cols-2 gap-[0.4rem]" aria-hidden="true">
         <div
           class:list={[
-            "aspect-square flex flex-col p-3 items-start justify-start",
+            "aspect-square flex flex-col p-3 md:p-6 items-start justify-start",
             desktopColors[0],
           ]}
         >
-          Une chambre d'hôtes
+          {f.mosaicTile1Text}
         </div>
         <div
           class:list={[
-            "aspect-square flex flex-col p-3 items-start justify-end text-right",
+            "aspect-square flex flex-col p-3 md:p-6 items-start justify-end text-right",
             desktopColors[1],
           ]}
         >
-          <span>à Challes-les-Eaux</span>
-          <span class="text-txtMuted">en Savoie</span>
+          <span>{f.mosaicTile2Line1}</span>
+          <span class="text-txtMuted">{f.mosaicTile2Line2}</span>
         </div>
       </div>
 
       <!-- Cell [1,0]: Accommodations -->
       <div
-        class:list={["aspect-square flex flex-col p-3 items-end justify-start", desktopColors[2]]}
+        class:list={[
+          "aspect-square flex flex-col p-3 md:p-6 items-end justify-start",
+          desktopColors[2],
+        ]}
       >
         <ul
-          class="flex flex-col font-medium leading-none text-txtPri text-[clamp(14px_4vw_18px)] list-inside"
+          class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] list-inside"
         >
-          <li class="pb-1">avec</li>
-          <li class="text-txtMuted">un lit double</li>
-          <li class="text-txtMuted">une salle de bain privative</li>
+          <li class="pb-2">{f.amenitiesLabel}</li>
+          {f.amenities.map((item: string) => <li class="text-txtMuted">{item}</li>)}
         </ul>
       </div>
 
       <!-- Cell [1,1]: Pricing -->
       <div
         class:list={[
-          "aspect-square flex flex-col p-3 items-start justify-end text-right",
+          "aspect-square flex flex-col font-display p-3 md:p-6 items-start justify-end",
           desktopColors[3],
         ]}
       >
-        <p class="text-txtPri leading-none text-[clamp(14px_4vw_18px)] font-medium">
+        <p
+          class="text-txtPri leading-none pb-2 text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] font-medium"
+        >
           à partir de {baseNightly1PersonEuroFR} la nuitée
         </p>
         <p
-          class="text-txtMuted uppercase tracking-wider leading-tight text-[clamp(10px_2.5vw_12px)] pt-1"
+          class="text-txtMuted pb-4 uppercase tracking-wider leading-tight text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] pt-1"
         >
-          réservations par téléphone uniquement
+          {f.bookingNote}
         </p>
       </div>
     </div>
@@ -225,7 +249,98 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
       }
 
       <!-- CTA -->
+      <div class="absolute p-0.8rem inset-x-0 top-0.8rem flex justify-center z-10">
+        <Button
+          variant="accent"
+          size="sm"
+          icon="ion/call-sharp"
+          href={phoneLink}
+          class="inline-flex font-sans w-full items-center justify-center"
+        >
+          {phoneDisplay}
+        </Button>
+      </div>
       <div class="absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10">
+        <Button
+          class="inline-flex font-sans w-full items-center justify-center"
+          variant="primary"
+          size="sm"
+          href="/la-chambre"
+        >
+          Découvrir la chambre
+        </Button>
+      </div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="hidden w-full flex-row gap-[0.4rem] xl:flex xl:flex-1">
+      <!-- LEFT BLOCK -->
+      <div class="relative flex flex-1 flex-col gap-[0.4rem]">
+        <!-- Row 1 -->
+        <div class="relative w-full">
+          <div class="pointer-events-none absolute inset-0">
+            <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+              {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
+            </div>
+          </div>
+
+          <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+            {
+              squareCells.map((cell) => (
+                <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
+                  {cell.type === "heading" && (
+                    <span aria-hidden="true" class="heading-1">
+                      {f.mosaicTile1Text}
+                    </span>
+                  )}
+
+                  {cell.type === "availability" && (
+                    <div class="flex flex-col font-display justify-start  gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]">
+                      <p class="text-txtPri leading-none font-display">
+                        à partir de {baseNightly1PersonEuroFR} la nuitée
+                      </p>
+
+                      <p class="text-txtMuted tracking-wider leading-tight">{f.bookingNote}</p>
+                    </div>
+                  )}
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="relative flex flex-1">
+          <div class="pointer-events-none absolute inset-0">
+            <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+              {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
+            </div>
+          </div>
+
+          <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+            <div></div>
+
+            <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
+              <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
+              <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
+            </div>
+
+            <div
+              class="flex flex-col justify-start gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
+            >
+              <ul
+                class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside"
+              >
+                <li class="pb-2">{f.amenitiesLabel}</li>
+                {f.amenities.map((item: string) => <li class="text-txtMuted">{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10 xl:hidden">
         <Button
           class="inline-flex font-sans w-full items-center justify-center"
           variant="primary"
@@ -239,7 +354,7 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
   </div>
 
   <!-- Desktop -->
-  <div class="hidden w-full flex-row gap-[0.4rem] lg:flex lg:flex-1">
+  <div class="hidden w-full flex-row gap-[0.4rem] xl:flex xl:flex-1">
     <!-- LEFT BLOCK -->
     <div class="relative flex flex-1 flex-col gap-[0.4rem]">
       <!-- Row 1 -->
@@ -256,20 +371,17 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
               <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
                 {cell.type === "heading" && (
                   <span aria-hidden="true" class="heading-1">
-                    une chambre d'hôtes
+                    {f.mosaicTile1Text}
                   </span>
                 )}
 
-                {cell.type === "availability" && (
-                  <div class="flex flex-col justify-start font-medium gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]">
-                    <p class="text-txtPri leading-none">
-                      à partir de {baseNightly1PersonEuroFR} la nuitée
-                    </p>
-
-                    <p class="text-txtMuted uppercase tracking-wider leading-tight">
-                      réservations par téléphone uniquement
-                    </p>
-                  </div>
+                {cell.type === "amenities" && (
+                  <ul class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside">
+                    <li class="pb-2">{f.amenitiesLabel}</li>
+                    {f.amenities.map((item: string) => (
+                      <li class="text-txtMuted">{item}</li>
+                    ))}
+                  </ul>
                 )}
               </div>
             ))
@@ -289,31 +401,34 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
           <div></div>
 
           <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
-            <span class="heading-1 pb-2">à Challes-les-Eaux</span>
-            <span class="heading-1 text-txtMuted">en Savoie</span>
+            <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
+            <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
           </div>
 
           <div
-            class="flex flex-col justify-start font-medium gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
+            class="flex flex-col justify-end font-display font-medium p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
           >
-            <ul
-              class="flex flex-col font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside"
+            <div>
+              <p class="text-txtPri leading-none pb-2">
+                à partir de {baseNightly1PersonEuroFR} la nuitée
+              </p>
+
+              <p class="text-txtMuted uppercase tracking-wider leading-tight pb-6">
+                {f.bookingNote}
+              </p>
+            </div>
+
+            <Button
+              variant="accent"
+              size="sm"
+              icon="ion/call-sharp"
+              href={phoneLink}
+              class="inline-flex font-sans font-400 w-full items-center justify-center"
             >
-              <li class="pb-2">avec</li>
-              <li class="text-txtMuted">un lit double</li>
-              <li class="text-txtMuted">une salle de bain privative</li>
-            </ul>
+              {phoneDisplay}
+            </Button>
           </div>
         </div>
-      </div>
-
-      <!-- Description -->
-      <div class="bg-bgBase/50 absolute bottom-.8rem p-.8rem">
-        <h2 class="text-balance body">
-          Dans une maison individuelle de plain-pied, au calme et dans un environnement de verdure.
-          Vous serez attendu.e.s et accueilli.e.s par au moins une personne qui aura à coeur de
-          rendre votre séjour chez nous agréable.
-        </h2>
       </div>
     </div>
 
@@ -379,18 +494,23 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
   </div>
 </div>
 
-<!-- Bottom description (mobile) -->
-<div class="grid grid-cols-5">
-  <div class="col-span-full flex flex-col col-start-1 px-[.4rem]">
-    <h2 class="text-balance heading-3">
-      Dans une maison individuelle de plain-pied, au calme et dans un environnement de verdure. Vous
-      serez attendu.e.s et accueilli.e.s par au moins une personne qui aura à coeur de rendre votre
-      séjour chez nous agréable.
-    </h2>
-  </div>
-</div>
-
 <style>
+  .fold-image-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .fold-image-container :global(img),
+  .fold-image-container :global(.fold-image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
   .fold-image-container {
     position: absolute;
     inset: 0;

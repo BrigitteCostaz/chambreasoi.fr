@@ -11,16 +11,16 @@ const ACCOMMODATION_DEFAULTS: AccomodationConfig = {
   checkoutTime: "10:00",
 
   amenities: [
-    "Wi-Fi gratuit",// 
+    "Wi-Fi gratuit",
     "Chauffage individuel",
     "Terrasse privative",
-    "Salle de bain privative avec douche",//
-    "Linges de toilette fournis",//
+    "Salle de bain privative avec douche",
+    "Linges de toilette fournis",
     "Draps fournis",
     "Coin cuisine (18h-20h)",
     "Espace commun avec télévision (18h-22h)",
-    "Parking gratuit sur place",//
-    "Abri vélos sécurisé",//
+    "Parking gratuit sur place",
+    "Abri vélos sécurisé",
     "Dressing",
     "Bureau",
     "Espace fumeur terrasse",
