@@ -39,3 +39,24 @@ li {
     white-space: nowrap;
     border-width: 0;
 }
+
+.grid-line {
+    position: relative;
+    height: 100%;
+}
+
+.grid-line::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 1px;
+    transform: translateX(100%);
+    background: color-mix(in oklch, var(--grid-line-color, var(--color-txtPri)) var(--grid-line-opacity, 10%), transparent);
+}
+
+.grid-line-reverse {
+    --grid-line-color: var(--color-bgCard);
+    --grid-line-opacity: 50%;
+}

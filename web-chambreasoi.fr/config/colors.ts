@@ -13,7 +13,7 @@ export const ColorData: ColorConfig = {
       txtMuted: "oklch(0.4672 0.0228 133.29)", // #555d50
 
       accentForest: "oklch(48.0% 0.084 145deg)", // #3d6a3f
-      accentStone: "oklch(0.4876 0.0303 221.14)", // #4b6362
+      accentStone: "oklch(0.4876 0.0303 221.14)", // #4d646c
       accentTerra: "oklch(50.0% 0.101 31deg)", // #944b3e
       accentBistre: "oklch(0.5465 0.0961 68.27)", // #95652b
       accentBurgundy: "oklch(46% 0.16 17deg)", // #9f1d35

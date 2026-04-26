@@ -140,3 +140,24 @@ export const HEADLINE_CONTENT_QUERY = /* groq */ `
     headLineText,
     }
 `
+// ---------------------------------------------------------------------------
+// locationSectionContent
+// ---------------------------------------------------------------------------
+
+export interface LocationSectionContentResult {
+  introText: string | null
+  mapLabel1: string | null
+  mapLabel2: string | null
+  mapLabel3: string | null
+  mapCta: string | null
+}
+
+export const LOCATIONSECTION_CONTENT_QUERY = /* groq */ `
+    *[_type == "locationSectionContent"][0]{
+    introText,
+    mapLabel1,
+    mapLabel2,
+    mapLabel3,
+    mapCta,
+    }
+`

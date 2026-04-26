@@ -9,6 +9,7 @@ import { getOrgData } from "@config/organization";
 import { getFoldContent } from "@lib/sanity";
 import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
 import { resolveImage } from "@utils/imageUtils";
+import { formatEuroFR } from "@utils/currency";
 
 /* =========================
  * Types / Props
@@ -120,19 +121,6 @@ const phoneDisplay = org.contact.phone.display;
 const phoneLink = org.contact.phone.link;
 
 /* =========================
- * Utils
- * ========================= */
-function formatEuroFR(cents: number): string {
-  const euros = cents / 100;
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(euros);
-}
-
-/* =========================
  * Final computed values
  * ========================= */
 const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
@@ -161,58 +149,34 @@ const f = {
   <!-- Mobile -->
   <div class="mt-[0.8rem] flex w-full flex-col flex-1 xl:hidden">
     <!-- Part 1: 2×2 Square Grid -->
-    <div class="grid grid-cols-2 gap-[0.4rem]">
-      <!-- Visual title (aria-hidden to avoid duplication) -->
-      <div class="heading-1 col-span-2 grid grid-cols-2 gap-[0.4rem]" aria-hidden="true">
-        <div
-          class:list={[
-            "aspect-square flex flex-col p-3 md:p-6 items-start justify-start",
-            desktopColors[0],
-          ]}
-        >
+    <div class="grid grid-cols-2 gap-grid">
+      <!-- heading -->
+      <div class="heading-1 col-span-2 grid grid-cols-2 gap-grid" aria-hidden="true">
+        <div class:list={["square box-pad flex-col-start", desktopColors[0]]}>
           {f.mosaicTile1Text}
         </div>
-        <div
-          class:list={[
-            "aspect-square flex flex-col p-3 md:p-6 items-start justify-end text-right",
-            desktopColors[1],
-          ]}
-        >
+
+        <div class:list={["square box-pad flex-col-end text-right", desktopColors[1]]}>
           <span>{f.mosaicTile2Line1}</span>
-          <span class="text-txtMuted">{f.mosaicTile2Line2}</span>
+          <span class="text-muted">{f.mosaicTile2Line2}</span>
         </div>
       </div>
 
-      <!-- Cell [1,0]: Accommodations -->
-      <div
-        class:list={[
-          "aspect-square flex flex-col p-3 md:p-6 items-end justify-start",
-          desktopColors[2],
-        ]}
-      >
-        <ul
-          class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] list-inside"
-        >
+      <!-- amenities -->
+      <div class:list={["square box-pad flex-col-end", desktopColors[2]]}>
+        <ul class="list-ui text-ui-md text-primary">
           <li class="pb-2">{f.amenitiesLabel}</li>
-          {f.amenities.map((item: string) => <li class="text-txtMuted">{item}</li>)}
+          {f.amenities.map((item: string) => <li class="text-muted">{item}</li>)}
         </ul>
       </div>
 
-      <!-- Cell [1,1]: Pricing -->
-      <div
-        class:list={[
-          "aspect-square flex flex-col font-display p-3 md:p-6 items-start justify-end",
-          desktopColors[3],
-        ]}
-      >
-        <p
-          class="text-txtPri leading-none pb-2 text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] font-medium"
-        >
+      <!-- pricing -->
+      <div class:list={["square box-pad flex-col-start justify-end", desktopColors[3]]}>
+        <p class="text-ui-md text-primary pb-2 font-medium">
           à partir de {baseNightly1PersonEuroFR} la nuitée
         </p>
-        <p
-          class="text-txtMuted pb-4 uppercase tracking-wider leading-tight text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)] pt-1"
-        >
+
+        <p class="text-ui-md text-muted uppercase tracking-wider pt-1">
           {f.bookingNote}
         </p>
       </div>
@@ -249,7 +213,7 @@ const f = {
       }
 
       <!-- CTA -->
-      <div class="absolute p-0.8rem inset-x-0 top-0.8rem flex justify-center z-10">
+      <div class="cta-top">
         <Button
           variant="accent"
           size="sm"
@@ -260,7 +224,7 @@ const f = {
           {phoneDisplay}
         </Button>
       </div>
-      <div class="absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10">
+      <div class="cta-bottom">
         <Button
           class="inline-flex font-sans w-full items-center justify-center"
           variant="primary"
@@ -273,18 +237,18 @@ const f = {
     </div>
 
     <!-- Desktop -->
-    <div class="hidden w-full flex-row gap-[0.4rem] xl:flex xl:flex-1">
+    <div class="hidden w-full flex-row gap-grid xl:flex xl:flex-1">
       <!-- LEFT BLOCK -->
-      <div class="relative flex flex-1 flex-col gap-[0.4rem]">
+      <div class="relative flex flex-1 flex-col gap-grid">
         <!-- Row 1 -->
         <div class="relative w-full">
           <div class="pointer-events-none absolute inset-0">
-            <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+            <div class="grid h-full grid-cols-3 gap-grid">
               {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
             </div>
           </div>
 
-          <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+          <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
             {
               squareCells.map((cell) => (
                 <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
@@ -296,11 +260,9 @@ const f = {
 
                   {cell.type === "availability" && (
                     <div class="flex flex-col font-display justify-start  gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]">
-                      <p class="text-txtPri leading-none font-display">
-                        à partir de {baseNightly1PersonEuroFR} la nuitée
-                      </p>
+                      <p class="text-primary">à partir de {baseNightly1PersonEuroFR} la nuitée</p>
 
-                      <p class="text-txtMuted tracking-wider leading-tight">{f.bookingNote}</p>
+                      <p class="text-muted tracking-wider">{f.bookingNote}</p>
                     </div>
                   )}
                 </div>
@@ -312,12 +274,12 @@ const f = {
         <!-- Row 2 -->
         <div class="relative flex flex-1">
           <div class="pointer-events-none absolute inset-0">
-            <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+            <div class="grid h-full grid-cols-3 gap-grid">
               {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
             </div>
           </div>
 
-          <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+          <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
             <div></div>
 
             <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
@@ -328,11 +290,9 @@ const f = {
             <div
               class="flex flex-col justify-start gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
             >
-              <ul
-                class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside"
-              >
+              <ul class="list-ui-disc text-ui-lg text-primary">
                 <li class="pb-2">{f.amenitiesLabel}</li>
-                {f.amenities.map((item: string) => <li class="text-txtMuted">{item}</li>)}
+                {f.amenities.map((item: string) => <li class="text-muted">{item}</li>)}
               </ul>
             </div>
           </div>
@@ -354,18 +314,18 @@ const f = {
   </div>
 
   <!-- Desktop -->
-  <div class="hidden w-full flex-row gap-[0.4rem] xl:flex xl:flex-1">
+  <div class="hidden w-full flex-row gap-grid xl:flex xl:flex-1">
     <!-- LEFT BLOCK -->
-    <div class="relative flex flex-1 flex-col gap-[0.4rem]">
+    <div class="relative flex flex-1 flex-col gap-grid">
       <!-- Row 1 -->
       <div class="relative w-full">
         <div class="pointer-events-none absolute inset-0">
-          <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+          <div class="grid h-full grid-cols-3 gap-grid">
             {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
           </div>
         </div>
 
-        <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
           {
             squareCells.map((cell) => (
               <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
@@ -392,12 +352,12 @@ const f = {
       <!-- Row 2 -->
       <div class="relative flex flex-1">
         <div class="pointer-events-none absolute inset-0">
-          <div class="grid h-full grid-cols-3 gap-[0.4rem]">
+          <div class="grid h-full grid-cols-3 gap-grid">
             {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
           </div>
         </div>
 
-        <div class="relative z-10 grid w-full grid-cols-3 gap-[0.4rem]">
+        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
           <div></div>
 
           <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
@@ -409,11 +369,11 @@ const f = {
             class="flex flex-col justify-end font-display font-medium p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
           >
             <div>
-              <p class="text-txtPri leading-none pb-2">
+              <p class="text-primary pb-2">
                 à partir de {baseNightly1PersonEuroFR} la nuitée
               </p>
 
-              <p class="text-txtMuted uppercase tracking-wider leading-tight pb-6">
+              <p class="text-muted uppercase tracking-wider pb-6">
                 {f.bookingNote}
               </p>
             </div>
@@ -468,7 +428,7 @@ const f = {
       </div>
 
       <div class="relative w-full border-b-[0.4rem] border-bgBase box-content">
-        <div class="relative z-10 grid w-full grid-cols-2 gap-[0.4rem]">
+        <div class="relative z-10 grid w-full grid-cols-2 gap-grid">
           <div class="aspect-square"></div>
           <div class="aspect-square"></div>
         </div>
@@ -495,22 +455,6 @@ const f = {
 </div>
 
 <style>
-  .fold-image-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  .fold-image-container :global(img),
-  .fold-image-container :global(.fold-image) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
   .fold-image-container {
     position: absolute;
     inset: 0;

@@ -53,7 +53,14 @@ export * from "@chambreasoi/sanity/queries";
 // ---------------------------------------------------------------------------
 
 import { fetchSanity } from "@chambreasoi/sanity/fetch";
-import { FOLD_CONTENT_QUERY, HEADLINE_CONTENT_QUERY, type FoldContentResult, type HeadlineContentResult } from "@chambreasoi/sanity/queries";
+import {
+  FOLD_CONTENT_QUERY,
+  HEADLINE_CONTENT_QUERY,
+  LOCATIONSECTION_CONTENT_QUERY,
+  type FoldContentResult,
+  type HeadlineContentResult,
+  type LocationSectionContentResult,
+} from "@chambreasoi/sanity/queries";
 
 /**
  * Fetch the single foldContent document from Sanity.
@@ -68,4 +75,10 @@ export async function getFoldContent(): Promise<FoldContentResult | null> {
  */
 export async function getHeadlineContent(): Promise<HeadlineContentResult | null> {
   return fetchSanity<HeadlineContentResult>(HEADLINE_CONTENT_QUERY);
+}
+/**
+ * Fetch the single LocationSectionContent document from Sanity.
+ */
+export async function getLocationSectionContent(): Promise<LocationSectionContentResult | null> {
+  return fetchSanity<LocationSectionContentResult>(LOCATIONSECTION_CONTENT_QUERY);
 }

@@ -16,10 +16,11 @@
     "paths": {
       "@components/*": ["src/components/*"],
       "@config/*": ["config/*"],
+      "@images/*": ["src/assets/images/*"],
       "@layouts/*": ["src/layouts/*"],
+      "@lib/*": ["src/lib/*"],
       "@styles/*": ["src/styles/*"],
-      "@utils/*": ["src/utils/*"],
-      "@lib/*": ["src/lib/*"]
+      "@utils/*": ["src/utils/*"]
     }
   }
 }

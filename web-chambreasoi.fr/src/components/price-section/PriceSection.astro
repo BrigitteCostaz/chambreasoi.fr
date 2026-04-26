@@ -1,0 +1,543 @@
+---
+/* =========================
+ * Imports
+ * ========================= */
+import { Image } from "astro:assets";
+import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
+import { resolveImage } from "@utils/imageUtils";
+import { formatEuroFR } from "@utils/currency";
+import { getPricing } from "@config/pricing";
+
+/* =========================
+ * Types / Props
+ * ========================= */
+
+/** Sanity image field shape (asset ref + optional alt) */
+interface SanityImageSource {
+  asset?: { _ref?: string; _id?: string; url?: string };
+  alt?: string;
+}
+
+interface Props {
+  /** Sanity image source (preferred) */
+  image?: SanityImageSource | null;
+  /** Alt text override (defaults to image.alt or empty string) */
+  imageAlt?: string;
+  /** Local fallback image path (e.g., "@images/fold-fallback.webp") */
+  fallbackImagePath?: string;
+}
+
+/* =========================
+ * Props
+ * ========================= */
+const {
+  image: sanityImageSource = null,
+  imageAlt: altOverride,
+  fallbackImagePath = "@images/price.png",
+} = Astro.props;
+
+/* =========================
+ * Image handling: Sanity CDN with local fallback
+ * ========================= */
+
+// Target display size (CSS pixels) for the fold cover
+// The image fills ~40% of viewport width, so 800px covers up to 2000px viewports at 1x
+const coverWidth = 1280;
+const coverHeight = 1152;
+
+const imageAlt = altOverride ?? sanityImageSource?.alt ?? "";
+
+const sanitySrc = buildSanityImageUrl({
+  source: sanityImageSource,
+  width: coverWidth,
+  height: coverHeight,
+  quality: 80,
+  format: "webp",
+  fit: "crop",
+});
+
+const sanitySrcSet = buildSanityDprSrcSet({
+  source: sanityImageSource,
+  width: coverWidth,
+  height: coverHeight,
+  dprs: [1, 1.5, 2],
+  quality: 80,
+  format: "webp",
+  fit: "crop",
+});
+
+const shouldRenderSanityImage = !!sanitySrc;
+const fallbackImage = resolveImage(fallbackImagePath);
+const shouldRenderFallback = !shouldRenderSanityImage && !!fallbackImage;
+
+/* =========================
+ * Data fetching
+ * ========================= */
+const pricing = await getPricing();
+
+/* =========================
+ * Final computed values
+ * ========================= */
+const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
+const baseNightly2PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[1].priceCents);
+const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
+
+---
+
+<section class="hidden lg:block relative overflow-x-clip pt-[.8rem] mt-[3.2rem] h-24">
+  <!-- Grid overlay -->
+  <div class="pointer-events-none absolute inset-0">
+    <!-- Tablet + Desktop -->
+    <div class="hidden size-full grid-cols-5 lg:grid">
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+    </div>
+  </div>
+</section>
+
+<section
+  class="relative flex min-h-[calc(100svh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
+>
+  <!-- Grid overlay (your existing one stays untouched) -->
+  <div class="pointer-events-none absolute inset-0 z-10">
+    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+
+    <div class="hidden size-full grid-cols-5 gap-0 lg:grid">
+      <div class="grid-line grid-line-reverse"></div>
+      <div class=""></div>
+      <div class=""></div>
+      <div class="grid-line grid-line-reverse"></div>
+      <div class=""></div>
+    </div>
+  </div>
+
+  <!-- HERO IMAGE (desktop only) -->
+  <div class="hero-image">
+    {
+      shouldRenderSanityImage ? (
+        <img
+          src={sanitySrc}
+          srcset={sanitySrcSet ?? undefined}
+          sizes="(max-width: 1024px) 100vw, 40vw"
+          alt={imageAlt}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          class="block w-full h-auto"
+        />
+      ) : shouldRenderFallback ? (
+        <Image
+          src={fallbackImage!}
+          alt={imageAlt}
+          width={coverWidth}
+          height={coverHeight}
+          densities={[1, 1.5, 2]}
+          loading="eager"
+          decoding="async"
+          class="block w-full h-auto"
+        />
+      ) : null
+    }
+  </div>
+
+  <!-- PRICING WRAPPER: overlay on desktop, in-flow on mobile/tablet -->
+  <div class="pricing-wrapper">
+    <div class="pricing-grid">
+      <!-- Mobile/tablet background image -->
+      <div class="pricing-grid-bg" aria-hidden="true">
+        {
+          shouldRenderSanityImage ? (
+            <img
+              src={sanitySrc}
+              srcset={sanitySrcSet ?? undefined}
+              sizes="100vw"
+              alt=""
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          ) : shouldRenderFallback ? (
+            <Image
+              src={fallbackImage!}
+              alt=""
+              width={coverWidth}
+              height={coverHeight}
+              densities={[1, 1.5, 2]}
+              loading="eager"
+              decoding="async"
+            />
+          ) : null
+        }
+      </div>
+
+      <!-- Col 1 -->
+      <div class="pricing-col">
+        <p class="col-label">Tarifs</p>
+        <div class="title-row" style="--label-y: start">
+          <h3 class="price-ui">nuitée</h3>
+        </div>
+        <p class="col-description text-ui-sm">Taxe de séjour<br />(0.85€/personne/nuit) incluse.</p>
+      </div>
+
+      <!-- Col 2 -->
+      <div class="pricing-col pricing-col--divider">
+        <p class="col-label">par nuit</p>
+        <div class="inner-grid" style="grid-row: 2 / 4">
+          <div class="price-row row-divider">
+            <span class="price-ui">{baseNightly1PersonEuroFR}</span>
+            <span class="text-ui-xl">1 personne</span>
+          </div>
+          <div class="price-row row-divider">
+            <span class="price-ui">{baseNightly2PersonEuroFR}</span>
+            <span class="text-ui-xl">2 personnes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3 -->
+      <div class="pricing-col pricing-col--divider flex-grow-1">
+        <p class="col-label">option</p>
+        <div class="title-row">
+          <h3 class="price-ui text-balance">petit-déjeuner</h3>
+        </div>
+        <div class="inner-grid">
+          <div class="price-row pt-16 md:pt-0">
+            <span class="price-ui">{breakfastSurchargeEuroFR}</span>
+            <span class="text-ui-xl">par personne</span>
+          </div>
+          <div class="price-row mobile price-row--muted">
+            <p class="price-note text-ui-sm">
+              Sur demande à la réservation.<br />
+              <span class="price-note__detail text-ui-sm">
+                Jus de fruit, yaourt, boisson chaude, pain, beurre, confiture,
+                salade ou compote de fruits de saison.
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  /* =========================
+   * Hero image (desktop only)
+   * ========================= */
+  .hero-image {
+    position: relative;
+    width: 100%;
+    z-index: 0;
+    display: none;
+  }
+
+  @media (min-width: 1025px) {
+    .hero-image {
+      display: block;
+    }
+  }
+
+  /* =========================
+   * Pricing wrapper
+   * - Mobile/tablet: in-flow, fills remaining space, centered vertically
+   * - Desktop: absolute overlay with 5-col layout, centered vertically
+   * ========================= */
+  .pricing-wrapper {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pricing-wrapper > .pricing-grid {
+    width: 100%;
+  }
+
+  @media (min-width: 1025px) {
+    .pricing-wrapper {
+      position: absolute;
+      inset: 0;
+      flex: initial;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-content: center;
+      pointer-events: none;
+    }
+
+    .pricing-wrapper > .pricing-grid {
+      grid-column: 2 / span 3;
+      pointer-events: auto;
+    }
+  }
+
+  /* =========================
+   * Pricing grid
+   * ========================= */
+  .pricing-grid {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Ligne 1 = hauteur fixe contrôlée */
+    grid-template-rows:
+      var(--pricing-label-height, clamp(2.4rem, 4vw, 3.2rem)) /* label */
+      var(--pricing-title-height, auto) /* title */
+      1fr;
+    width: 100%;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: rgb(26 26 30 / 0.2);
+    border-block: 1px solid color-mix(in oklch, var(--color-bgBase) 50%, transparent);
+  }
+
+  @media (min-width: 1025px) {
+    .pricing-grid {
+      container-type: size;
+      aspect-ratio: 6 / 5;
+    }
+  }
+
+  .pricing-grid-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: none;
+    opacity: 0.35;
+    overflow: hidden;
+  }
+
+  .pricing-grid-bg :global(img),
+  .pricing-grid-bg :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .pricing-col {
+    grid-row: 1 / 4;
+    position: relative;
+    z-index: 1;
+    padding: 0.8rem;
+    color: var(--color-bgBase);
+  }
+
+  .pricing-col--divider {
+    border-left: 1px solid color-mix(in oklch, currentColor 20%, transparent);
+  }
+
+  /* Label row */
+  .col-label {
+    position: relative;
+    display: flex;
+    align-items: var(--label-y, start);
+    justify-content: var(--label-x, flex-start);
+    padding-bottom: 0.4rem;
+    font-size: clamp(14px, calc(14px + 6 * (100vw - 375px) / 1225), 18px);
+    line-height: 1.2;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .col-label::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -0.8rem;
+    right: -0.8rem;
+    height: 1px;
+    background: color-mix(in oklch, currentColor 20%, transparent);
+  }
+
+  /* Inner grid (col 2 & 3) */
+  .inner-grid {
+    grid-template-rows: repeat(auto-fit, 1fr);
+    height: 100%;
+  }
+
+  .pricing-col:nth-child(2) .inner-grid,
+  .pricing-col:nth-child(3) .inner-grid {
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: var(--label-y, center);
+    justify-content: var(--label-x, start);
+    min-height: calc((100cqh - var(--pricing-label-height, clamp(2.4rem, 4vw, 3.2rem))) / 3);
+  }
+
+  .price-row {
+    display: flex;
+    flex-direction: column;
+    align-items: var(--label-y, start);
+    justify-content: var(--label-x, center);
+    gap: 0.2rem;
+  }
+
+  .row-divider + .row-divider {
+    position: relative;
+    padding-top: 0.4rem;
+  }
+
+  .row-divider + .row-divider::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -0.8rem;
+    right: -0.8rem;
+    height: 1px;
+    background: color-mix(in oklch, currentColor 20%, transparent);
+  }
+
+  .col-description {
+    align-self: end;
+    opacity: 0.85;
+  }
+
+  .price-note {
+    opacity: 0.85;
+  }
+  .price-note__detail {
+  display: block;
+  margin-top: 0.3rem;
+  opacity: 0.7;
+  font-size: smaller;
+}
+
+  @media (min-width: 1025px) {
+    .pricing-col {
+      display: grid;
+      grid-template-rows: subgrid;
+    }
+
+    .inner-grid {
+      display: grid;
+    }
+  }
+
+  @media (max-width: 1024px) {
+
+    .pricing-wrapper {
+      align-items: unset;
+      
+    }
+    .pricing-grid {
+      /* Reset grid rows so content (not the 1st-row track) drives the height */
+      grid-template-rows: auto;
+      grid-auto-rows: auto;
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      background: rgb(26 26 30 / 0.45);
+    }
+
+    .pricing-grid-bg {
+      display: block;
+    }
+
+    .pricing-col {
+      /* disable subgrid behavior */
+      grid-row: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+
+      padding: 1rem;
+    }
+
+    .title-row {
+      min-height: unset; /* critical: remove cqh dependency */
+    }
+
+    .inner-grid {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    /* remove forced equal distribution */
+    .pricing-col:nth-child(2) .inner-grid,
+    .pricing-col:nth-child(3) .inner-grid {
+      grid-template-rows: none;
+    }
+
+    .price-row {
+      justify-content: flex-start;
+    }
+    .col-description {
+      align-self: start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .pricing-grid {
+      display: flex;
+      flex-direction: column;
+
+      gap: 0;
+      border: 1px solid color-mix(in oklch, var(--color-bgBase) 50%, transparent);
+    }
+
+    .pricing-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.2rem;
+
+      border-left: none;
+    }
+
+    /* separation between cards */
+    .pricing-col + .pricing-col {
+      border-top: 1px solid color-mix(in oklch, currentColor 20%, transparent);
+    }
+
+    /* label becomes header */
+    .col-label {
+      opacity: 1;
+      font-weight: 500;
+      padding-bottom: 0.2rem;
+    }
+
+    .col-label::before {
+      display: none; /* remove desktop separator logic */
+    }
+
+    .title-row {
+      align-items: center;
+      text-align: center;
+    }
+
+    .inner-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .pricing-col:nth-child(3) .inner-grid {
+      flex: 1 1 auto;
+    }
+
+    .price-row {
+      align-items: center;
+    }
+    .price-row.mobile {
+      align-items: flex-start;
+    }
+
+    .price-row.mobile.price-row--muted {
+      margin-top: auto;
+    }
+
+    .row-divider + .row-divider::before {
+      left: 0;
+      right: 0;
+    }
+  }
+</style>

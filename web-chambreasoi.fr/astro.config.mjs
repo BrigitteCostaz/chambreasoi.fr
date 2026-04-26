@@ -83,13 +83,17 @@ const projectId =
   process.env.SANITY_STUDIO_PROJECT_ID ||
   requireProcessEnv("PUBLIC_SANITY_PROJECT_ID");
 
-const dataset =
-  process.env.PUBLIC_SANITY_DATASET ||
-  process.env.SANITY_DATASET ||
-  process.env.SANITY_STUDIO_DATASET ||
-  "production";
-
 const isDev = process.env.NODE_ENV !== "production";
+/**
+ * Always use Sanity production dataset in local dev so frontend content mirrors
+ * live editorial content.
+ */
+const dataset = isDev
+  ? "production"
+  : process.env.PUBLIC_SANITY_DATASET ||
+    process.env.SANITY_DATASET ||
+    process.env.SANITY_STUDIO_DATASET ||
+    "production";
 /**
  * Studio is ENABLED by default (opt-out, not opt-in).
  *
@@ -159,18 +163,20 @@ export default defineConfig({
     resolve: {
       alias: {
         // Mirror tsconfig paths for runtime resolution (config/ lives outside src/)
-        "@layouts": new URL("./src/layouts", import.meta.url).pathname,
-        "@layouts/": new URL("./src/layouts/", import.meta.url).pathname,
-        "@utils": new URL("./src/utils", import.meta.url).pathname,
-        "@utils/": new URL("./src/utils/", import.meta.url).pathname,
         "@components": new URL("./src/components", import.meta.url).pathname,
         "@components/": new URL("./src/components/", import.meta.url).pathname,
-        "@styles": new URL("./src/styles", import.meta.url).pathname,
-        "@styles/": new URL("./src/styles/", import.meta.url).pathname,
         "@config": new URL("./config", import.meta.url).pathname,
         "@config/": new URL("./config/", import.meta.url).pathname,
+        "@images": new URL("./src/assets/images", import.meta.url).pathname,
+        "@images/": new URL("./src/assets/images/", import.meta.url).pathname,
+        "@layouts": new URL("./src/layouts", import.meta.url).pathname,
+        "@layouts/": new URL("./src/layouts/", import.meta.url).pathname,
         "@lib": new URL("./src/lib", import.meta.url).pathname,
         "@lib/": new URL("./src/lib", import.meta.url).pathname,
+        "@styles": new URL("./src/styles", import.meta.url).pathname,
+        "@styles/": new URL("./src/styles/", import.meta.url).pathname,
+        "@utils": new URL("./src/utils", import.meta.url).pathname,
+        "@utils/": new URL("./src/utils/", import.meta.url).pathname,
 
         ...(process.env.NODE_ENV === "production"
           ? { "react-dom/server": "react-dom/server.edge" }
