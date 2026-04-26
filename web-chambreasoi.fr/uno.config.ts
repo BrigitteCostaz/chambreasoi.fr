@@ -97,7 +97,7 @@ export default defineConfig({
         sans: { name: "Karla", weights: [400, 500, 700] },
         mono: {
           name: "Victor Mono",
-          weights: [400, 700],
+          weights: [400, 500, 700],
           italic: true,
         },
         // General Sans (self-hosted)
