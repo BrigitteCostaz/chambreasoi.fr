@@ -64,4 +64,26 @@ export const sitemap: Record<string, PageMeta> = {
       name: "Découvrir les environs",
     },
   },
+
+  mentionsLegales: {
+    key: "mentionsLegales",
+    path: "/legales/mentions-legales",
+    title: "mentions légales",
+    description: "Consultez les mentions légales de Une chambre à soi.",
+    jsonLd: {
+      "@type": "WebPage",
+      name: "Mentions légales",
+    },
+  },
+
+  politiqueConfidentialite: {
+    key: "politiqueConfidentialite",
+    path: "/legales/politique-confidentialite",
+    title: "politique de confidentialité",
+    description: "Consultez la politique de confidentialité de Une chambre à soi.",
+    jsonLd: {
+      "@type": "WebPage",
+      name: "Politique de confidentialité",
+    },
+  },
 };

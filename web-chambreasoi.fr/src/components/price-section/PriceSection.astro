@@ -86,26 +86,26 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
 
 <section class="hidden lg:block relative overflow-x-clip pt-[.8rem] mt-[3.2rem] h-24">
   <!-- Grid overlay -->
-  <div class="pointer-events-none absolute inset-0">
-    <!-- Tablet + Desktop -->
-    <div class="hidden size-full grid-cols-5 lg:grid">
+  <div class="pointer-events-none absolute inset-0 translate-x-[0.15rem]">
+    <!-- Desktop -->
+    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
       <div class="grid-line"></div>
       <div class="grid-line"></div>
       <div class="grid-line"></div>
       <div class="grid-line"></div>
-      <div class="grid-line"></div>
+      <div></div>
     </div>
   </div>
 </section>
 
 <section
-  class="relative flex min-h-[calc(100svh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
+  class="relative flex min-h-[calc(100dvh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
 >
   <!-- Grid overlay (your existing one stays untouched) -->
-  <div class="pointer-events-none absolute inset-0 z-10">
+  <div class="pointer-events-none absolute inset-0 z-10 translate-x-[0.15rem]">
     <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
 
-    <div class="hidden size-full grid-cols-5 gap-0 lg:grid">
+    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
       <div class="grid-line grid-line-reverse"></div>
       <div class=""></div>
       <div class=""></div>

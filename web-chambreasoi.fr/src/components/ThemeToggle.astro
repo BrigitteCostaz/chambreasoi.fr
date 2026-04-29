@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@config/site";
 import { Icon } from "astro-icon/components";
+import Button from "./button/Button.astro";
 
 /**
  * ThemeToggle.astro
@@ -24,10 +25,10 @@ import { Icon } from "astro-icon/components";
 const defaultMode = siteConfig.themeConfig.colors.mode;
 const STORAGE_KEY = "theme:mode";
 ---
-
-<button
+<Button
   type="button"
-  class="theme-toggle inline-flex items-center gap-2 rounded px-3 py-2"
+  variant="ghost"
+  class="theme-toggle inline-flex items-center px-1 py-1"
   aria-label="Toggle theme"
   data-default-mode={defaultMode}
 >
@@ -36,8 +37,7 @@ const STORAGE_KEY = "theme:mode";
     <Icon name="ion/moon-sharp" class="w-5 h-5 icon-moon" />
     <Icon name="ion/contrast-sharp" class="w-5 h-5 icon-auto" />
   </span>
-  <span class="theme-toggle__label"></span>
-</button>
+</Button>
 
 <script is:inline>
   (() => {
@@ -89,12 +89,12 @@ const STORAGE_KEY = "theme:mode";
       return "auto";
     }
 
-    const btn = document.querySelector(".theme-toggle");
-    if (!btn) return;
+    const buttons = Array.from(document.querySelectorAll(".theme-toggle"));
+    if (!buttons.length) return;
 
     /** @type {ThemeMode} */
     const defaultMode = (() => {
-      const v = btn.getAttribute("data-default-mode");
+      const v = buttons[0]?.getAttribute("data-default-mode");
       return v === "light" || v === "dark" || v === "auto" ? v : "auto";
     })();
 
@@ -104,26 +104,28 @@ const STORAGE_KEY = "theme:mode";
     // Initial apply
     applyMode(currentMode);
 
-    // Render label
-    const labelEl = btn.querySelector(".theme-toggle__label");
-
     function render() {
       const label = modeLabel(currentMode);
 
-      if (labelEl) labelEl.textContent = label;
+      buttons.forEach((btn) => {
+        const labelEl = btn.querySelector(".theme-toggle__label");
+        if (labelEl) labelEl.textContent = label;
 
-      btn.setAttribute("aria-pressed", currentMode === "dark" ? "true" : "false");
-      btn.setAttribute("data-mode", currentMode);
-      btn.setAttribute("title", `Theme: ${label} (click to change)`);
+        btn.setAttribute("aria-pressed", currentMode === "dark" ? "true" : "false");
+        btn.setAttribute("data-mode", currentMode);
+        btn.setAttribute("title", `Theme: ${label} (click to change)`);
+      });
     }
 
     render();
 
-    btn.addEventListener("click", () => {
-      currentMode = nextMode(currentMode);
-      storeMode(currentMode);
-      applyMode(currentMode);
-      render();
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentMode = nextMode(currentMode);
+        storeMode(currentMode);
+        applyMode(currentMode);
+        render();
+      });
     });
 
     // If you're in auto mode, and system preference changes, the CSS will react
@@ -140,21 +142,23 @@ const STORAGE_KEY = "theme:mode";
 <style>
   .theme-toggle {
     cursor: pointer;
-    border: 1px solid var(--color-bgAlt);
-    background: var(--color-bgCard);
+    background: transparent;
+    border: 0;
     color: var(--color-txtPri);
     font: inherit;
     line-height: 1;
-    transition: background-color 0.2s ease;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    opacity: 0.82;
   }
 
   .theme-toggle:hover {
-    background: var(--color-bgAlt);
+    background: transparent;
+    opacity: 1;
   }
 
   .theme-toggle:focus {
-    outline: 2px solid var(--color-accentStone);
-    outline-offset: 2px;
+    outline: 1px solid var(--color-accentStone);
+    outline-offset: 1px;
   }
 
   .theme-toggle__icons {

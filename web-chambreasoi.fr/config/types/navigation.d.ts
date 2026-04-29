@@ -17,7 +17,9 @@ export interface NavLinkItem extends BaseLinkItem {
 }
 
 // Legal
-export interface LegalLinkItem extends BaseLinkItem {}
+export interface LegalLinkItem extends BaseLinkItem {
+  pageKey?: "mentionsLegales" | "politiqueConfidentialite";
+}
 
 // Social
 export interface SocialLinkItem extends BaseLinkItem {}

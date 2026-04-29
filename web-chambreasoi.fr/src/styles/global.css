@@ -16,6 +16,11 @@ body {
     font-family: "Karla", sans-serif;
 }
 
+header
+{
+    background-color: var(--color-bgBase);
+    color: var(--color-txtPri);
+}
 ul,
 ol {
     margin: 0;

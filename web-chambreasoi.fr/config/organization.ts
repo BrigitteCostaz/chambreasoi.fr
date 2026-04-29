@@ -37,6 +37,8 @@ const ORG_DEFAULTS: OrganizationConfig = {
     siren: "100 235 191",
     vatNumber: "FR56100235191",
 
+    startYear: 2026,
+
     activityCode: "5520Z",
     activityLabel: "Hébergement touristique et autre hébergement de courte durée",
   },
@@ -104,6 +106,7 @@ function mapSanityToOrgData(
       vatNumber: resolveString(fallback.legal.vatNumber ?? "", cms.legalVatNumber),
       rcsNumber: fallback.legal.rcsNumber,
       tradeRegistry: fallback.legal.tradeRegistry,
+      startYear: fallback.legal.startYear,
       activityCode: resolveString(fallback.legal.activityCode, cms.legalActivityCode),
       activityLabel: resolveString(fallback.legal.activityLabel, cms.legalActivityLabel),
     },

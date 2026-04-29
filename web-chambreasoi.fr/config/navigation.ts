@@ -48,3 +48,16 @@ export const footerNavigation: NavLinkItem[] = [
   // Can be a subset or different ordering
   ...headerNavigation.map((item) => ({ ...item, icon: undefined })),
 ];
+
+export const legalNavigation: LegalLinkItem[] = [
+  {
+    pageKey: "mentionsLegales",
+    text: sitemap.mentionsLegales.title,
+    link: sitemap.mentionsLegales.path,
+  },
+  {
+    pageKey: "politiqueConfidentialite",
+    text: sitemap.politiqueConfidentialite.title,
+    link: sitemap.politiqueConfidentialite.path,
+  },
+];

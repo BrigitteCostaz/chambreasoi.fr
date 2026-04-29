@@ -35,7 +35,7 @@ const opensNewTab = newTab || isExternal;
 // Variant-specific classes
 const linkClasses = {
   header: "block overflow-hidden text-caption-30-fixed",
-  footer: "block text-sm hover:underline",
+  footer: "block text-sm",
 };
 
 const heightStyle = variant === "header" ? "48px" : "auto";
@@ -54,7 +54,12 @@ const accentColorVar = `var(--color-accent${accentColor})`;
       rel={opensNewTab ? "noopener noreferrer" : ""}
       aria-current={isActive ? "page" : undefined}
     >
-      <div class="transition-transform duration-600 ease-out group-hover:-translate-y-[48px]">
+      <div
+        class:list={[
+          "transition-transform duration-600 ease-out group-hover:-translate-y-[48px]",
+          isActive && "-translate-y-[48px]",
+        ]}
+      >
         <div class="flex items-center justify-between px-[0.8rem]" style={`height:${heightStyle}`}>
           <span>{text}</span>
           <!-- <span

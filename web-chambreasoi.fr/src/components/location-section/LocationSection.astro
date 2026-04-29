@@ -24,10 +24,7 @@ const l = {
 <section class="hidden xl:block relative overflow-x-clip pt-[.8rem] mb-[3.2rem]">
   <!-- Grid overlay -->
   <div class="pointer-events-none absolute inset-0 translate-x-[0.15rem]">
-    <!-- Mobile -->
-    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-
-    <!-- Tablet + Desktop -->
+    <!-- Desktop -->
     <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
       <div class="grid-line"></div>
       <div class="grid-line"></div>
@@ -119,7 +116,7 @@ const l = {
   </div>
 </section>
 
-<div class="hidden xl:block parallax-map h-[calc(100svh-var(--header-height,0px))]" data-parallax>
+<div class="hidden xl:block parallax-map h-[calc(100dvh-var(--header-height,0px))]" data-parallax>
   <div class="parallax-layer">
     <Map class="map-svg" aria-label="Carte de la région" role="img" />
   </div>

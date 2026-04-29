@@ -30,6 +30,8 @@ export interface OrganizationConfig {
     vatNumber?: string;
     rcsNumber?: string;
     tradeRegistry?: string;
+    
+    startYear?: number;
 
     activityCode: string;
     activityLabel: string;
