@@ -1,10 +1,22 @@
 ---
-
 import CalendarDisplay from "@components/availabily-page/CalendarDisplay.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
-
 ---
 
 <BaseLayout>
-  <CalendarDisplay />
+  <CalendarDisplay>
+    <Fragment slot="intro">
+      <p>
+        Consultez les disponibilités de la chambre avant de préparer votre séjour. Les jours
+        indiqués comme disponibles peuvent être demandés à la réservation.
+      </p>
+    </Fragment>
+
+    <Fragment slot="outro">
+      <p>
+        Pour confirmer une date ou poser une question sur votre venue, contactez-nous en précisant
+        vos dates souhaitées et le nombre de personnes.
+      </p>
+    </Fragment>
+  </CalendarDisplay>
 </BaseLayout>
