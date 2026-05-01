@@ -39,7 +39,7 @@ export const ColorData: ColorConfig = {
 
       info: "oklch(64% 0.075 225deg)", // ~ #6698ad
       warning: "oklch(66% 0.095 75deg)", // ~ #a08040
-      alert: "oklch(64% 0.095 22deg)", // ~ #b47070
+      alert: "oklch(55% 0.1143 21deg)",
       success: "oklch(62% 0.085 145deg)", // ~# 5a9060
     },
   },

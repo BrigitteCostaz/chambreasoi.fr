@@ -1,0 +1,395 @@
+---
+import "vanilla-calendar-pro/styles/index.css";
+import { Icon } from "astro-icon/components";
+import chevronIconUrl from "@icons/ion/chevron-down-sharp.svg?url";
+
+type AvailabilityDate = {
+  date: string;
+  available?: boolean;
+};
+
+interface Props {
+  month: string;
+  dates: AvailabilityDate[];
+}
+
+const { month, dates } = Astro.props;
+const availableDates = dates.filter(({ available }) => available === true).map(({ date }) => date);
+const unavailableDates = dates
+  .filter(({ available }) => available === false)
+  .map(({ date }) => date);
+const defaultUnavailableDates = dates
+  .filter(({ available }) => available === undefined)
+  .map(({ date }) => date);
+const sortedDates = dates.map(({ date }) => date).sort();
+const fallbackMonthStart = `${month.slice(0, 7)}-01`;
+const fallbackMonthEnd = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0))
+  .toISOString()
+  .slice(0, 10);
+const minDate = sortedDates[0] ?? fallbackMonthStart;
+const maxDate = sortedDates.at(-1) ?? fallbackMonthEnd;
+const calendarData = JSON.stringify({
+  availableDates,
+  unavailableDates,
+  defaultUnavailableDates,
+  minDate,
+  maxDate,
+});
+const chevronBackgroundImage = `url("${chevronIconUrl}")`;
+---
+
+<div id="calendar" data-availability-calendar={calendarData}></div>
+
+<template id="availability-icon-available">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/checkbox-sharp" /><span>Disponible</span>
+  </div>
+</template>
+
+<template id="availability-icon-unavailable">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/close-circle-sharp" /><span>Complet</span>
+  </div>
+</template>
+
+<template id="availability-icon-default-unavailable">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/close-sharp" /><span>Non disponible</span>
+  </div>
+</template>
+
+<script>
+  import { Calendar } from "vanilla-calendar-pro";
+
+  type CalendarData = {
+    availableDates: string[];
+    unavailableDates: string[];
+    defaultUnavailableDates: string[];
+    minDate: string;
+    maxDate: string;
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-availability-calendar]").forEach((element) => {
+    const rawData = element.dataset.availabilityCalendar;
+    if (!rawData) return;
+
+    const { availableDates, unavailableDates, defaultUnavailableDates, minDate, maxDate } =
+      JSON.parse(rawData) as CalendarData;
+    const availableIcon =
+      document.querySelector<HTMLTemplateElement>("#availability-icon-available")?.innerHTML ??
+      "✅ Disponible";
+    const unavailableIcon =
+      document.querySelector<HTMLTemplateElement>("#availability-icon-unavailable")?.innerHTML ??
+      "🔴 Complet";
+    const defaultUnavailableIcon =
+      document.querySelector<HTMLTemplateElement>("#availability-icon-default-unavailable")
+        ?.innerHTML ?? "✖️​ Non disponible";
+    const popups = Object.fromEntries([
+      ...availableDates.map((date) => [
+        date,
+        { modifier: "vc-date__btn--available", html: availableIcon },
+      ]),
+      ...unavailableDates.map((date) => [
+        date,
+        { modifier: "vc-date__btn--unavailable", html: unavailableIcon },
+      ]),
+      ...defaultUnavailableDates.map((date) => [
+        date,
+        { modifier: "vc-date__btn--default-unavailable", html: defaultUnavailableIcon },
+      ]),
+    ]);
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(today.getDate()).padStart(2, "0")}`;
+
+    const calendarOptions = {
+      type: "default",
+      dateMin: minDate,
+      dateMax: maxDate,
+      dateToday: "today",
+      displayDateMin: minDate,
+      displayDateMax: maxDate,
+      // selectedMonth: selectedMonth -1,
+      // selectedYear,
+      selectionDatesMode: false,
+      selectionMonthsMode: "only-arrows",
+      selectionYearsMode: false,
+      popups,
+      locale: "fr-FR",
+      onCreateDateEls: (_calendar: Calendar, dateEl: HTMLElement) => {
+        const date = dateEl.dataset.vcDate;
+
+        if (date && date < todayDate) {
+          dateEl.classList.add("vc-date--past");
+        }
+      },
+    } as ConstructorParameters<typeof Calendar>[1];
+
+    const calendar = new Calendar(element, calendarOptions);
+
+    calendar.init();
+  });
+</script>
+
+<style define:vars={{ chevronBackgroundImage }}>
+  /* Etat global du calendrier. */
+  :global([data-vc-theme].vc) {
+    background: var(--color-bgCard);
+    border-radius: 0;
+    color: var(--color-txtPri);
+  }
+
+  /* Etat du header mois/annee. */
+  :global([data-vc-theme] .vc-header) {
+    border-bottom: 0.5px solid color-mix(in oklch, var(--color-accentForest) 12%, transparent);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  :global([data-vc-theme] .vc-header__content :is(.vc-month, .vc-year)) {
+    color: var(--color-accentForest);
+    font-weight: 500;
+    letter-spacing: 0.015em;
+  }
+
+  /* Icone des fleches de navigation. */
+  :global([data-vc-theme] .vc-header .vc-arrow::before) {
+    background-image: var(--chevronBackgroundImage);
+    color: var(--color-accentForest);
+  }
+
+  /* Etat des labels de jours de semaine. */
+  :global([data-vc-theme] .vc-week__day) {
+    color: color-mix(in oklch, var(--color-txtPri) 78%, var(--color-accentForest));
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Etat des labels de jours weekend. */
+  :global([data-vc-theme] .vc-week__day[data-vc-week-day-off]) {
+    color: var(--color-txtMuted);
+  }
+
+  /* Etat normal d'une date. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn) {
+    border-radius: 0;
+    color: var(--color-txtPri);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition:
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      color 160ms ease,
+      opacity 160ms ease;
+  }
+
+  /* Etat hover d'une date standard. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn:hover) {
+    background-color: color-mix(in oklch, var(--color-accentStone) 9%, transparent);
+  }
+
+  /* Etat focus clavier d'une date. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn:focus-visible) {
+    outline: 1px solid color-mix(in oklch, var(--color-accentForest) 58%, transparent);
+    outline-offset: 2px;
+  }
+
+  /* Etat weekend dans le mois courant. */
+  :global([data-vc-theme] .vc-date[data-vc-date-weekend] > .vc-date__btn) {
+    color: var(--color-txtMuted);
+  }
+
+  /* Etat dates du mois precedent/suivant. */
+  :global(
+    [data-vc-theme]
+      .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn
+  ) {
+    background-color: transparent;
+    color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+  }
+
+  /* Etat date du jour. */
+  :global([data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn) {
+    background: color-mix(in oklch, var(--color-accentStone) 13%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accentStone) 50%, transparent);
+    color: oklch(from var(--color-accentStone) calc(l - 0.14) calc(c + 0.03) h);
+    font-weight: 500;
+    outline: 1.5px solid oklch(from var(--color-accentStone) l c h / 0.45);
+    outline-offset: -1.5px;
+  }
+
+  /* Etat hover de la date du jour. */
+  :global([data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn:hover) {
+    background: color-mix(in oklch, var(--color-accentStone) 17%, transparent);
+    color: oklch(from var(--color-accentStone) calc(l - 0.2) calc(c + 0.04) h);
+  }
+
+  /* Etat disponible dans le mois courant. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available) {
+    background: color-mix(in oklch, var(--color-success) 15%, transparent);
+    box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-success) 32%, transparent);
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  /* Etat hover disponible dans le mois courant. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available:hover) {
+    background: color-mix(in oklch, var(--color-success) 22%, transparent);
+    color: oklch(from var(--color-success) calc(l - 0.08) calc(c + 0.02) h);
+  }
+
+  /* Etat complet dans le mois courant, y compris hover et popup ouvert. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable),
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable:hover),
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable[aria-expanded="true"]) {
+    background: color-mix(in oklch, var(--color-alert) 78%, transparent);
+    box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-alert) 32%, var(--color-txtPri));
+    color: var(--color-bgBase);
+    font-weight: 500;
+  }
+
+  /* Etat non disponible par defaut, y compris hover et popup ouvert. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable),
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable:hover),
+  :global(
+    [data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable[aria-expanded="true"]
+  ) {
+    background-color: transparent;
+    box-shadow: none;
+    color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+    font-weight: 450;
+  }
+
+  /* Etat disponible du mois precedent/suivant, sans fond ni hover. */
+  :global(
+    [data-vc-theme]
+      .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn:is(
+        .vc-date__btn--available,
+        .vc-date__btn--available:hover,
+        .vc-date__btn--available[aria-expanded="true"]
+      )
+  ) {
+    background: color-mix(in oklch, var(--color-success) 9%, transparent);
+    box-shadow: none;
+    color: color-mix(in oklch, var(--color-success) 46%, var(--color-txtMuted));
+  }
+
+  /* Etat complet du mois precedent/suivant, y compris hover et popup ouvert. */
+  :global(
+    [data-vc-theme]
+      .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn:is(
+        .vc-date__btn--unavailable,
+        .vc-date__btn--unavailable:hover,
+        .vc-date__btn--unavailable[aria-expanded="true"]
+      )
+  ) {
+    background: color-mix(in oklch, var(--color-alert) 9%, transparent);
+    box-shadow: none;
+    color: color-mix(in oklch, var(--color-alert) 46%, var(--color-txtMuted));
+  }
+
+  /* Etat popup des dates passees. */
+  :global([data-vc-theme] .vc-date.vc-date--past [data-vc-date-popup]) {
+    display: none;
+  }
+
+  /* Etat date passee dans le mois courant. */
+  :global([data-vc-theme] .vc-date.vc-date--past > .vc-date__btn),
+  :global([data-vc-theme] .vc-date.vc-date--past > .vc-date__btn:hover),
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past
+      > .vc-date__btn:is(
+        .vc-date__btn--available,
+        .vc-date__btn--unavailable,
+        .vc-date__btn--default-unavailable
+      )
+  ),
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past
+      > .vc-date__btn:is(
+        .vc-date__btn--available,
+        .vc-date__btn--unavailable,
+        .vc-date__btn--default-unavailable
+      ):hover
+  ) {
+    background-color: transparent;
+    box-shadow: none;
+    color: color-mix(in oklch, var(--color-txtMuted) 48%, transparent);
+    font-weight: 400;
+  }
+
+  /* Etat date passee du mois precedent/suivant. */
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn
+  ),
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn:hover
+  ) {
+    background-color: transparent;
+    box-shadow: none;
+    color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+    font-weight: 450;
+  }
+
+  /* Etat date passee disponible du mois precedent/suivant. */
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn:is(
+        .vc-date__btn--available,
+        .vc-date__btn--available:hover,
+        .vc-date__btn--available[aria-expanded="true"]
+      )
+  ) {
+    background-color: transparent;
+    box-shadow: none;
+    color: color-mix(in oklch,var(--color-txtMuted) 58%,transparent);
+    font-weight: 450;
+  }
+
+  /* Etat date passee complete du mois precedent/suivant. */
+  :global(
+    [data-vc-theme]
+      .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+      > .vc-date__btn:is(
+        .vc-date__btn--unavailable,
+        .vc-date__btn--unavailable:hover,
+        .vc-date__btn--unavailable[aria-expanded="true"]
+      )
+  ) {
+    background-color: transparent;
+    box-shadow: none;
+    color: color-mix(in oklch,var(--color-txtMuted) 58%,transparent);
+    font-weight: 450;
+  }
+
+  /* Etat du popup d'information. */
+  :global([data-vc-date-popup].vc-date__popup) {
+    background-color: var(--color-bgCard);
+    border: 0.5px solid color-mix(in oklch, var(--color-accentForest) 16%, transparent);
+    border-radius: 0;
+    box-shadow: 0 0.75rem 1.75rem color-mix(in oklch, var(--color-accentStone) 16%, transparent);
+    color: var(--color-txtPri);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  /* Icone dans le popup d'information. */
+  :global([data-vc-date-popup] svg) {
+    font-size: 1rem;
+  }
+</style>

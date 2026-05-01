@@ -10,8 +10,13 @@ interface CfEnvBindings {
   readonly SANITY_DATASET: string;
   readonly PUBLIC_SANITY_PROJECT_ID: string;
   readonly PUBLIC_SANITY_DATASET: string;
+  readonly SANITY_WEBHOOK_SECRET: string;
+  readonly CF_ZONE_ID: string;
+  readonly CF_API_TOKEN: string;
   readonly ASSETS: Fetcher;
 }
+
+interface Env extends CfEnvBindings {}
 
 // ---------------------------------------------------------------------------
 // Astro v6 × Cloudflare runtime typing

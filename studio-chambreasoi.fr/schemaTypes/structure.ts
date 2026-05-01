@@ -1,4 +1,4 @@
-import { CreditCardIcon, HomeIcon, PinIcon } from '@sanity/icons'
+import { ComposeIcon, CreditCardIcon, HomeIcon, PinIcon } from '@sanity/icons'
 import type { StructureResolver } from 'sanity/structure'
 import { SINGLETON_TYPES } from './lib/singletons'
 
@@ -36,11 +36,16 @@ export const structure: StructureResolver = (S) =>
             .title('Hébergement'),
         ),
 
-      S.divider(),
+      S.listItem()
+        .title('Disponibilités')
+        .id('availability')
+        .icon(ComposeIcon)
+        .child(S.documentTypeList('availability').title('Disponibilités par mois')),
 
+      S.divider(),
 
       ...S.documentTypeListItems().filter((item) => {
         const id = item.getId() ?? ''
-        return !SINGLETON_TYPES.has(id)
+        return id !== 'availability' && !SINGLETON_TYPES.has(id)
       }),
     ])

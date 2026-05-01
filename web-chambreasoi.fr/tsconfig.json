@@ -16,6 +16,7 @@
     "paths": {
       "@components/*": ["src/components/*"],
       "@config/*": ["config/*"],
+      "@icons/*": ["src/icons/*"],
       "@images/*": ["src/assets/images/*"],
       "@layouts/*": ["src/layouts/*"],
       "@lib/*": ["src/lib/*"],

@@ -167,6 +167,8 @@ export default defineConfig({
         "@components/": new URL("./src/components/", import.meta.url).pathname,
         "@config": new URL("./config", import.meta.url).pathname,
         "@config/": new URL("./config/", import.meta.url).pathname,
+        "@icons": new URL("./src/icons", import.meta.url).pathname,
+        "@icons/": new URL("./src/icons/", import.meta.url).pathname,
         "@images": new URL("./src/assets/images", import.meta.url).pathname,
         "@images/": new URL("./src/assets/images/", import.meta.url).pathname,
         "@layouts": new URL("./src/layouts", import.meta.url).pathname,

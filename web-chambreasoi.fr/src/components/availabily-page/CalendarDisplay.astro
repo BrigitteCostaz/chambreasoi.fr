@@ -1,0 +1,53 @@
+---
+import { sanityClient } from "sanity:client";
+import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalendar.astro";
+
+
+type AvailabilityDate = {
+  date: string;
+  available?: boolean;
+};
+
+type AvailabilityMonth = {
+  month: string;
+  dates?: AvailabilityDate[];
+};
+
+function getMonthDays(month: string) {
+  const year = Number(month.slice(0, 4));
+  const monthIndex = Number(month.slice(5, 7)) - 1;
+  const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const day = String(index + 1).padStart(2, "0");
+
+    return `${month.slice(0, 7)}-${day}`;
+  });
+}
+
+const now = new Date();
+const currentMonthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+const availabilityMonths = await sanityClient.fetch<AvailabilityMonth[]>(
+  `*[_type == "availability" && !(_id in path("drafts.**"))] | order(month asc){
+    month,
+    dates[]{ date, available }
+  }`
+);
+const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
+  const availabilityByDate = new Map(dates.map(({ date, available }) => [date, available]));
+
+  return getMonthDays(month).map((date) => {
+    const available = availabilityByDate.get(date);
+
+    return typeof available === "boolean" ? { date, available } : { date };
+  });
+});
+---
+
+    
+      <AvailabilityCalendar month={currentMonthStart} dates={dates} />
+
+ 
+
+  
+
