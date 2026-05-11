@@ -26,7 +26,7 @@ const comparePathsWithTrailingSlash = (path1: string, path2: string): boolean =>
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="fixed z-40 px-.8rem lg:hidden" data-mobile-nav>
+<header class="bg-bgBase fixed z-40 px-.8rem lg:hidden" data-mobile-nav>
   <nav class="grid grid-cols-[1fr_auto] bg-bgBase border border-txtMuted/10">
     <!-- Logo -->
     <div class="flex items-center h-12 mobile-nav-logo px-[0.8rem]">
@@ -61,7 +61,7 @@ const currentPath = Astro.url.pathname;
     <!-- Dropdown -->
     <div
       id="mobile-nav-dropdown"
-      class="col-span-full overflow-hidden transition-[height] duration-300 ease-in-out"
+      class="bg-bgBase col-span-full overflow-hidden transition-[height] duration-300 ease-in-out"
       style="height: 0px;"
       hidden
       data-mobile-nav-dropdown

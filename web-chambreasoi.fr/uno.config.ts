@@ -42,7 +42,7 @@ export default defineConfig({
       "text-[clamp(14px,calc(14*1px+(6)*(100vw-375*1px)/(1225)),18px)] font-[var(--font-sans)] leading-[1.2] [text-transform:uppercase]",
     // Body / UI
     "text-ui-sm": "text-[clamp(14px,calc(14px+4*(100vw-360px)/920),18px)]",
-    "text-ui-md": "text-[clamp(16px,calc(16px+8*(100vw-360px)/920),24px)]",
+    "text-ui-md": "text-[clamp(16px,calc(16px+8*(100vw-360px)/920),20px)] leading-[1.3]",
     "text-ui-lg": "text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] leading-[1.1]",
     "text-ui-xl": "text-[clamp(22.5px,calc(22.5px+28*(100vw-375px)/1225),28px)] leading-[1.1]",
 
@@ -97,8 +97,7 @@ export default defineConfig({
         sans: { name: "Karla", weights: [400, 500, 700] },
         mono: {
           name: "Victor Mono",
-          weights: [400, 500, 700],
-          italic: true,
+          provider: "none",
         },
         // General Sans (self-hosted)
         display: {

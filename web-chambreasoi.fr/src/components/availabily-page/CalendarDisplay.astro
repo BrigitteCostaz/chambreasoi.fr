@@ -2,7 +2,7 @@
 import { sanityClient } from "sanity:client";
 import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalendar.astro";
 import Button from "@components/button/Button.astro";
-import { sitemap } from "@config/pages";
+import { getOrgData } from "@config/organization";
 
 type AvailabilityDate = {
   date: string;
@@ -34,6 +34,10 @@ const availabilityMonths = await sanityClient.fetch<AvailabilityMonth[]>(
     dates[]{ date, available }
   }`
 );
+const orgData = await getOrgData();
+const {
+  contact: { phone },
+} = orgData;
 const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
   const availabilityByDate = new Map(dates.map(({ date, available }) => [date, available]));
 
@@ -68,8 +72,8 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
 
     <div class="px-[0.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-2">
       <div data-reveal data-reveal-delay="120" class="max-w-[72ch]">
-        <h1 class="heading-2 text-balance">Tarifs et disponibilités</h1>
-        <div class="mt-[1.6rem] max-w-[58ch] space-y-[0.8rem] text-balance text-ui-lg font-medium">
+        <h1 class="heading-2 text-balance">Agenda</h1>
+        <div class="mt-[1.6rem] max-w-[65ch] space-y-[0.8rem] text-balance text-ui-lg font-medium">
           <slot name="intro" />
         </div>
       </div>
@@ -89,16 +93,16 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
         class="mt-[2.4rem] flex flex-col gap-[1.6rem] lg:mt-[3.2rem] lg:max-w-[58ch]"
       >
         <div class="space-y-[0.8rem] text-balance text-ui-lg font-medium">
-          <slot name="outro" />
+          <p>Pour réserver une date ou poser une question sur votre venue, contactez-nous au</p>
         </div>
 
         <Button
           class="w-full font-sans sm:w-max"
           variant="primary"
           size="sm"
-          href={`${sitemap.reservations.path}#reservation`}
+          href={phone.link}
         >
-          Demander une réservation
+          {phone.display}
         </Button>
       </div>
     </div>

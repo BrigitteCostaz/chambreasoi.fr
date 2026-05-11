@@ -15,8 +15,9 @@ const year = startYear === currentYear ? currentYear : `${startYear}–${current
 const {
   contact: {
     phone,
-    email
-  }
+    email,
+  },
+  address,
 } = orgData;
 
 const contact = {
@@ -27,7 +28,12 @@ const contact = {
   email: {
     value: email,
     link: `mailto:${email}`
-  }
+  },
+  address: {
+    street: address.street,
+    city: address.city,
+    postalCode: address.postalCode,
+  },
 };
 ---
 
@@ -69,15 +75,23 @@ const contact = {
             <!-- Contact -->
             <div class="flex flex-col">
               <div class="footer-link-row footer-link--rule">
-                <Icon class="text-txtPri hidden sm:block" name="ion/call-sharp" />
+                
                 <a href={contact.phone.link} class="footer-link footer-hover text-ui-sm">
                   {contact.phone.display}
                 </a>
               </div>
-              <div class="footer-link-row">
-                <Icon class="text-txtPri hidden sm:block" name="ion/mail-sharp" />
-                <a href={contact.email.link} class="footer-link footer-hover text-ui-sm">{contact.email.value}</a>
+              
+              <div class="footer-link-row footer-link--rule">
+               
+                <a href="https://www.openstreetmap.org/node/13391574122" class="footer-link footer-link--address footer-hover">
+                  {address.street} {address.postalCode} {address.city}
+                </a>
               </div>
+              <div class="footer-link-row">
+                
+                <a href="https://www.openstreetmap.org/node/13391574122" class="footer-link footer-hover text-ui-sm">{contact.email.value}</a>
+              </div>
+             
             </div>
           </div>
 
@@ -152,6 +166,12 @@ const contact = {
                     {contact.phone.display}
                   </a>
                 </div>
+                <div class="footer-link-row footer-link--rule">
+                  <Icon class="text-txtPri" name="ion/location-sharp" />
+                  <a href="https://www.openstreetmap.org/node/13391574122" class="footer-link footer-link--address footer-hover">
+                    {address.street} {address.postalCode} {address.city}
+                  </a>
+                </div>
                 <div class="footer-link-row">
                   <Icon class="text-txtPri" name="ion/mail-sharp" />
                   <a href={contact.email.link} class="footer-link footer-hover text-ui-sm">{contact.email.value}</a>
@@ -216,8 +236,13 @@ const contact = {
   flex: 0 0 auto;
   max-width: 100%;
   width: fit-content;
-  padding: 0.4rem 0.8rem 0.4rem 0;
+  padding: 0.4rem 0 0.4rem 0;
   line-height: 1.2;
+}
+
+/* Narrower than text-ui-sm so the desktop footer address stays one line in the grid */
+.footer-link.footer-link--address {
+  font-size: clamp(12px, calc(12px + 3 * (100vw - 360px) / 920), 15px);
 }
 
 .footer-hover {
@@ -238,7 +263,7 @@ const contact = {
   align-items: center;
   gap: 0.6rem;
   min-height: 2.75rem;
-  padding-inline: 0.8rem;
+  padding-left: 0.8rem;
 }
 
 .footer-link--rule {

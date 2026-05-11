@@ -40,6 +40,18 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
 
 <div id="calendar" data-availability-calendar={calendarData}></div>
 
+<div class="calendar-legend" aria-label="Legende des disponibilites">
+  <span class="legend-item">
+    <span class="square availableDates" aria-hidden="true"></span>Disponible
+  </span>
+  <span class="legend-item">
+    <span class="square unavailableDates" aria-hidden="true"></span>Complet
+  </span>
+  <span class="legend-item">
+    <span class="square defaultUnavailableDates" aria-hidden="true"></span>Non disponible
+  </span>
+</div>
+
 <template id="availability-icon-available">
   <div class="flex items-center gap-1">
     <Icon name="ion/checkbox-sharp" /><span>Disponible</span>
@@ -391,5 +403,43 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   /* Icone dans le popup d'information. */
   :global([data-vc-date-popup] svg) {
     font-size: 1rem;
+  }
+
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+    color: var(--color-txtPri);
+    font-size: 0.8125rem;
+    font-weight: 400;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .square {
+    display: inline-block;
+    width: 16px;
+    aspect-ratio: 16 / 10;
+    border-radius: 0;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+  }
+
+  .availableDates {
+    background: color-mix(in oklch, var(--color-success) 28%, transparent);
+  }
+
+  .unavailableDates {
+    background: color-mix(in oklch, var(--color-alert) 78%, transparent);
+  }
+
+  .defaultUnavailableDates {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-txtMuted) 55%, transparent);
   }
 </style>

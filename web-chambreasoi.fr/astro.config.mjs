@@ -146,9 +146,6 @@ export default defineConfig({
     }),
   ],
 
-  experimental: {
-    svgo: true,
-  },
 
   devToolbar: {
     enabled: false,

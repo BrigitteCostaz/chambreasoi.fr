@@ -1,0 +1,453 @@
+---
+import { Image } from "astro:assets";
+import { getPricing } from "@config/pricing";
+import { buildSanityDprSrcSet, buildSanityImageUrl } from "@lib/sanity";
+import { resolveImage } from "@utils/imageUtils";
+import { formatEuroFR } from "@utils/currency";
+
+const pricing = await getPricing();
+const cuisineImage = resolveImage("@images/cuisine.png");
+const detailsImage = resolveImage("@images/details.png");
+const tariffColClasses = [
+  "lg:row-start-3 lg:col-start-2",
+  "lg:row-start-4 lg:col-start-2",
+  "lg:row-start-5 lg:col-start-2",
+  "lg:row-start-6 lg:col-start-2",
+] as const;
+const tariffAccentClasses = [
+  "bg-accentStone/25",
+  "bg-accentForest/20",
+  "bg-accentBistre/25",
+  "bg-accentStone/25",
+] as const;
+
+type SanityImageSource = {
+  asset?: { _ref?: string; _id?: string; url?: string };
+  alt?: string;
+};
+
+type ServiceImage = {
+  alt: string;
+  placeholderSrc: string;
+  sanityImage?: SanityImageSource | null;
+  fallbackImagePath?: string;
+};
+
+const serviceImageWidth = 1400;
+const serviceImageHeight = 1000;
+
+const serviceImages: ServiceImage[] = [
+  {
+    alt: "Chambre d'hôtes à Challes-les-Eaux",
+    placeholderSrc: "@images/dispo_01.png",
+    fallbackImagePath: "@images/dispo_01.png",
+  },
+  {
+    alt: "Petit déjeuner en maison d'hôtes",
+    placeholderSrc: "@images/dispo_02.png",
+    fallbackImagePath: "@images/dispo_02.png",
+  },
+  {
+    alt: "Accompagnement vers la clinique Médipôle",
+    placeholderSrc: "@images/dispo_03.png",
+    fallbackImagePath: "@images/dispo_03.png",
+  },
+  {
+    alt: "Séjour familial en Savoie",
+    placeholderSrc: "@images/dispo_04.png",
+    fallbackImagePath: "@images/dispo_04.png",
+  },
+  {
+    alt: "Randonnées autour de Challes-les-Eaux",
+    placeholderSrc: "@images/dispo_05.png",
+    fallbackImagePath: "@images/dispo_05.png",
+  },
+];
+
+const resolvedServiceImages = serviceImages.map((image) => {
+  const sanitySrc = buildSanityImageUrl({
+    source: image.sanityImage ?? null,
+    width: serviceImageWidth,
+    height: serviceImageHeight,
+    quality: 80,
+    format: "webp",
+    fit: "crop",
+  });
+
+  const sanitySrcSet = buildSanityDprSrcSet({
+    source: image.sanityImage ?? null,
+    width: serviceImageWidth,
+    height: serviceImageHeight,
+    dprs: [1, 1.5, 2],
+    quality: 80,
+    format: "webp",
+    fit: "crop",
+  });
+
+  const fallbackImage = image.fallbackImagePath ? resolveImage(image.fallbackImagePath) : null;
+
+  return {
+    ...image,
+    sanitySrc,
+    sanitySrcSet,
+    fallbackImage,
+  };
+});
+---
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-[3.6rem] lg:gap-[4.8rem]">
+    <!-- Tarifs: own 5-col grid -->
+    <div class="grid grid-cols-1 lg:grid-flow-dense lg:items-stretch lg:gap-grid lg:grid-cols-5">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+      >
+        <span class="heading-3">Infos pratiques</span>
+      </div>
+
+      <div
+        data-reveal
+        data-reveal-delay="80"
+        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+      >
+        <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+          <h2 class="heading-2 text-balance">Tarifs pour une nuitée</h2>
+        </div>
+      </div>
+
+      {
+        cuisineImage ? (
+          <figure
+            data-reveal
+            data-reveal-delay="100"
+            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
+          >
+            <Image
+              src={cuisineImage}
+              alt="Cuisine de la maison d'hôtes"
+              width={1400}
+              height={1050}
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        pricing.publicRates.map((rate, i) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(120 + i * 40)}
+            class:list={[
+              "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem]",
+              tariffColClasses[i] ?? tariffColClasses[0],
+              tariffAccentClasses[i] ?? tariffAccentClasses[0],
+            ]}
+          >
+            <div class="flex flex-col gap-[0.2rem]">
+              <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">
+              <span class="text-ui-sm font-medium tabular-nums">
+                {formatEuroFR(rate.priceCents)}
+              </span>
+              <span class="text-muted"> TTC</span>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Infos pratiques / modalités: separate 5-col grid -->
+    <div
+      class="grid grid-cols-1 lg:grid-flow-dense lg:items-stretch lg:gap-grid lg:grid-cols-5 lg:mt-[3.2rem]"
+    >
+      <div
+        data-reveal
+        data-reveal-delay="80"
+        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-3 lg:pb-[3.2rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] lg:min-h-[6.2rem]">
+          <h2 class="heading-2 text-balance">Modalités de réservation</h2>
+        </div>
+      </div>
+
+      {
+        detailsImage ? (
+          <figure
+            data-reveal
+            data-reveal-delay="100"
+            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start"
+          >
+            <Image
+              src={detailsImage}
+              alt="Détail de la décoration et des équipements"
+              width={900}
+              height={1200}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      <article
+        data-reveal
+        data-reveal-delay="120"
+        class="flex flex-col gap-[1.2rem] bg-accentStone/25 p-[0.8rem] lg:col-span-1 lg:col-start-4 lg:row-start-3 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Arrivée &amp; Chambre</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          Votre chambre sera disponible à partir de
+          <strong class="font-semibold">15h</strong>
+          le jour de votre arrivée. Vous pouvez toutefois déposer vos bagages en dehors de ces horaires,
+          sur demande lors de la réservation.
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="140"
+        class="flex flex-col gap-[1.2rem] bg-accentForest/20 p-[0.8rem] lg:col-span-1 lg:col-start-5 lg:row-start-3 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Départ</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          Le jour de votre départ, merci de libérer votre chambre avant
+          <strong class="font-semibold">11h</strong>.
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="160"
+        class="flex flex-col gap-[1.2rem] bg-accentBistre/25 p-[0.8rem] lg:col-span-1 lg:col-start-4 lg:row-start-4 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Réservation</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          Les réservations se font
+          <strong class="font-semibold">uniquement par téléphone</strong>.
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="180"
+        class="flex flex-col gap-[1.2rem] bg-accentStone/25 p-[0.8rem] lg:col-span-1 lg:col-start-5 lg:row-start-4 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Règlement</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          Le règlement s'effectue à l'arrivée par chèque, carte bancaire ou en espèces.
+        </p>
+        <p class="text-balance text-[0.85rem] leading-relaxed text-muted">
+          Vous trouverez 2 distributeurs automatiques dans le centre de Challes-les-Eaux.
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="200"
+        class="flex flex-col gap-[1.2rem] bg-accentForest/20 p-[0.8rem] lg:col-span-1 lg:col-start-4 lg:row-start-5 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Animaux</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          Les animaux de compagnie ne sont pas acceptés dans l'établissement.
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="220"
+        class="flex flex-col gap-[1.2rem] bg-accentBistre/25 p-[0.8rem] lg:col-span-1 lg:col-start-5 lg:row-start-5 lg:pb-[1.6rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+          <h3 class="text-ui-lg font-medium leading-snug">Tabac</h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          L'établissement est entièrement non-fumeur. Il est interdit de fumer dans les chambres et
+          les espaces communs. Un espace fumeur est disponible à l'extérieur.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="relative z-10 grid grid-cols-1 lg:items-stretch lg:gap-grid lg:grid-cols-5">
+    <div
+      data-reveal
+      data-reveal-delay="0"
+      class="flex items-center gap-grid px-[0.4rem] pb-[3.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+    >
+      <span class="heading-3">Services</span>
+    </div>
+
+    <div
+      data-reveal
+      data-reveal-delay="120"
+      class="max-w-[72ch] px-[0.4rem] mb-[2.4rem] lg:mb-[3.2rem] lg:col-span-4 lg:col-start-1 lg:row-start-3"
+    >
+      <h2 class="heading-2 text-balance">Accompagnements</h2>
+    </div>
+
+    <article
+      data-reveal
+      data-reveal-delay="240"
+      class="flex flex-col gap-[1.2rem] bg-accentStone/25 p-[0.8rem] lg:col-start-3 lg:row-start-3 lg:min-h-[18rem] lg:pb-[1.6rem]"
+    >
+      <div
+        class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[6.2rem]"
+      >
+        <span class="text-[0.85rem] text-muted uppercase tracking-widest">Santé</span>
+        <h3 class="text-ui-lg font-medium leading-snug">Passage par la clinique Médipôle</h3>
+      </div>
+      <p class="text-balance text-ui-sm leading-relaxed">
+        Pour les personnes séjournant chez nous dans le cadre d'un rendez-vous ou d'une visite à la
+        clinique Médipôle, nous proposons un
+        <strong class="font-semibold">accompagnement en voiture gratuit</strong>, à convenir lors de
+        votre réservation par téléphone.
+      </p>
+    </article>
+
+    <article
+      data-reveal
+      data-reveal-delay="320"
+      class="flex flex-col gap-[1.2rem] bg-accentForest/20 p-[0.8rem] lg:col-start-4 lg:row-start-3 lg:min-h-[18rem] lg:pb-[1.6rem]"
+    >
+      <div
+        class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[6.2rem]"
+      >
+        <span class="text-[0.85rem] text-muted uppercase tracking-widest">Marmaille</span>
+        <h3 class="text-ui-lg font-medium leading-snug">Parents solos</h3>
+      </div>
+      <p class="text-balance text-ui-sm leading-relaxed">
+        Nous proposons <strong class="font-semibold">2 couchages pour enfants (3–10 ans)</strong> dans
+        une chambre attenante, au tarif de <strong class="font-semibold">10 € par enfant</strong>. À
+        demander au moment de la réservation.
+      </p>
+    </article>
+
+    <article
+      data-reveal
+      data-reveal-delay="400"
+      class="flex flex-col gap-[1.2rem] bg-accentBistre/25 p-[0.8rem] lg:col-start-5 lg:row-start-3 lg:min-h-[18rem] lg:pb-[1.6rem]"
+    >
+      <div
+        class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[6.2rem]"
+      >
+        <span class="text-[0.85rem] text-muted uppercase tracking-widest">Découverte</span>
+        <h3 class="text-ui-lg font-medium leading-snug">Séjours touristiques</h3>
+      </div>
+      <p class="text-balance text-ui-sm leading-relaxed">
+        Vous disposerez de <strong class="font-semibold">carnets et guides de randonnées</strong> de la
+        région, ainsi que de conseils sur les sites à consulter pour préparer vos promenades autour de
+        Challes-les-Eaux.
+      </p>
+    </article>
+
+    <div
+      class="grid grid-cols-1 gap-grid lg:col-span-5 lg:col-start-1 lg:row-start-4 lg:grid-cols-5"
+    >
+      {
+        resolvedServiceImages.map((image, index) => (
+          <figure
+            data-reveal
+            data-reveal-delay={String(480 + index * 80)}
+            class="group/image relative aspect-[4/3.5] overflow-hidden bg-accentStone/25"
+          >
+            <div class="service-image-container">
+              {image.sanitySrc ? (
+                <img
+                  src={image.sanitySrc}
+                  srcset={image.sanitySrcSet ?? undefined}
+                  sizes="(max-width: 1024px) 100vw, 20vw"
+                  alt={image.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : image.fallbackImage ? (
+                <Image
+                  src={image.fallbackImage}
+                  alt={image.alt}
+                  width={serviceImageWidth}
+                  height={serviceImageHeight}
+                  densities={[1, 1.5, 2]}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : (
+                <img
+                  src={image.placeholderSrc}
+                  width={serviceImageWidth}
+                  height={serviceImageHeight}
+                  alt={image.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              )}
+            </div>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .service-image-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .service-image-container :global(img),
+  .service-image-container :global(.service-image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+</style>
