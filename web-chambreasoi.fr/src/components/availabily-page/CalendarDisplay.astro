@@ -90,20 +90,22 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
         id="reservation"
         data-reveal
         data-reveal-delay="360"
-        class="mt-[2.4rem] flex flex-col gap-[1.6rem] lg:mt-[3.2rem] lg:max-w-[58ch]"
+        class="mt-[2.4rem] flex flex-col gap-[1.6rem] sm:block lg:col-span-4 lg:col-start-2 lg:mt-[3.2rem]"
       >
-        <div class="space-y-[0.8rem] text-balance text-ui-lg font-medium">
-          <p>Pour réserver une date ou poser une question sur votre venue, contactez-nous au</p>
+        <div class="space-y-[0.8rem] text-balance text-ui-lg font-medium lg:max-w-[35ch]">
+          <p class="sm:hidden">
+            Pour réserver une date ou poser une question sur votre venue, contactez-nous au
+          </p>
+          <p class="hidden sm:block">
+            Pour réserver une date ou poser une question sur votre venue, contactez-nous au {phone.display}
+          </p>
         </div>
 
-        <Button
-          class="w-full font-sans sm:w-max"
-          variant="primary"
-          size="sm"
-          href={phone.link}
-        >
-          {phone.display}
-        </Button>
+        <div class="sm:hidden">
+          <Button class="w-full font-sans" variant="primary" size="sm" href={phone.link}>
+            {phone.display}
+          </Button>
+        </div>
       </div>
     </div>
   </div>

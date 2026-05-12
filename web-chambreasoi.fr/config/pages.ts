@@ -34,8 +34,8 @@ export const sitemap: Record<string, PageMeta> = {
   reservations: {
     key: "reservations",
     path: "/tarifs-et-reservation",
-    title: "Disponibilité",
-    description: "Consultez les tarifs et la disponibilité pour votre séjour.",
+    title: "Infos pratiques",
+    description: "Consultez les tarifs, la disponibilité et les modalités de votre séjour.",
     jsonLd: {
       "@type": "WebPage",
       name: "Tarifs et disponibilité",
