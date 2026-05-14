@@ -55,11 +55,13 @@ export * from "@chambreasoi/sanity/queries";
 import { fetchSanity } from "@chambreasoi/sanity/fetch";
 import {
   FOLD_CONTENT_QUERY,
-  HEADLINE_CONTENT_QUERY,
-  LOCATIONSECTION_CONTENT_QUERY,
   type FoldContentResult,
+  HEADLINE_CONTENT_QUERY,
   type HeadlineContentResult,
+  LOCATIONSECTION_CONTENT_QUERY,
   type LocationSectionContentResult,
+  PRACTICAL_INFO_CONTENT_QUERY,
+  type PracticalInfoContentResult,
 } from "@chambreasoi/sanity/queries";
 
 /**
@@ -81,4 +83,11 @@ export async function getHeadlineContent(): Promise<HeadlineContentResult | null
  */
 export async function getLocationSectionContent(): Promise<LocationSectionContentResult | null> {
   return fetchSanity<LocationSectionContentResult>(LOCATIONSECTION_CONTENT_QUERY);
+}
+
+/**
+ * Fetch the first practicalInfoContent document from Sanity.
+ */
+export async function getPracticalInfoContent(): Promise<PracticalInfoContentResult | null> {
+  return fetchSanity<PracticalInfoContentResult>(PRACTICAL_INFO_CONTENT_QUERY);
 }

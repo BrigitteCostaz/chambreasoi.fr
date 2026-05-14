@@ -3,10 +3,10 @@
  * Imports
  * ========================= */
 import { Image } from "astro:assets";
-import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
-import { resolveImage } from "@utils/imageUtils";
-import { formatEuroFR } from "@utils/currency";
 import { getPricing } from "@config/pricing";
+import { buildSanityDprSrcSet, buildSanityImageUrl } from "@lib/sanity";
+import { formatEuroFR } from "@utils/currency";
+import { resolveImage } from "@utils/imageUtils";
 
 /* =========================
  * Types / Props
@@ -33,7 +33,7 @@ interface Props {
 const {
   image: sanityImageSource = null,
   imageAlt: altOverride,
-  fallbackImagePath = "@images/price.png",
+  fallbackImagePath = "@images/chambreasoi-accueil-tarifs.png",
 } = Astro.props;
 
 /* =========================
@@ -45,7 +45,10 @@ const {
 const coverWidth = 1280;
 const coverHeight = 1152;
 
-const imageAlt = altOverride ?? sanityImageSource?.alt ?? "";
+const imageAlt =
+  altOverride ??
+  sanityImageSource?.alt ??
+  "Vase en terre cuite avec de hautes tiges de fleurs sauvages séchées sur une table d'appoint ronde en bois, accompagné d'un bol en céramique bleu foncé, d'un bocal en verre et de galets";
 
 const sanitySrc = buildSanityImageUrl({
   source: sanityImageSource,
@@ -81,7 +84,6 @@ const pricing = await getPricing();
 const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
 const baseNightly2PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[1].priceCents);
 const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
-
 ---
 
 <section class="hidden lg:block relative overflow-x-clip pt-[.8rem] mt-[3.2rem] h-24">

@@ -1,13 +1,13 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
 import Fold from "@components/fold/Fold.astro";
 import HeadLineSection from "@components/headline-section/HeadlineSection.astro";
 import LocationSection from "@components/location-section/LocationSection.astro";
 import PriceSection from "@components/price-section/PriceSection.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
 ---
 
 <BaseLayout>
-  <Fold fallbackImagePath="@images/test.webp" />
+  <Fold />
   <HeadLineSection />
   <LocationSection />
   <PriceSection />

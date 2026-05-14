@@ -12,7 +12,11 @@
     "skipLibCheck": true,
     "noEmit": true,
     "baseUrl": ".",
-    "types": ["@cloudflare/workers-types"],
+    "types": [
+      "astro/client",
+      "@sanity/astro/module",
+      "@cloudflare/workers-types"
+    ],
     "paths": {
       "@components/*": ["src/components/*"],
       "@config/*": ["config/*"],

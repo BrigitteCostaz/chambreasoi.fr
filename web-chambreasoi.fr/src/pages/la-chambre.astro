@@ -1,5 +1,577 @@
 ---
+import { Image } from "astro:assets";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { resolveImage } from "@utils/imageUtils";
+
+type Accent = "stone" | "forest" | "bistre";
+type GalleryOrientation = "landscape" | "portrait";
+
+interface ContentCard {
+  title: string;
+  body: string;
+  accent: Accent;
+}
+
+interface GalleryImage {
+  image: ImageMetadata | null;
+  alt: string;
+}
+
+const accentClasses: Record<Accent, string> = {
+  stone: "bg-accentStone/25",
+  forest: "bg-accentForest/20",
+  bistre: "bg-accentBistre/25",
+};
+const serviceFeatureImage = null;
+// later, when needed:
+// const serviceFeatureImage = room03Image;
+const room01Image = resolveImage("@images/chambreasoi-room-01.png");
+const room02Image = resolveImage("@images/chambreasoi-room-02.png");
+const room03Image = resolveImage("@images/chambreasoi-room-03.png");
+const livingroom01Image = resolveImage("@images/chambreasoi-livingroom-01.png");
+const livingroom02Image = resolveImage("@images/chambreasoi-livingroom-02.png");
+const livingroom03Image = resolveImage("@images/chambreasoi-livingroom-03.png");
+const bathroom01Image = resolveImage("@images/chambreasoi-bathroom-01.png");
+const terrace01Image = resolveImage("@images/chambreasoi-terrace-01.png");
+const cuisineImage = resolveImage("@images/chambreasoi-cuisine.png");
+const gardenImage01 = resolveImage("@images/chambreasoi-garden-01.png");
+const gardenImage02 = resolveImage("@images/chambreasoi-garden-02.png");
+const gardenImage03 = resolveImage("@images/chambreasoi-garden-03.png");
+const privateCards: ContentCard[] = [
+  {
+    title: "La chambre",
+    body: "Une chambre équipée d'un lit double avec draps et couette, d'un chauffage individuel, du wifi, d'un dressing ainsi que d'un petit bureau pour travailler ou vous installer confortablement.",
+    accent: "stone",
+  },
+  {
+    title: "La terrasse",
+    body: "Depuis votre chambre, vous accédez directement à la terrasse, idéale pour savourer vos petits-déjeuners ou profiter du soleil en toute tranquillité lorsque le temps le permet.",
+    accent: "forest",
+  },
+  {
+    title: "La salle de bain",
+    body: "Vous disposez également d'une salle de bain privative avec douche ainsi que du linge de toilette fourni pour votre confort.",
+    accent: "bistre",
+  },
+];
+
+const sharedCards: ContentCard[] = [
+  {
+    title: "La cuisine équipée",
+    body: "La partie cuisine, accessible de 18h à 20h30, comprend un réfrigérateur, une bouilloire, des plaques chauffantes et un micro-ondes pour chauffer ou réchauffer vos plats.",
+    accent: "stone",
+  },
+  {
+    title: "La salle à manger",
+    body: "Un espace salle à manger est prévu pour prendre vos petits-déjeuners ou vos repas sur place dans un cadre convivial.",
+    accent: "forest",
+  },
+  {
+    title: "Le salon",
+    body: "Un coin salon avec téléviseur est également à votre disposition pour vos moments de détente.",
+    accent: "bistre",
+  },
+];
+
+const serviceCards: ContentCard[] = [
+  {
+    title: "Chauffage individuel",
+    body: "La chambre est équipée d'un chauffage individuel pour un confort optimal en toute saison.",
+    accent: "forest",
+  },
+  {
+    title: "Parking et local vélo sécurisé",
+    body: "Un parking pour voiture ou moto est disponible devant la maison, ainsi qu'un abri sécurisé pouvant accueillir jusqu'à deux vélos.",
+    accent: "bistre",
+  },
+  {
+    title: "Connexion wifi",
+    body: "Une connexion wifi est disponible pour rester connecté pendant votre séjour.",
+    accent: "stone",
+  },
+];
+
+const rightCardPositions = [
+  "lg:col-start-3 lg:row-start-3",
+  "lg:col-start-5 lg:row-start-3",
+  "lg:col-start-4 lg:row-start-3",
+] as const;
+
+const leftCardPositions = [
+  "lg:col-start-1 lg:row-start-3",
+  "lg:col-start-2 lg:row-start-3",
+  "lg:col-start-3 lg:row-start-3",
+] as const;
+
+const galleryColumnStartClasses = {
+  1: "lg:col-start-1",
+  2: "lg:col-start-2",
+  3: "lg:col-start-3",
+  4: "lg:col-start-4",
+  5: "lg:col-start-5",
+} as const;
+
+const getGalleryOrientation = (image: ImageMetadata | null): GalleryOrientation =>
+  image && image.height > image.width ? "portrait" : "landscape";
+
+const getGalleryColumnSpan = (image: ImageMetadata | null) =>
+  getGalleryOrientation(image) === "portrait" ? 1 : 2;
+
+const getGalleryColumnStart = (images: GalleryImage[], index: number, startColumn = 1) =>
+  images
+    .slice(0, index)
+    .reduce(
+      (column, item) => column + (item.image ? getGalleryColumnSpan(item.image) : 0),
+      startColumn
+    );
+const getGalleryLayoutClasses = (images: GalleryImage[], index: number, startColumn = 1) => {
+  const image = images[index]?.image ?? null;
+  const orientation = getGalleryOrientation(image);
+  const spanClass = orientation === "portrait" ? "lg:col-span-1" : "lg:col-span-2";
+  const aspectClass = orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]";
+  const columnStart = getGalleryColumnStart(
+    images,
+    index,
+    startColumn
+  ) as keyof typeof galleryColumnStartClasses;
+  return [
+    aspectClass,
+    spanClass,
+    galleryColumnStartClasses[columnStart] ?? galleryColumnStartClasses[1],
+  ];
+};
+const getGalleryImageDimensions = (image: ImageMetadata | null) =>
+  getGalleryOrientation(image) === "portrait"
+    ? { width: 825, height: 1100 }
+    : { width: 1100, height: 825 };
+
+const getGallerySizes = (image: ImageMetadata | null) =>
+  getGalleryOrientation(image) === "portrait"
+    ? "(min-width: 1024px) 20vw, 100vw"
+    : "(min-width: 1024px) 40vw, 100vw";
+
+const privateGalleryImages: GalleryImage[] = [
+  {
+    image: room01Image,
+    alt: "Chambre lumineuse avec lit double, linge de lit et décoration sobre",
+  },
+  {
+    image: bathroom01Image,
+    alt: "Salle de bain privative avec douche et linge de toilette",
+  },
+
+  {
+    image: terrace01Image,
+    alt: "Terrasse en bois accessible directement depuis la chambre",
+  },
+];
+
+const sharedGalleryImages: GalleryImage[] = [
+  {
+    image: gardenImage01,
+    alt: "Salle à manger lumineuse ouverte sur la terrasse",
+  },
+  {
+    image: cuisineImage,
+    alt: "Cuisine équipée avec réfrigérateur, évier, plaques et micro-ondes",
+  },
+  {
+    image: livingroom02Image,
+    alt: "Espace salle à manger et salon commun dans une ambiance conviviale",
+  },
+];
+
+const serviceGalleryImages: GalleryImage[] = [
+  {
+    image: livingroom03Image,
+    alt: "Chambre avec lit double, dressing et rangements",
+  },
+  {
+    image: gardenImage02,
+    alt: "Chambre avec lit double, dressing et rangements",
+  },
+  {
+    image: gardenImage03,
+    alt: "Accès extérieur pratique depuis la chambre",
+  },
+];
 ---
 
-<BaseLayout />
+<BaseLayout>
+  <section>
+    <div class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+      <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+        <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+        <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+          <div class="grid-line"></div>
+          <div class="grid-line"></div>
+          <div class="grid-line"></div>
+          <div class="grid-line"></div>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+        <div
+          data-reveal
+          data-reveal-delay="80"
+          class="max-w-[80ch] px-[0.4rem] lg:col-span-3 lg:col-start-2"
+        >
+          <h1 class="heading-2 text-balance">
+            Chambre confortable avec terrasse et accès aux espaces communs
+          </h1>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div></div>
+      </div>
+    </div>
+    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+      >
+        <span class="heading-3">Un séjour tout confort</span>
+      </div>
+
+      <div
+        class="max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:translate-x-1/3 lg:pb-0"
+      >
+        <div data-reveal data-reveal-delay="80">
+          <h2 class="heading-2 text-balance">Sur place, vous bénéficiez de plusieurs commodités</h2>
+        </div>
+      </div>
+
+      {
+        room02Image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={room02Image}
+              alt="Chambre confortable avec lit double, dressing et espace bureau"
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="eager"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        privateCards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(200 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              rightCardPositions[index] ?? rightCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        privateGalleryImages.map((galleryImage, index) =>
+          galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(380 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                ...getGalleryLayoutClasses(privateGalleryImages, index),
+              ]}
+            >
+              <Image
+                src={galleryImage.image}
+                alt={galleryImage.alt}
+                width={getGalleryImageDimensions(galleryImage.image).width}
+                height={getGalleryImageDimensions(galleryImage.image).height}
+                densities={[1, 1.5, 2]}
+                sizes={getGallerySizes(galleryImage.image)}
+                loading="lazy"
+                decoding="async"
+                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+              />
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div></div>
+      </div>
+    </div>
+
+    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem] lg:pb-0"
+      >
+        <span class="heading-3">Espace commun</span>
+      </div>
+
+      <div
+        class="max-w-[74ch] px-[0.4rem] pb-[1.6rem] lg:col-span-4 lg:col-start-1 lg:row-start-2 lg:translate-x-1/4 lg:pb-0"
+      >
+        <div data-reveal data-reveal-delay="80">
+          <h2 class="heading-2 text-pretty">Des espaces partagés pour vos moments de détente</h2>
+        </div>
+      </div>
+
+      <div
+        data-reveal
+        data-reveal-delay="120"
+        class="flex flex-col justify-center gap-[1.2rem] lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:min-h-[12rem] lg:pb-[1.4rem]"
+      >
+        <p
+          class="h-fit max-w-[59ch] self-center text-ui-md leading-relaxed text-balance p-[0.8rem] bg-accentTerra/20"
+        >
+          Un espace partagé avec l'hôte (accessible entre 18h et 22h30) qui va vous permettre de profiter de vos
+          soirées chez nous en apportant ou achetant au bourg de quoi vous préparer un repas léger
+          ou votre petit déjeuner.
+        </p>
+      </div>
+
+      {
+        sharedCards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(180 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[13rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              leftCardPositions[index] ?? leftCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        livingroom01Image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="360"
+            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={livingroom01Image}
+              alt="Espace salon partagé pour les moments de détente"
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        sharedGalleryImages.map((galleryImage, index) =>
+          galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(420 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                ...getGalleryLayoutClasses(sharedGalleryImages, index),
+              ]}
+            >
+              <Image
+                src={galleryImage.image}
+                alt={galleryImage.alt}
+                width={getGalleryImageDimensions(galleryImage.image).width}
+                height={getGalleryImageDimensions(galleryImage.image).height}
+                densities={[1, 1.5, 2]}
+                sizes={getGallerySizes(galleryImage.image)}
+                loading="lazy"
+                decoding="async"
+                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+              />
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
+      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div></div>
+      </div>
+    </div>
+
+    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem] lg:pb-0"
+      >
+        <span class="heading-3">Confort au quotidien</span>
+      </div>
+
+      <div
+        class="max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:translate-x-1/3 lg:pb-0"
+      >
+        <div data-reveal data-reveal-delay="80">
+          <h2 class="heading-2 text-balance">Services et équipements</h2>
+        </div>
+      </div>
+
+      {
+        serviceFeatureImage ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={serviceFeatureImage ?? ""}
+              alt="Espace bureau et rangements de la chambre"
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        serviceCards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(200 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              rightCardPositions[index] ?? rightCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        serviceGalleryImages.map((galleryImage, index) =>
+          galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(380 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                ...getGalleryLayoutClasses(serviceGalleryImages, index, 1),
+              ]}
+            >
+              <Image
+                src={galleryImage.image}
+                alt={galleryImage.alt}
+                width={getGalleryImageDimensions(galleryImage.image).width}
+                height={getGalleryImageDimensions(galleryImage.image).height}
+                densities={[1, 1.5, 2]}
+                sizes={getGallerySizes(galleryImage.image)}
+                loading="lazy"
+                decoding="async"
+                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+              />
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
+
+  elements.forEach((el) => {
+    const delay = el.dataset.revealDelay ?? "0";
+    el.style.setProperty("--reveal-delay", `${delay}ms`);
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        requestAnimationFrame(() => {
+          (entry.target as HTMLElement).classList.add("is-visible");
+        });
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  elements.forEach((el) => observer.observe(el));
+</script>

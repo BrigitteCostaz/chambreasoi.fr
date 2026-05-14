@@ -161,3 +161,119 @@ export const LOCATIONSECTION_CONTENT_QUERY = /* groq */ `
     mapCta,
     }
 `
+
+// ---------------------------------------------------------------------------
+// practicalInfoContent
+// ---------------------------------------------------------------------------
+
+export type PracticalInfoAccent = "stone" | "forest" | "bistre"
+
+export interface PracticalInfoImageResult {
+  asset: {
+    _ref?: string
+    _id?: string
+    url?: string
+  } | null
+  alt: string | null
+}
+
+export interface PracticalInfoTextSpanResult {
+  _key: string
+  _type: string
+  text: string | null
+  marks: string[] | null
+}
+
+export interface PracticalInfoTextBlockResult {
+  _key: string
+  _type: string
+  style: string | null
+  children: PracticalInfoTextSpanResult[] | null
+}
+
+export interface PracticalInfoCardResult {
+  _key: string
+  title: string | null
+  body: PracticalInfoTextBlockResult[] | null
+  secondaryText?: string | null
+  accent: PracticalInfoAccent | null
+}
+
+export interface PracticalInfoServiceCardResult {
+  _key: string
+  category: string | null
+  title: string | null
+  body: PracticalInfoTextBlockResult[] | null
+  accent: PracticalInfoAccent | null
+}
+
+export interface PracticalInfoContentResult {
+  eyebrow: string | null
+  tariffsHeading: string | null
+  kitchenImage: PracticalInfoImageResult | null
+  bookingHeading: string | null
+  bookingEyebrow: string | null
+  bookingImage: PracticalInfoImageResult | null
+  bookingCards: PracticalInfoCardResult[] | null
+  servicesEyebrow: string | null
+  servicesHeading: string | null
+  serviceCards: PracticalInfoServiceCardResult[] | null
+  serviceImages: PracticalInfoImageResult[] | null
+}
+
+export const PRACTICAL_INFO_CONTENT_QUERY = /* groq */ `
+  *[_type == "practicalInfoContent"][0]{
+    eyebrow,
+    tariffsHeading,
+    kitchenImage{
+      "asset": asset.asset,
+      alt
+    },
+    bookingHeading,
+    bookingEyebrow,
+    bookingImage{
+      "asset": asset.asset,
+      alt
+    },
+    bookingCards[]{
+      _key,
+      title,
+      body[]{
+        _key,
+        _type,
+        style,
+        children[]{
+          _key,
+          _type,
+          text,
+          marks
+        }
+      },
+      secondaryText,
+      accent
+    },
+    servicesEyebrow,
+    servicesHeading,
+    serviceCards[]{
+      _key,
+      category,
+      title,
+      body[]{
+        _key,
+        _type,
+        style,
+        children[]{
+          _key,
+          _type,
+          text,
+          marks
+        }
+      },
+      accent
+    },
+    serviceImages[]{
+      "asset": asset.asset,
+      alt
+    }
+  }
+`

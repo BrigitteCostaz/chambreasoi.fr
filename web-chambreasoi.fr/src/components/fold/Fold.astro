@@ -4,12 +4,11 @@
  * ========================= */
 import { Image } from "astro:assets";
 import Button from "@components/button/Button.astro";
-import { getPricing } from "@config/pricing";
 import { getOrgData } from "@config/organization";
-import { getFoldContent } from "@lib/sanity";
-import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
-import { resolveImage } from "@utils/imageUtils";
+import { getPricing } from "@config/pricing";
+import { buildSanityDprSrcSet, buildSanityImageUrl, getFoldContent } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
+import { resolveImage } from "@utils/imageUtils";
 
 /* =========================
  * Types / Props
@@ -36,7 +35,7 @@ interface Props {
 const {
   image: sanityImageSource = null,
   imageAlt: altOverride,
-  fallbackImagePath = "@images/test.webp",
+  fallbackImagePath = "@images/chambreasoi-accueil-facade.png",
 } = Astro.props;
 
 /* =========================
@@ -48,7 +47,10 @@ const {
 const coverWidth = 800;
 const coverHeight = 1200;
 
-const imageAlt = altOverride ?? sanityImageSource?.alt ?? "";
+const imageAlt =
+  altOverride ??
+  sanityImageSource?.alt ??
+  "Extérieur d'une maison contemporaine avec façade gris foncé et bardage bois, dotée d'une baie vitrée coulissante avec rideaux blancs donnant sur une terrasse en bois, encadrée par un olivier en pot et un petit tabouret avec des jonquilles en fleurs, avec une crête rocheuse visible en arrière-plan";
 
 const sanitySrc = buildSanityImageUrl({
   source: sanityImageSource,
@@ -423,7 +425,7 @@ const f = {
       </div>
 
       <div
-        class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1"
+        class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1 lg:translate-x-0"
       >
       </div>
 
