@@ -61,7 +61,7 @@ export default defineConfig({
     "flex-col-end": "flex flex-col items-end justify-start",
     "flex-col-between": "flex flex-col justify-between",
 
-    "square": "aspect-square",
+    square: "aspect-square",
 
     "list-ui": "flex flex-col font-display font-medium leading-none list-inside",
 
@@ -70,8 +70,9 @@ export default defineConfig({
     "cta-top": "absolute p-0.8rem inset-x-0 top-0.8rem flex justify-center z-10",
 
     "cta-bottom": "absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10",
-  
-    "price-ui": "text-[clamp(28px,calc(28px+36*(100vw-375px)/1225),64px)] font-[var(--font-display)] font-medium tracking-[var(--font-display-tracking)] leading-[1.1]",
+
+    "price-ui":
+      "text-[clamp(28px,calc(28px+36*(100vw-375px)/1225),64px)] font-[var(--font-display)] font-medium tracking-[var(--font-display-tracking)] leading-[1.1]",
   },
   rules: [
     [

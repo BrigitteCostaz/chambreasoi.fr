@@ -1,10 +1,10 @@
 ---
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
 /**
  * MobileNav - Fixed bottom mobile navigation bar
  * Visible only below `lg` breakpoint, hidden on `lg+`
  */
 import { Icon } from "astro-icon/components";
-import SiteLogo from "@components/site-logo/SiteLogo.astro";
 
 interface Link {
   href: string;
@@ -96,7 +96,7 @@ const currentPath = Astro.url.pathname;
 <style>
   [data-mobile-nav] {
     position: fixed;
-    bottom: .8rem;
+    bottom: 0.8rem;
     left: 0;
     right: auto;
     width: 100%;
@@ -311,11 +311,7 @@ const currentPath = Astro.url.pathname;
           this.dropdown.hidden = true;
         }
       };
-      this.dropdown.addEventListener(
-        "transitionend",
-        hideDropdown,
-        { once: true }
-      );
+      this.dropdown.addEventListener("transitionend", hideDropdown, { once: true });
       // Fallback: Firefox can skip transitionend during rapid resize/breakpoint changes.
       window.setTimeout(hideDropdown, 350);
       this.toggle.setAttribute("aria-expanded", "false");

@@ -1,7 +1,7 @@
 ---
 import "vanilla-calendar-pro/styles/index.css";
-import { Icon } from "astro-icon/components";
 import chevronIconUrl from "@icons/ion/chevron-down-sharp.svg?url";
+import { Icon } from "astro-icon/components";
 
 type AvailabilityDate = {
   date: string;
@@ -258,7 +258,9 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   /* Etat complet dans le mois courant, y compris hover et popup ouvert. */
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable),
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable:hover),
-  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable[aria-expanded="true"]) {
+  :global(
+    [data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable[aria-expanded="true"]
+  ) {
     background: color-mix(in oklch, var(--color-alert) 78%, transparent);
     box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-alert) 32%, var(--color-txtPri));
     color: var(--color-bgBase);
@@ -368,7 +370,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   ) {
     background-color: transparent;
     box-shadow: none;
-    color: color-mix(in oklch,var(--color-txtMuted) 58%,transparent);
+    color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
     font-weight: 450;
   }
 
@@ -384,7 +386,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   ) {
     background-color: transparent;
     box-shadow: none;
-    color: color-mix(in oklch,var(--color-txtMuted) 58%,transparent);
+    color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
     font-weight: 450;
   }
 

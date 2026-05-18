@@ -3,65 +3,68 @@
 @import "./fonts.css";
 
 :root {
-    --header-height: 48px;
-    /* Will be set by JS if header is sticky */
+  --header-height: 48px;
+  /* Will be set by JS if header is sticky */
 }
 
 html,
 body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-bgBase);
-    color: var(--color-txtPri);
-    font-family: "Karla", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bgBase);
+  color: var(--color-txtPri);
+  font-family: "Karla", sans-serif;
 }
 
-header
-{
-    background-color: var(--color-bgBase);
-    color: var(--color-txtPri);
+header {
+  background-color: var(--color-bgBase);
+  color: var(--color-txtPri);
 }
 ul,
 ol {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 li {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border-width: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .grid-line {
-    position: relative;
-    height: 100%;
+  position: relative;
+  height: 100%;
 }
 
 .grid-line::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: 1px;
-    transform: translateX(100%);
-    background: color-mix(in oklch, var(--grid-line-color, var(--color-txtPri)) var(--grid-line-opacity, 10%), transparent);
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  transform: translateX(100%);
+  background: color-mix(
+    in oklch,
+    var(--grid-line-color, var(--color-txtPri)) var(--grid-line-opacity, 10%),
+    transparent
+  );
 }
 
 .grid-line-reverse {
-    --grid-line-color: var(--color-bgCard);
-    --grid-line-opacity: 50%;
+  --grid-line-color: var(--color-bgCard);
+  --grid-line-opacity: 50%;
 }

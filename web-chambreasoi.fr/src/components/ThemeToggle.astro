@@ -25,6 +25,7 @@ import Button from "./button/Button.astro";
 const defaultMode = siteConfig.themeConfig.colors.mode;
 const STORAGE_KEY = "theme:mode";
 ---
+
 <Button
   type="button"
   variant="ghost"
@@ -147,7 +148,9 @@ const STORAGE_KEY = "theme:mode";
     color: var(--color-txtPri);
     font: inherit;
     line-height: 1;
-    transition: color 0.2s ease, opacity 0.2s ease;
+    transition:
+      color 0.2s ease,
+      opacity 0.2s ease;
     opacity: 0.82;
   }
 

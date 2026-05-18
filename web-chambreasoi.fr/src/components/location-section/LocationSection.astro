@@ -1,11 +1,11 @@
 ---
+import Button from "@components/button/Button.astro";
+import SvgMap from "@images/map-chambreasoi.svg";
+import { getLocationSectionContent } from "@lib/sanity";
 /* =========================
  * Imports
  * ========================= */
 import { Icon } from "astro-icon/components";
-import Button from "@components/button/Button.astro";
-import Map from "@images/map-chambreasoi.svg";
-import { getLocationSectionContent } from "@lib/sanity";
 
 /* =========================
  * Final computed values
@@ -92,7 +92,7 @@ const l = {
 
   <!-- Carte mobile — EN DEHORS du wrapper, donc sans lignes -->
   <div class="xl:hidden map-mobile overflow-hidden flex justify-center">
-    <Map class="map-mobile-svg shrink-0" aria-label="Carte de la région" role="img" />
+    <SvgMap class="map-mobile-svg shrink-0" aria-label="Carte de la région" role="img" />
   </div>
 
   <!-- CTA — EN DEHORS du wrapper, donc sans lignes -->
@@ -110,7 +110,7 @@ const l = {
 
 <div class="hidden xl:block parallax-map h-[calc(100dvh-var(--header-height,0px))]" data-parallax>
   <div class="parallax-layer">
-    <Map class="map-svg" aria-label="Carte de la région" role="img" />
+    <SvgMap class="map-svg" aria-label="Carte de la région" role="img" />
   </div>
   <div class="map-inner grid grid-cols-1 lg:grid-cols-10">
     <div class="lg:col-span-3 lg:col-start-4 lg:row-start-1">
