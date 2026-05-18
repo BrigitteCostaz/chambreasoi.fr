@@ -45,6 +45,7 @@ export default defineConfig({
     "text-ui-md": "text-[clamp(16px,calc(16px+8*(100vw-360px)/920),20px)] leading-[1.3]",
     "text-ui-lg": "text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] leading-[1.1]",
     "text-ui-xl": "text-[clamp(22.5px,calc(22.5px+28*(100vw-375px)/1225),28px)] leading-[1.1]",
+    "text-ui-map": "text-[clamp(18px,calc(16.68px+0.3516vw),20px)]",
 
     "text-primary": "text-txtPri leading-none",
     "text-muted": "text-txtMuted leading-tight",

@@ -277,3 +277,96 @@ export const PRACTICAL_INFO_CONTENT_QUERY = /* groq */ `
     }
   }
 `
+
+// ---------------------------------------------------------------------------
+// roomPageContent
+// ---------------------------------------------------------------------------
+
+export type RoomPageAccent = "stone" | "forest" | "bistre"
+
+export interface RoomPageImageResult {
+  asset: {
+    _ref?: string
+    _id?: string
+    url?: string
+    metadata?: {
+      dimensions?: {
+        width?: number
+        height?: number
+      } | null
+    } | null
+  } | null
+  alt: string | null
+}
+
+export interface RoomPageCardResult {
+  _key: string
+  title: string | null
+  body: string | null
+  accent: RoomPageAccent | null
+}
+
+export interface RoomPageSectionResult {
+  eyebrow: string | null
+  heading: string | null
+  introText: string | null
+  featureImage: RoomPageImageResult | null
+  cards: RoomPageCardResult[] | null
+  galleryImages: RoomPageImageResult[] | null
+}
+
+export interface RoomPageContentResult {
+  heroEyebrow: string | null
+  heroTitle: string | null
+  privateSection: RoomPageSectionResult | null
+  sharedSection: RoomPageSectionResult | null
+  serviceSection: RoomPageSectionResult | null
+}
+
+const ROOM_PAGE_IMAGE_PROJECTION = /* groq */ `
+  "asset": asset.asset->{
+    _id,
+    url,
+    metadata{
+      dimensions{
+        width,
+        height
+      }
+    }
+  },
+  alt
+`
+
+const ROOM_PAGE_SECTION_PROJECTION = /* groq */ `
+  eyebrow,
+  heading,
+  introText,
+  featureImage{
+    ${ROOM_PAGE_IMAGE_PROJECTION}
+  },
+  cards[]{
+    _key,
+    title,
+    body,
+    accent
+  },
+  galleryImages[]{
+    ${ROOM_PAGE_IMAGE_PROJECTION}
+  }
+`
+
+export const ROOM_PAGE_CONTENT_QUERY = /* groq */ `
+  *[_type == "roomPageContent"][0]{
+    heroEyebrow,
+    heroTitle,
+    privateSection{
+      ${ROOM_PAGE_SECTION_PROJECTION}
+    },
+    sharedSection{
+      ${ROOM_PAGE_SECTION_PROJECTION}
+    },
+    serviceSection{
+      ${ROOM_PAGE_SECTION_PROJECTION}
+    }
+  }
+`

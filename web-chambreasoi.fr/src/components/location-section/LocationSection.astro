@@ -72,16 +72,16 @@ const l = {
       <div
         data-reveal
         data-reveal-delay="120"
-        class="bg-accentTerra/25 lg:col-start-2 lg:col-span-4 lg:row-start-2 flex flex-col gap-[1.2rem] p-[0.8rem]"
+        class="bg-accentTerra/25 lg:col-start-1 lg:col-span-4 lg:row-start-2 flex flex-col gap-[1.2rem] p-[0.8rem]"
       >
         <!-- Intro heading -->
-        <h2 class="max-w-[36ch] text-pretty text-ui-lg">
+        <h2 class="max-w-full text-pretty text-ui-map">
           {l.introText}.
         </h2>
 
         <!-- Map labels -->
         <div>
-          <p class="max-w-[42ch] whitespace-pre-line text-pretty text-ui-lg">
+          <p class="max-w-full whitespace-pre-line text-pretty text-ui-map">
             {l.mapLabel1}, {l.mapLabel2}
             {l.mapLabel3}
           </p>
@@ -113,11 +113,11 @@ const l = {
     <SvgMap class="map-svg" aria-label="Carte de la région" role="img" />
   </div>
   <div class="map-inner grid grid-cols-1 lg:grid-cols-10">
-    <div class="lg:col-span-3 lg:col-start-4 lg:row-start-1">
+    <div class="lg:col-span-4 lg:col-start-4 lg:row-start-1">
       <h2
         data-reveal
         data-reveal-delay="0"
-        class="inline-block p-[0.8rem] w-fit text-muted heading-2 px-[0.4rem] text-balance text-ui-lg bg-accentTerra/25"
+        class="inline-block p-[0.8rem] w-fit text-ui-map px-[0.4rem] text-balance text-ui-map bg-accentTerra/25"
       >
         {l.introText}
       </h2>
@@ -128,7 +128,7 @@ const l = {
       class="eyebrow flex h-full flex-col self-stretch p-[0.8rem] lg:col-span-2 lg:col-start-1 justify-end"
     >
       <p
-        class="text-muted whitespace-pre-line text-ui-lg w-fit font-medium p-[0.8rem] bg-accentTerra/25"
+        class="whitespace-pre-line text-ui-map w-fit p-[0.8rem] bg-accentTerra/25"
       >
         {l.mapLabel1}
       </p>
@@ -136,9 +136,9 @@ const l = {
     <div
       data-reveal
       data-reveal-delay="240"
-      class="lead flex h-full flex-col p-[0.8rem] lg:col-span-3 lg:col-start-2"
+      class="lead flex h-full flex-col p-[0.8rem] lg:col-span-4 lg:col-start-2"
     >
-      <p class="text-muted mt-[25vh] w-fit text-ui-lg font-medium p-[0.8rem] bg-accentTerra/25">
+      <p class="mt-[25vh] w-fit text-ui-map p-[0.8rem] bg-accentTerra/25">
         {l.mapLabel2}
       </p>
     </div>
@@ -147,7 +147,7 @@ const l = {
       data-reveal-delay="240"
       class="lead flex h-full flex-col p-[0.8rem] lg:col-span-2 lg:col-start-8"
     >
-      <p class="text-muted my-2/4 w-fit text-ui-lg font-medium p-[0.8rem] bg-accentTerra/25">
+      <p class="my-2/4 w-fit text-ui-map p-[0.8rem] bg-accentTerra/20">
         {l.mapLabel3}
       </p>
       <Button

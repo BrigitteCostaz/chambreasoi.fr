@@ -1,12 +1,22 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import {
+  buildSanityDprSrcSet,
+  buildSanityImageUrl,
+  getRoomPageContent,
+  type RoomPageAccent,
+  type RoomPageCardResult,
+  type RoomPageImageResult,
+  type RoomPageSectionResult,
+} from "@lib/sanity";
 import { resolveImage } from "@utils/imageUtils";
 
-type Accent = "stone" | "forest" | "bistre";
+type Accent = RoomPageAccent;
 type GalleryOrientation = "landscape" | "portrait";
 
 interface ContentCard {
+  _key?: string;
   title: string;
   body: string;
   accent: Accent;
@@ -15,7 +25,12 @@ interface ContentCard {
 interface GalleryImage {
   image: ImageMetadata | null;
   alt: string;
+  sanityImage?: RoomPageImageResult | null;
+  sanitySrc?: string | null;
+  sanitySrcSet?: string | null;
 }
+
+const roomPageContent = await getRoomPageContent();
 
 const accentClasses: Record<Accent, string> = {
   stone: "bg-accentStone/25",
@@ -27,7 +42,6 @@ const serviceFeatureImage = null;
 // const serviceFeatureImage = room03Image;
 const room01Image = resolveImage("@images/chambreasoi-room-01.png");
 const room02Image = resolveImage("@images/chambreasoi-room-02.png");
-const room03Image = resolveImage("@images/chambreasoi-room-03.png");
 const livingroom01Image = resolveImage("@images/chambreasoi-livingroom-01.png");
 const livingroom02Image = resolveImage("@images/chambreasoi-livingroom-02.png");
 const livingroom03Image = resolveImage("@images/chambreasoi-livingroom-03.png");
@@ -37,7 +51,7 @@ const cuisineImage = resolveImage("@images/chambreasoi-cuisine.png");
 const gardenImage01 = resolveImage("@images/chambreasoi-garden-01.png");
 const gardenImage02 = resolveImage("@images/chambreasoi-garden-02.png");
 const gardenImage03 = resolveImage("@images/chambreasoi-garden-03.png");
-const privateCards: ContentCard[] = [
+const defaultPrivateCards: ContentCard[] = [
   {
     title: "La chambre",
     body: "Une chambre équipée d'un lit double avec draps et couette, d'un chauffage individuel, du wifi, d'un dressing ainsi que d'un petit bureau pour travailler ou vous installer confortablement.",
@@ -55,7 +69,7 @@ const privateCards: ContentCard[] = [
   },
 ];
 
-const sharedCards: ContentCard[] = [
+const defaultSharedCards: ContentCard[] = [
   {
     title: "La cuisine équipée",
     body: "La partie cuisine, accessible de 18h à 20h30, comprend un réfrigérateur, une bouilloire, des plaques chauffantes et un micro-ondes pour chauffer ou réchauffer vos plats.",
@@ -73,7 +87,7 @@ const sharedCards: ContentCard[] = [
   },
 ];
 
-const serviceCards: ContentCard[] = [
+const defaultServiceCards: ContentCard[] = [
   {
     title: "Chauffage individuel",
     body: "La chambre est équipée d'un chauffage individuel pour un confort optimal en toute saison.",
@@ -103,6 +117,27 @@ const leftCardPositions = [
   "lg:col-start-3 lg:row-start-3",
 ] as const;
 
+const mobileInterleavedCardOrdersWithHero = [
+  "max-lg:order-4 lg:order-none",
+  "max-lg:order-6 lg:order-none",
+  "max-lg:order-8 lg:order-none",
+] as const;
+const mobileInterleavedGalleryOrdersWithHero = [
+  "max-lg:order-5 lg:order-none",
+  "max-lg:order-7 lg:order-none",
+  "max-lg:order-9 lg:order-none",
+] as const;
+const mobileInterleavedCardOrdersNoHero = [
+  "max-lg:order-3 lg:order-none",
+  "max-lg:order-5 lg:order-none",
+  "max-lg:order-7 lg:order-none",
+] as const;
+const mobileInterleavedGalleryOrdersNoHero = [
+  "max-lg:order-4 lg:order-none",
+  "max-lg:order-6 lg:order-none",
+  "max-lg:order-8 lg:order-none",
+] as const;
+
 const galleryColumnStartClasses = {
   1: "lg:col-start-1",
   2: "lg:col-start-2",
@@ -111,21 +146,32 @@ const galleryColumnStartClasses = {
   5: "lg:col-start-5",
 } as const;
 
-const getGalleryOrientation = (image: ImageMetadata | null): GalleryOrientation =>
-  image && image.height > image.width ? "portrait" : "landscape";
+const hasSanityAsset = (image: RoomPageImageResult | null | undefined) =>
+  Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
 
-const getGalleryColumnSpan = (image: ImageMetadata | null) =>
+const getSanityDimensions = (image: RoomPageImageResult | null | undefined) =>
+  image?.asset?.metadata?.dimensions ?? null;
+
+const getGalleryOrientation = (image: GalleryImage | null): GalleryOrientation => {
+  const sanityDimensions = getSanityDimensions(image?.sanityImage);
+  const width = sanityDimensions?.width ?? image?.image?.width ?? null;
+  const height = sanityDimensions?.height ?? image?.image?.height ?? null;
+
+  return width && height && height > width ? "portrait" : "landscape";
+};
+
+const getGalleryColumnSpan = (image: GalleryImage | null) =>
   getGalleryOrientation(image) === "portrait" ? 1 : 2;
 
 const getGalleryColumnStart = (images: GalleryImage[], index: number, startColumn = 1) =>
   images
     .slice(0, index)
     .reduce(
-      (column, item) => column + (item.image ? getGalleryColumnSpan(item.image) : 0),
+      (column, item) => column + (item.sanityImage || item.image ? getGalleryColumnSpan(item) : 0),
       startColumn
     );
 const getGalleryLayoutClasses = (images: GalleryImage[], index: number, startColumn = 1) => {
-  const image = images[index]?.image ?? null;
+  const image = images[index] ?? null;
   const orientation = getGalleryOrientation(image);
   const spanClass = orientation === "portrait" ? "lg:col-span-1" : "lg:col-span-2";
   const aspectClass = orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]";
@@ -140,17 +186,130 @@ const getGalleryLayoutClasses = (images: GalleryImage[], index: number, startCol
     galleryColumnStartClasses[columnStart] ?? galleryColumnStartClasses[1],
   ];
 };
-const getGalleryImageDimensions = (image: ImageMetadata | null) =>
+const getGalleryImageDimensions = (image: GalleryImage | null) =>
   getGalleryOrientation(image) === "portrait"
     ? { width: 825, height: 1100 }
     : { width: 1100, height: 825 };
 
-const getGallerySizes = (image: ImageMetadata | null) =>
+const getGallerySizes = (image: GalleryImage | null) =>
   getGalleryOrientation(image) === "portrait"
     ? "(min-width: 1024px) 20vw, 100vw"
     : "(min-width: 1024px) 40vw, 100vw";
 
-const privateGalleryImages: GalleryImage[] = [
+const normalizeCards = (
+  sanityCards: RoomPageCardResult[] | null | undefined,
+  fallbackCards: ContentCard[]
+): ContentCard[] =>
+  sanityCards?.length
+    ? sanityCards.map((card, index) => {
+        const fallback =
+          fallbackCards[index] ?? fallbackCards[index % fallbackCards.length] ?? fallbackCards[0];
+        return {
+          _key: card._key,
+          title: card.title ?? fallback.title,
+          body: card.body ?? fallback.body,
+          accent: card.accent ?? fallback.accent,
+        };
+      })
+    : fallbackCards;
+
+const withSanityImageSources = (
+  image: GalleryImage,
+  width: number,
+  height: number
+): GalleryImage => {
+  const sanityImage = hasSanityAsset(image.sanityImage) ? image.sanityImage : null;
+
+  return {
+    ...image,
+    sanityImage,
+    sanitySrc: buildSanityImageUrl({
+      source: sanityImage,
+      width,
+      height,
+      quality: 80,
+      format: "webp",
+      fit: "crop",
+    }),
+    sanitySrcSet: buildSanityDprSrcSet({
+      source: sanityImage,
+      width,
+      height,
+      dprs: [1, 1.5, 2],
+      quality: 80,
+      format: "webp",
+      fit: "crop",
+    }),
+  };
+};
+
+const resolveFeatureImage = (
+  fallbackImage: ImageMetadata | null,
+  fallbackAlt: string,
+  sanityImage: RoomPageImageResult | null | undefined,
+  loading: "eager" | "lazy"
+) => ({
+  ...withSanityImageSources(
+    {
+      image: fallbackImage,
+      alt: sanityImage?.alt ?? fallbackAlt,
+      sanityImage,
+    },
+    1400,
+    1000
+  ),
+  loading,
+});
+
+const resolveGalleryImages = (
+  fallbackImages: GalleryImage[],
+  sanityImages: RoomPageImageResult[] | null | undefined
+) => {
+  const images = sanityImages?.length
+    ? sanityImages.map((sanityImage, index) => {
+        const fallback =
+          fallbackImages[index] ??
+          fallbackImages[index % fallbackImages.length] ??
+          fallbackImages[0];
+        return {
+          ...fallback,
+          alt: sanityImage.alt ?? fallback.alt,
+          sanityImage,
+        };
+      })
+    : fallbackImages;
+
+  return images.map((image) => {
+    const dimensions = getGalleryImageDimensions(image);
+    return withSanityImageSources(image, dimensions.width, dimensions.height);
+  });
+};
+
+const getSection = (
+  sanitySection: RoomPageSectionResult | null | undefined,
+  fallback: {
+    eyebrow: string;
+    heading: string;
+    introText?: string;
+    featureImage: GalleryImage;
+    cards: ContentCard[];
+    galleryImages: GalleryImage[];
+  }
+) => ({
+  eyebrow: sanitySection?.eyebrow ?? fallback.eyebrow,
+  heading: sanitySection?.heading ?? fallback.heading,
+  introText: sanitySection?.introText ?? fallback.introText ?? null,
+  featureImage: resolveFeatureImage(
+    fallback.featureImage.image,
+    fallback.featureImage.alt,
+    sanitySection?.featureImage,
+    fallback.eyebrow === "Un séjour tout confort" ? "eager" : "lazy"
+  ),
+  cards: normalizeCards(sanitySection?.cards, fallback.cards),
+  galleryImages: resolveGalleryImages(fallback.galleryImages, sanitySection?.galleryImages),
+});
+
+const defaultPrivateGalleryImages: GalleryImage[] = [
   {
     image: room01Image,
     alt: "Chambre lumineuse avec lit double, linge de lit et décoration sobre",
@@ -166,7 +325,7 @@ const privateGalleryImages: GalleryImage[] = [
   },
 ];
 
-const sharedGalleryImages: GalleryImage[] = [
+const defaultSharedGalleryImages: GalleryImage[] = [
   {
     image: gardenImage01,
     alt: "Salle à manger lumineuse ouverte sur la terrasse",
@@ -181,7 +340,7 @@ const sharedGalleryImages: GalleryImage[] = [
   },
 ];
 
-const serviceGalleryImages: GalleryImage[] = [
+const defaultServiceGalleryImages: GalleryImage[] = [
   {
     image: livingroom03Image,
     alt: "Chambre avec lit double, dressing et rangements",
@@ -195,11 +354,53 @@ const serviceGalleryImages: GalleryImage[] = [
     alt: "Accès extérieur pratique depuis la chambre",
   },
 ];
+
+const p = {
+  heroEyebrow: roomPageContent?.heroEyebrow ?? "La chambre",
+  heroTitle:
+    roomPageContent?.heroTitle ?? "Chambre confortable avec terrasse et accès aux espaces communs",
+  privateSection: getSection(roomPageContent?.privateSection, {
+    eyebrow: "Un séjour tout confort",
+    heading: "Sur place, vous bénéficiez de plusieurs commodités",
+    featureImage: {
+      image: room02Image,
+      alt: "Chambre confortable avec lit double, dressing et espace bureau",
+    },
+    cards: defaultPrivateCards,
+    galleryImages: defaultPrivateGalleryImages,
+  }),
+  sharedSection: getSection(roomPageContent?.sharedSection, {
+    eyebrow: "Espace commun",
+    heading: "Des espaces partagés pour vos moments de détente",
+    introText:
+      "Un espace partagé avec l'hôte (accessible entre 18h et 22h30) qui va vous permettre de profiter de vos soirées chez nous en apportant ou achetant au bourg de quoi vous préparer un repas léger ou votre petit déjeuner.",
+    featureImage: {
+      image: livingroom01Image,
+      alt: "Espace salon partagé pour les moments de détente",
+    },
+    cards: defaultSharedCards,
+    galleryImages: defaultSharedGalleryImages,
+  }),
+  serviceSection: getSection(roomPageContent?.serviceSection, {
+    eyebrow: "Confort au quotidien",
+    heading: "Services et équipements",
+    featureImage: {
+      image: serviceFeatureImage,
+      alt: "Espace bureau et rangements de la chambre",
+    },
+    cards: defaultServiceCards,
+    galleryImages: defaultServiceGalleryImages,
+  }),
+};
+
+const hasServiceFeatureImage = Boolean(
+  p.serviceSection.featureImage.sanitySrc || p.serviceSection.featureImage.image
+);
 ---
 
 <BaseLayout>
   <section>
-    <div class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+    <div class="relative overflow-x-clip py-[.8rem] lg:pb-[4.8rem]">
       <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
         <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
         <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
@@ -211,15 +412,14 @@ const serviceGalleryImages: GalleryImage[] = [
         </div>
       </div>
 
-      <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem] bg-accentStone/25"
+      >
         <div
-          data-reveal
-          data-reveal-delay="80"
-          class="max-w-[80ch] px-[0.4rem] lg:col-span-3 lg:col-start-2"
+          class="col-span-full flex flex-col gap-[3.2rem] px-[0.4rem] lg:col-span-4 lg:col-start-2"
         >
-          <h1 class="heading-2 text-balance">
-            Chambre confortable avec terrasse et accès aux espaces communs
-          </h1>
+          <span class="heading-3 uppercase">{p.heroEyebrow}</span>
+          <h1 class="title-room text-balance">{p.heroTitle}</h1>
         </div>
       </div>
     </div>
@@ -236,33 +436,56 @@ const serviceGalleryImages: GalleryImage[] = [
         <div></div>
       </div>
     </div>
-    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
-        <span class="heading-3">Un séjour tout confort</span>
+        <span class="heading-3">{p.privateSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:translate-x-1/3 lg:pb-0"
+        class="max-lg:order-2 max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:pb-0 lg:mb-[1.6rem]"
       >
-        <div data-reveal data-reveal-delay="80">
-          <h2 class="heading-2 text-balance">Sur place, vous bénéficiez de plusieurs commodités</h2>
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
+          <h2 class="heading-2 text-balance">{p.privateSection.heading}</h2>
+          {
+            p.privateSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.privateSection.introText}</p>
+            ) : null
+          }
         </div>
       </div>
 
       {
-        room02Image ? (
+        p.privateSection.featureImage.sanitySrc ? (
           <figure
             data-reveal
             data-reveal-delay="120"
-            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.privateSection.featureImage.sanitySrc}
+              srcset={p.privateSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.privateSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="eager"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.privateSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
           >
             <Image
-              src={room02Image}
-              alt="Chambre confortable avec lit double, dressing et espace bureau"
+              src={p.privateSection.featureImage.image}
+              alt={p.privateSection.featureImage.alt}
               width={1400}
               height={1000}
               densities={[1, 1.5, 2]}
@@ -276,13 +499,14 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        privateCards.map((card, index) => (
+        p.privateSection.cards.map((card, index) => (
           <article
             data-reveal
             data-reveal-delay={String(200 + index * 60)}
             class:list={[
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
+              mobileInterleavedCardOrdersWithHero[index] ?? mobileInterleavedCardOrdersWithHero[2],
               rightCardPositions[index] ?? rightCardPositions[0],
             ]}
           >
@@ -295,27 +519,43 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        privateGalleryImages.map((galleryImage, index) =>
-          galleryImage.image ? (
+        p.privateSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
             <figure
               data-reveal
               data-reveal-delay={String(380 + index * 50)}
               class:list={[
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
-                ...getGalleryLayoutClasses(privateGalleryImages, index),
+                mobileInterleavedGalleryOrdersWithHero[index] ??
+                  mobileInterleavedGalleryOrdersWithHero[2],
+                ...getGalleryLayoutClasses(p.privateSection.galleryImages, index),
               ]}
             >
-              <Image
-                src={galleryImage.image}
-                alt={galleryImage.alt}
-                width={getGalleryImageDimensions(galleryImage.image).width}
-                height={getGalleryImageDimensions(galleryImage.image).height}
-                densities={[1, 1.5, 2]}
-                sizes={getGallerySizes(galleryImage.image)}
-                loading="lazy"
-                decoding="async"
-                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-              />
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
             </figure>
           ) : null
         )
@@ -335,45 +575,39 @@ const serviceGalleryImages: GalleryImage[] = [
       </div>
     </div>
 
-    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem] lg:pb-0"
+        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
-        <span class="heading-3">Espace commun</span>
+        <span class="heading-3">{p.sharedSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-w-[74ch] px-[0.4rem] pb-[1.6rem] lg:col-span-4 lg:col-start-1 lg:row-start-2 lg:translate-x-1/4 lg:pb-0"
+        class="max-lg:order-2 flex flex-col pb-[1.6rem] lg:order-none lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:pb-0"
       >
-        <div data-reveal data-reveal-delay="80">
-          <h2 class="heading-2 text-pretty">Des espaces partagés pour vos moments de détente</h2>
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem] pb-[1.6rem]">
+          <h2 class="heading-2 text-balance leading-[1.2] min-h-[2.4em]">
+            {p.sharedSection.heading}
+          </h2>
+          {
+            p.sharedSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.sharedSection.introText}</p>
+            ) : null
+          }
         </div>
       </div>
 
-      <div
-        data-reveal
-        data-reveal-delay="120"
-        class="flex flex-col justify-center gap-[1.2rem] lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:min-h-[12rem] lg:pb-[1.4rem]"
-      >
-        <p
-          class="h-fit max-w-[59ch] self-center text-ui-md leading-relaxed text-balance p-[0.8rem] bg-accentTerra/20"
-        >
-          Un espace partagé avec l'hôte (accessible entre 18h et 22h30) qui va vous permettre de
-          profiter de vos soirées chez nous en apportant ou achetant au bourg de quoi vous préparer
-          un repas léger ou votre petit déjeuner.
-        </p>
-      </div>
-
       {
-        sharedCards.map((card, index) => (
+        p.sharedSection.cards.map((card, index) => (
           <article
             data-reveal
             data-reveal-delay={String(180 + index * 60)}
             class:list={[
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[13rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
+              mobileInterleavedCardOrdersWithHero[index] ?? mobileInterleavedCardOrdersWithHero[2],
               leftCardPositions[index] ?? leftCardPositions[0],
             ]}
           >
@@ -386,15 +620,33 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        livingroom01Image ? (
+        p.sharedSection.featureImage.sanitySrc ? (
           <figure
             data-reveal
             data-reveal-delay="360"
-            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+            class="max-lg:order-3 group/image relative aspect-[3/4] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.sharedSection.featureImage.sanitySrc}
+              srcset={p.sharedSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.sharedSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.sharedSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="360"
+            class="max-lg:order-3 group/image relative aspect-[3/4] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
           >
             <Image
-              src={livingroom01Image}
-              alt="Espace salon partagé pour les moments de détente"
+              src={p.sharedSection.featureImage.image}
+              alt={p.sharedSection.featureImage.alt}
               width={1400}
               height={1000}
               densities={[1, 1.5, 2]}
@@ -408,27 +660,43 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        sharedGalleryImages.map((galleryImage, index) =>
-          galleryImage.image ? (
+        p.sharedSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
             <figure
               data-reveal
               data-reveal-delay={String(420 + index * 50)}
               class:list={[
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
-                ...getGalleryLayoutClasses(sharedGalleryImages, index),
+                mobileInterleavedGalleryOrdersWithHero[index] ??
+                  mobileInterleavedGalleryOrdersWithHero[2],
+                ...getGalleryLayoutClasses(p.sharedSection.galleryImages, index),
               ]}
             >
-              <Image
-                src={galleryImage.image}
-                alt={galleryImage.alt}
-                width={getGalleryImageDimensions(galleryImage.image).width}
-                height={getGalleryImageDimensions(galleryImage.image).height}
-                densities={[1, 1.5, 2]}
-                sizes={getGallerySizes(galleryImage.image)}
-                loading="lazy"
-                decoding="async"
-                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-              />
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
             </figure>
           ) : null
         )
@@ -448,33 +716,56 @@ const serviceGalleryImages: GalleryImage[] = [
       </div>
     </div>
 
-    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="px-[0.4rem] pb-[1.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem] lg:pb-0"
+        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
-        <span class="heading-3">Confort au quotidien</span>
+        <span class="heading-3">{p.serviceSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:translate-x-1/3 lg:pb-0"
+        class="max-lg:order-2 max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-3 lg:pb-0"
       >
-        <div data-reveal data-reveal-delay="80">
-          <h2 class="heading-2 text-balance">Services et équipements</h2>
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
+          <h2 class="heading-2 text-balance">{p.serviceSection.heading}</h2>
+          {
+            p.serviceSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.serviceSection.introText}</p>
+            ) : null
+          }
         </div>
       </div>
 
       {
-        serviceFeatureImage ? (
+        p.serviceSection.featureImage.sanitySrc ? (
           <figure
             data-reveal
             data-reveal-delay="120"
-            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.serviceSection.featureImage.sanitySrc}
+              srcset={p.serviceSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.serviceSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.serviceSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
           >
             <Image
-              src={serviceFeatureImage ?? ""}
-              alt="Espace bureau et rangements de la chambre"
+              src={p.serviceSection.featureImage.image}
+              alt={p.serviceSection.featureImage.alt}
               width={1400}
               height={1000}
               densities={[1, 1.5, 2]}
@@ -488,13 +779,22 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        serviceCards.map((card, index) => (
+        p.serviceSection.cards.map((card, index) => (
           <article
             data-reveal
             data-reveal-delay={String(200 + index * 60)}
             class:list={[
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
+              ...(hasServiceFeatureImage
+                ? [
+                    mobileInterleavedCardOrdersWithHero[index] ??
+                      mobileInterleavedCardOrdersWithHero[2],
+                  ]
+                : [
+                    mobileInterleavedCardOrdersNoHero[index] ??
+                      mobileInterleavedCardOrdersNoHero[2],
+                  ]),
               rightCardPositions[index] ?? rightCardPositions[0],
             ]}
           >
@@ -507,27 +807,50 @@ const serviceGalleryImages: GalleryImage[] = [
       }
 
       {
-        serviceGalleryImages.map((galleryImage, index) =>
-          galleryImage.image ? (
+        p.serviceSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
             <figure
               data-reveal
               data-reveal-delay={String(380 + index * 50)}
               class:list={[
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
-                ...getGalleryLayoutClasses(serviceGalleryImages, index, 1),
+                ...(hasServiceFeatureImage
+                  ? [
+                      mobileInterleavedGalleryOrdersWithHero[index] ??
+                        mobileInterleavedGalleryOrdersWithHero[2],
+                    ]
+                  : [
+                      mobileInterleavedGalleryOrdersNoHero[index] ??
+                        mobileInterleavedGalleryOrdersNoHero[2],
+                    ]),
+                ...getGalleryLayoutClasses(p.serviceSection.galleryImages, index, 1),
               ]}
             >
-              <Image
-                src={galleryImage.image}
-                alt={galleryImage.alt}
-                width={getGalleryImageDimensions(galleryImage.image).width}
-                height={getGalleryImageDimensions(galleryImage.image).height}
-                densities={[1, 1.5, 2]}
-                sizes={getGallerySizes(galleryImage.image)}
-                loading="lazy"
-                decoding="async"
-                class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-              />
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
             </figure>
           ) : null
         )
@@ -549,6 +872,11 @@ const serviceGalleryImages: GalleryImage[] = [
   [data-reveal].is-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  .title-room {
+    font-size: clamp(32px, calc(32 * 1px + (52) * (100vw - 375 * 1px) / (1225)), 68px);
+    line-height: 1;
   }
 </style>
 
