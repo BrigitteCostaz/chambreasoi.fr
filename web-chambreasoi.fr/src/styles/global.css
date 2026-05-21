@@ -16,6 +16,10 @@ body {
   font-family: "Karla", sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 header {
   background-color: var(--color-bgBase);
   color: var(--color-txtPri);

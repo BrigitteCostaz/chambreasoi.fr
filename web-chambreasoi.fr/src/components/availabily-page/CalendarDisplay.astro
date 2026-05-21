@@ -2,6 +2,7 @@
 import { sanityClient } from "sanity:client";
 import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalendar.astro";
 import Button from "@components/button/Button.astro";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getOrgData } from "@config/organization";
 
 type AvailabilityDate = {
@@ -50,16 +51,7 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
 ---
 
 <section id="disponibilites" class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div></div>
-    </div>
-  </div>
+  <GridOverlay />
 
   <div class="relative z-10 grid grid-cols-1 lg:grid-cols-5">
     <div

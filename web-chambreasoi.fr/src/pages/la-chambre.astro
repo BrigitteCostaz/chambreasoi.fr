@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import {
   buildSanityDprSrcSet,
@@ -11,6 +12,7 @@ import {
   type RoomPageSectionResult,
 } from "@lib/sanity";
 import { resolveImage } from "@utils/imageUtils";
+import { Icon } from "astro-icon/components";
 
 type Accent = RoomPageAccent;
 type GalleryOrientation = "landscape" | "portrait";
@@ -400,20 +402,11 @@ const hasServiceFeatureImage = Boolean(
 
 <BaseLayout>
   <section>
-    <div class="relative overflow-x-clip py-[.8rem] lg:pb-[4.8rem]">
-      <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-        <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-        <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-          <div class="grid-line"></div>
-          <div class="grid-line"></div>
-          <div class="grid-line"></div>
-          <div class="grid-line"></div>
-          <div></div>
-        </div>
-      </div>
-
+    <div class="relative overflow-x-clip py-[.8rem] lg:pb-[4.8rem] lg:bg-accentStone/25">
+      <GridOverlay />
+  
       <div
-        class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem] bg-accentStone/25"
+        class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem] bg-accentStone/25 lg:bg-transparent"
       >
         <div
           class="col-span-full flex flex-col gap-[3.2rem] px-[0.4rem] lg:col-span-4 lg:col-start-2"
@@ -422,20 +415,22 @@ const hasServiceFeatureImage = Boolean(
           <h1 class="title-room text-balance">{p.heroTitle}</h1>
         </div>
       </div>
+  
+      <a
+        href="#sejour-confort"
+        aria-label="Aller à la section suivante"
+        class="absolute bottom-[1.6rem] left-1/2 z-20 -translate-x-1/2 rounded-full p-2 transition-transform hover:translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-txtPri lg:bottom-[2.4rem]"
+      >
+        <Icon name="ion/chevron-down-sharp" class="text-txtPri size-[2.4rem]" />
+      </a>
     </div>
   </section>
 
-  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
-    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div></div>
-      </div>
-    </div>
+  <section
+    id="sejour-confort"
+    class="relative overflow-x-clip py-[3.2rem] scroll-mt-[var(--header-height,0px)] lg:py-[4.8rem]"
+  >
+    <GridOverlay />
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
@@ -564,16 +559,7 @@ const hasServiceFeatureImage = Boolean(
   </section>
 
   <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
-    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div></div>
-      </div>
-    </div>
+    <GridOverlay />
 
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
@@ -705,16 +691,7 @@ const hasServiceFeatureImage = Boolean(
   </section>
 
   <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
-    <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div></div>
-      </div>
-    </div>
+    <GridOverlay />
 
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div

@@ -163,6 +163,74 @@ export const LOCATIONSECTION_CONTENT_QUERY = /* groq */ `
 `
 
 // ---------------------------------------------------------------------------
+// locationPageContent
+// ---------------------------------------------------------------------------
+
+export type LocationPageAccent = "stone" | "forest" | "bistre"
+
+export interface LocationPageLinkMarkDefResult {
+  _key: string
+  _type: string
+  href: string | null
+}
+
+export interface LocationPageTextSpanResult {
+  _key: string
+  _type: string
+  text: string | null
+  marks: string[] | null
+}
+
+export interface LocationPageTextBlockResult {
+  _key: string
+  _type: string
+  style: string | null
+  markDefs: LocationPageLinkMarkDefResult[] | null
+  children: LocationPageTextSpanResult[] | null
+}
+
+export interface LocationPageItemResult {
+  _key: string
+  text: string | null
+  body: LocationPageTextBlockResult[] | null
+  accent: LocationPageAccent | null
+}
+
+export interface LocationPageContentResult {
+  eyebrow: string | null
+  introText: string | null
+  items: LocationPageItemResult[] | null
+}
+
+export const LOCATION_PAGE_CONTENT_QUERY = /* groq */ `
+  *[_type == "locationPageContent"][0]{
+    eyebrow,
+    introText,
+    items[]{
+      _key,
+      text,
+      body[]{
+        _key,
+        _type,
+        style,
+        markDefs[]{
+          _key,
+          _type,
+          href
+        },
+        children[]{
+          _key,
+          _type,
+          text,
+          marks
+        }
+      },
+      accent
+    }
+  }
+`
+
+// ---------------------------------------------------------------------------
 // practicalInfoContent
 // ---------------------------------------------------------------------------
 

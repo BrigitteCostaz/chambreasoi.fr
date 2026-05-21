@@ -1,5 +1,6 @@
 ---
 import Button from "@components/button/Button.astro";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import SvgMap from "@images/map-chambreasoi.svg";
 import { getLocationSectionContent } from "@lib/sanity";
 /* =========================
@@ -23,16 +24,7 @@ const l = {
 
 <section class="hidden xl:block relative overflow-x-clip pt-[.8rem] mb-[3.2rem]">
   <!-- Grid overlay -->
-  <div class="pointer-events-none absolute inset-0 translate-x-[0.15rem]">
-    <!-- Desktop -->
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div></div>
-    </div>
-  </div>
+  <GridOverlay desktopOnly zIndexClass="" />
   <div data-reveal data-reveal-delay="0" class="grid grid-cols-1 lg:grid-cols-10">
     <div
       class="flex items-center gap-grid px-[0.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[4.8rem]"
@@ -47,16 +39,7 @@ const l = {
   <!-- Wrapper qui contient les lignes + le texte -->
   <div class="relative">
     <!-- Grid overlay (limité à ce wrapper) -->
-    <div class="pointer-events-none absolute inset-0">
-      <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div class="grid-line"></div>
-        <div></div>
-      </div>
-    </div>
+    <GridOverlay zIndexClass="" offsetClass="" />
 
     <div class="grid grid-cols-1 lg:grid-cols-5 mb-[1.6rem]">
       <!-- Eyebrow -->

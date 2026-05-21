@@ -1,5 +1,6 @@
 ---
 // import { Icon } from "astro-icon/components";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getHeadlineContent } from "@lib/sanity";
 
 const headline = await getHeadlineContent();
@@ -12,15 +13,7 @@ const h = {
 
 <div class="overflow-x-clip relative">
   <!-- Grid overlay -->
-  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-    <!-- Desktop grid -->
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line hidden lg:block"></div>
-      <div class="grid-line hidden lg:block"></div>
-      <div class="grid-line hidden lg:block"></div>
-      <div class="grid-line hidden lg:block"></div>
-    </div>
-  </div>
+  <GridOverlay desktopOnly desktopCols={5} desktopVisibleLines={4} />
 
   <!-- Content -->
   <section

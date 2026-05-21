@@ -58,7 +58,9 @@ import {
   type FoldContentResult,
   HEADLINE_CONTENT_QUERY,
   type HeadlineContentResult,
+  LOCATION_PAGE_CONTENT_QUERY,
   LOCATIONSECTION_CONTENT_QUERY,
+  type LocationPageContentResult,
   type LocationSectionContentResult,
   PRACTICAL_INFO_CONTENT_QUERY,
   type PracticalInfoContentResult,
@@ -85,6 +87,13 @@ export async function getHeadlineContent(): Promise<HeadlineContentResult | null
  */
 export async function getLocationSectionContent(): Promise<LocationSectionContentResult | null> {
   return fetchSanity<LocationSectionContentResult>(LOCATIONSECTION_CONTENT_QUERY);
+}
+
+/**
+ * Fetch the first locationPageContent document from Sanity.
+ */
+export async function getLocationPageContent(): Promise<LocationPageContentResult | null> {
+  return fetchSanity<LocationPageContentResult>(LOCATION_PAGE_CONTENT_QUERY);
 }
 
 /**

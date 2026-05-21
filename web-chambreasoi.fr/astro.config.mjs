@@ -151,6 +151,13 @@ export default defineConfig({
   },
 
   vite: {
+    optimizeDeps: {
+      include: [
+        "astro-leaflet > leaflet",
+        "leaflet-extra-markers",
+        "leaflet-extra-markers > leaflet",
+      ],
+    },
     ssr: {
       resolve: {
         conditions: ["workerd", "worker", "browser"],

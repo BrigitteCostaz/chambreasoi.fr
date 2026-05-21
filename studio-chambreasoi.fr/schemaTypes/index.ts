@@ -1,6 +1,7 @@
 import {availability} from './documents/availability'
 import {foldContent} from './documents/foldContent'
 import {headlineContent} from './documents/headlineContent'
+import {locationPageContent} from './documents/locationPageContent'
 import {locationSectionContent} from './documents/locationSectionContent'
 import {practicalInfoContent} from './documents/practicalInfoContent'
 import {roomPageContent} from './documents/roomPageContent'
@@ -12,6 +13,7 @@ export const schemaTypes = [
   availability,
   foldContent,
   headlineContent,
+  locationPageContent,
   locationSectionContent,
   practicalInfoContent,
   roomPageContent,

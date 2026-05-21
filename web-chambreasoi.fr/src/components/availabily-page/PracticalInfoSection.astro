@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getPricing } from "@config/pricing";
 import {
   buildSanityDprSrcSet,
@@ -35,14 +36,12 @@ const accentClasses: Record<PracticalInfoAccent, string> = {
   bistre: "bg-accentBistre/25",
 };
 const bookingCardPositionClasses = [
+  "lg:col-start-3 lg:row-start-3",
   "lg:col-start-4 lg:row-start-3",
   "lg:col-start-5 lg:row-start-3",
+  "lg:col-start-3 lg:row-start-4",
   "lg:col-start-4 lg:row-start-4",
   "lg:col-start-5 lg:row-start-4",
-  "lg:col-start-4 lg:row-start-5",
-  "lg:col-start-5 lg:row-start-5",
-  "lg:col-start-4 lg:row-start-6",
-  "lg:col-start-5 lg:row-start-6",
 ] as const;
 const serviceDesktopPositionClassesByCount = {
   1: ["lg:col-start-5 lg:row-start-3"],
@@ -84,6 +83,17 @@ const serviceImageHeight = 1000;
 
 type BookingCard = NonNullable<PracticalInfoContentResult["bookingCards"]>[number];
 type ServiceCard = NonNullable<PracticalInfoContentResult["serviceCards"]>[number];
+
+const slugifyId = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getServiceCardId = (card: ServiceCard, index: number): string =>
+  slugifyId(card.category ?? card.title ?? `service-card-${index + 1}`);
 
 const textBlock = (
   key: string,
@@ -368,24 +378,15 @@ const getServiceImage = (index: number) =>
 ---
 
 <section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div></div>
-    </div>
-  </div>
+  <GridOverlay />
 
   <div class="relative z-10 flex flex-col gap-[3.6rem] lg:gap-[4.8rem]">
     <!-- Tarifs: own 5-col grid -->
-    <div class="grid grid-cols-1 lg:grid-flow-dense lg:items-stretch lg:gap-grid lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-grid lg:grid-flow-dense lg:items-stretch lg:grid-cols-5">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+        class="col-span-full flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
       >
         <span class="heading-3">{p.eyebrow}</span>
       </div>
@@ -393,7 +394,7 @@ const getServiceImage = (index: number) =>
       <div
         data-reveal
         data-reveal-delay="80"
-        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+        class="col-span-full max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
       >
         <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
           <h2 class="heading-2 text-balance">{p.tariffsHeading}</h2>
@@ -405,7 +406,7 @@ const getServiceImage = (index: number) =>
           <figure
             data-reveal
             data-reveal-delay="100"
-            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
+            class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
           >
             <img
               src={kitchenSanitySrc}
@@ -423,7 +424,7 @@ const getServiceImage = (index: number) =>
           <figure
             data-reveal
             data-reveal-delay="100"
-            class="group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
+            class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
           >
             <Image
               src={fallbackKitchenImage}
@@ -491,7 +492,7 @@ const getServiceImage = (index: number) =>
           <figure
             data-reveal
             data-reveal-delay="100"
-            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start"
+            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
           >
             <img
               src={bookingSanitySrc}
@@ -509,7 +510,7 @@ const getServiceImage = (index: number) =>
           <figure
             data-reveal
             data-reveal-delay="100"
-            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start"
+            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
           >
             <Image
               src={fallbackBookingImage}
@@ -531,7 +532,8 @@ const getServiceImage = (index: number) =>
             data-reveal
             data-reveal-delay={String(120 + index * 20)}
             class:list={[
-              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem]",
+              "flex flex-col gap-[1.2rem] p-[0.8rem] mb-[.4rem] lg:mb-0 lg:col-span-1 lg:pb-[1.6rem]",
+              index < 3 ? "lg:mt-[1.6rem]" : "",
               accentClasses[card.accent ?? "stone"],
               bookingCardPositionClasses[index] ?? bookingCardPositionClasses[0],
             ]}
@@ -565,16 +567,7 @@ const getServiceImage = (index: number) =>
 </section>
 
 <section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
-    <div class="grid size-full grid-cols-2 gap-4 lg:hidden"></div>
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div></div>
-    </div>
-  </div>
+  <GridOverlay />
 
   <div class="relative z-10 grid grid-cols-1 lg:items-stretch lg:gap-grid lg:grid-cols-5">
     <div
@@ -595,7 +588,23 @@ const getServiceImage = (index: number) =>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-grid lg:hidden">
+    <div class="contents">
+      {
+        displayedServiceCards.map((service, index) => (
+          <span
+            id={getServiceCardId(service, index)}
+            class:list={[
+              "block scroll-mt-[6rem] lg:scroll-mt-[-24rem]",
+              "lg:col-span-1 lg:h-0 lg:overflow-hidden",
+              serviceDesktopPositionClasses[index] ?? serviceDesktopPositionClasses[0],
+            ]}
+            aria-hidden="true"
+          />
+        ))
+      }
+    </div>
+
+    <div class="mt-[1.6rem] grid grid-cols-1 gap-grid lg:hidden">
       {
         Array.from({ length: mobileServiceItemCount }).map((_, index) => {
           const service = displayedServiceCards[index];
@@ -645,7 +654,6 @@ const getServiceImage = (index: number) =>
                   </div>
                 </figure>
               ) : null}
-
               {service ? (
                 <article
                   data-reveal
@@ -656,9 +664,9 @@ const getServiceImage = (index: number) =>
                   ]}
                 >
                   <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
-                    <span class="text-[0.85rem] text-muted uppercase tracking-widest">
+                    {/* <span class="text-[0.85rem] text-muted uppercase tracking-widest">
                       {service.category}
-                    </span>
+                    </span> */}
                     {service.title ? (
                       <h3 class="text-ui-lg font-medium leading-snug">{service.title}</h3>
                     ) : null}
@@ -695,10 +703,10 @@ const getServiceImage = (index: number) =>
             serviceDesktopPositionClasses[index] ?? serviceDesktopPositionClasses[0],
           ]}
         >
-          <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[6.2rem]">
-            <span class="text-[0.85rem] text-muted uppercase tracking-widest">
+          <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[3.2rem]">
+            {/* <span class="text-[0.85rem] text-muted uppercase tracking-widest">
               {service.category}
-            </span>
+            </span> */}
             {service.title ? (
               <h3 class="text-ui-lg font-medium leading-snug">{service.title}</h3>
             ) : null}

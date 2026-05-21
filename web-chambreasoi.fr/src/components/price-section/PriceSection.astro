@@ -3,6 +3,7 @@
  * Imports
  * ========================= */
 import { Image } from "astro:assets";
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getPricing } from "@config/pricing";
 import { buildSanityDprSrcSet, buildSanityImageUrl } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
@@ -88,16 +89,7 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
 
 <section class="hidden lg:block relative overflow-x-clip pt-[.8rem] mt-[3.2rem] h-24">
   <!-- Grid overlay -->
-  <div class="pointer-events-none absolute inset-0 translate-x-[0.15rem]">
-    <!-- Desktop -->
-    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div class="grid-line"></div>
-      <div></div>
-    </div>
-  </div>
+  <GridOverlay desktopOnly zIndexClass="" />
 </section>
 
 <section

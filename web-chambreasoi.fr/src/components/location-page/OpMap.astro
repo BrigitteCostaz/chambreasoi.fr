@@ -1,0 +1,491 @@
+---
+import { Leaflet } from "astro-leaflet";
+import { getOrgData } from "@config/organization";
+import { getFoldContent } from "@lib/sanity";
+import bedIconUrl from "@icons/ion/bed-sharp.svg?url";
+import carIconUrl from "@icons/ion/car-sharp.svg?url";
+import hospitalIconUrl from "@icons/ic/sharp-local-hospital.svg?url";
+
+const orgData = await getOrgData();
+const fold = await getFoldContent();
+
+const amenitiesLabel = fold?.amenitiesLabel ?? "avec";
+const amenities = fold?.amenities ?? [
+  "un lit double",
+  "une salle de bain privative",
+];
+const amenitiesSubtitle = [amenitiesLabel, ...amenities].join("\n");
+
+const mapId = "org-location-map";
+
+type OpMapMarker = {
+  lat: number;
+  lng: number;
+  title: string;
+  subtitle?: string;
+  address?: string;
+  phone?: string;
+  phoneHref?: string;
+  website?: string;
+  osmType?: "node" | "way";
+  osmId?: string;
+  iconUrl: string;
+};
+
+const mapMarkers: OpMapMarker[] = [
+  {
+    lat: 45.549858,
+    lng: 5.979432,
+    title: orgData.legal.brandName.toLowerCase(),
+    address: `${orgData.address.street} · ${orgData.address.city}`,
+    subtitle: amenitiesSubtitle,
+    phone: `${orgData.contact.phone.display}`,
+    phoneHref: `${orgData.contact.phone.link}`,
+    // osmType: "node",
+    //osmId: "13391574122",
+    iconUrl: bedIconUrl,
+  },
+  {
+    lat: 45.545448,
+    lng: 5.96975,
+    title: "Médipôle de Savoie",
+    subtitle: "Hôpital privé · Urgences 24/7",
+    phone: "04 79 26 80 80",
+    phoneHref: "tel:+33479268080",
+    website: "https://medipole-de-savoie.fr",
+    //osmType: "way",
+    //osmId: "164117082",
+    iconUrl: hospitalIconUrl,
+  },
+];
+
+type OpMapExitMarker = {
+  lat: number;
+  lng: number;
+  title: string;
+  subtitle?: string;
+  osmWays?: string[];
+  iconUrl: string;
+};
+
+// Single car pin covering both motorway-link ways 21830677 and 26389545
+// (the Chambéry-sud "Le Médipôle" exit ramps off the A43/A41). We avoid
+// drawing the way polylines and just mark the exit location instead.
+const exitMarkers: OpMapExitMarker[] = [
+  {
+    lat: 45.5365,
+    lng: 5.968,
+    title: "Sortie autoroute · Le Médipôle",
+    subtitle:
+      "Accès depuis l'A43 / A41\nSortie 20 : Baldoph / Challes-les-Eaux / Myans",
+    // osmWays: ["21830677", "26389545"],
+    iconUrl: carIconUrl,
+  },
+];
+
+const center: [number, number] = [
+  orgData.googleBusiness.location.latitude,
+  orgData.googleBusiness.location.longitude,
+];
+
+type OpMapBoundary = {
+  url: string;
+  name: string;
+  osmId: string;
+};
+
+const boundaries: OpMapBoundary[] = [
+  {
+    url: "/data/massif-des-bauges.geojson",
+    name: "Massif des Bauges",
+    osmId: "7466521",
+  },
+  {
+    url: "/data/massif-de-la-chartreuse.geojson",
+    name: "Massif de la Chartreuse",
+    osmId: "7468871",
+  },
+];
+---
+
+<Leaflet
+  id={mapId}
+  options={{
+    center,
+    zoom: 14,
+    tileLayer: "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}.png",
+    tileLayerOptions: {
+      subdomains: ["a", "b", "c"],
+      maxZoom: 17,
+    },
+  }}
+  class="op-map"
+/>
+
+<div class="op-map-markers" data-map-id={mapId} hidden>
+  {
+    mapMarkers.map((m) => (
+      <div
+        class="op-map-marker"
+        data-lat={m.lat}
+        data-lng={m.lng}
+        data-title={m.title}
+        data-address={m.address}
+        data-subtitle={m.subtitle}
+        data-phone={m.phone}
+        data-phone-href={m.phoneHref}
+        data-website={m.website}
+        data-osm-type={m.osmType}
+        data-osm-id={m.osmId}
+        data-icon-url={m.iconUrl}
+      />
+    ))
+  }
+
+  {
+    exitMarkers.map((m) => (
+      <div
+        class="op-map-exit-marker"
+        data-lat={m.lat}
+        data-lng={m.lng}
+        data-title={m.title}
+        data-subtitle={m.subtitle}
+        data-icon-url={m.iconUrl}
+        data-osm-ways={m.osmWays?.join(",")}
+      />
+    ))
+  }
+
+  {
+    boundaries.map((b) => (
+      <div
+        class="op-map-boundary"
+        data-url={b.url}
+        data-name={b.name}
+        data-osm-id={b.osmId}
+      />
+    ))
+  }
+</div>
+
+<script>
+  import L from "astro-leaflet/leaflet";
+  import { Icon, PinTeardropBorder } from "leaflet-extra-markers";
+  import { getMapFromId } from "astro-leaflet";
+
+  const svgCache = new Map<string, Promise<string>>();
+
+  function loadSvg(url: string): Promise<string> {
+    let pending = svgCache.get(url);
+    if (!pending) {
+      pending = fetch(url, { cache: "force-cache" })
+        .then((res) => (res.ok ? res.text() : ""))
+        .catch(() => "");
+      svgCache.set(url, pending);
+    }
+    return pending;
+  }
+
+  function buildPopup(data: DOMStringMap): HTMLElement {
+    const root = document.createElement("div");
+    root.className = "op-map-popup";
+
+    if (data.title) {
+      const title = document.createElement("h3");
+      title.className = "op-map-popup__title";
+      title.textContent = data.title;
+      root.appendChild(title);
+    }
+
+    if (data.address) {
+      const address = document.createElement("p");
+      address.className = "op-map-popup__address";
+      address.textContent = data.address;
+      root.appendChild(address);
+    }
+
+    if (data.subtitle) {
+      const subtitle = document.createElement("p");
+      subtitle.className = "op-map-popup__subtitle";
+      subtitle.textContent = data.subtitle;
+      root.appendChild(subtitle);
+    }
+
+    const links = document.createElement("ul");
+    links.className = "op-map-popup__links";
+
+    if (data.phone && data.phoneHref) {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = data.phoneHref;
+      a.textContent = data.phone;
+      li.appendChild(a);
+      links.appendChild(li);
+    }
+
+    if (data.website) {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = data.website;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      try {
+        a.textContent = new URL(data.website).hostname;
+      } catch {
+        a.textContent = data.website;
+      }
+      li.appendChild(a);
+      links.appendChild(li);
+    }
+
+    if (data.osmType && data.osmId) {
+      const li = document.createElement("li");
+      li.className = "op-map-popup__osm";
+      const a = document.createElement("a");
+      a.href = `https://www.openstreetmap.org/${data.osmType}/${data.osmId}`;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = `OSM ${data.osmType} ${data.osmId}`;
+      li.appendChild(a);
+      links.appendChild(li);
+    }
+
+    if (links.children.length > 0) {
+      root.appendChild(links);
+    }
+
+    return root;
+  }
+
+  function buildExitPopup(data: DOMStringMap): HTMLElement {
+    const root = document.createElement("div");
+    root.className = "op-map-popup";
+
+    if (data.title) {
+      const title = document.createElement("h3");
+      title.className = "op-map-popup__title";
+      title.textContent = data.title;
+      root.appendChild(title);
+    }
+
+    if (data.subtitle) {
+      const subtitle = document.createElement("p");
+      subtitle.className = "op-map-popup__subtitle";
+      subtitle.textContent = data.subtitle;
+      root.appendChild(subtitle);
+    }
+
+    const osmWays = (data.osmWays ?? "")
+      .split(",")
+      .map((w) => w.trim())
+      .filter(Boolean);
+
+    if (osmWays.length > 0) {
+      const links = document.createElement("ul");
+      links.className = "op-map-popup__links";
+
+      for (const wayId of osmWays) {
+        const li = document.createElement("li");
+        li.className = "op-map-popup__osm";
+        const a = document.createElement("a");
+        a.href = `https://www.openstreetmap.org/way/${wayId}`;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = `OSM way ${wayId}`;
+        li.appendChild(a);
+        links.appendChild(li);
+      }
+
+      root.appendChild(links);
+    }
+
+    return root;
+  }
+
+  async function addBoundaries(
+    map: ReturnType<typeof getMapFromId>,
+    container: HTMLElement,
+    color: string,
+  ): Promise<void> {
+    if (!map) return;
+
+    const boundaryEls =
+      container.querySelectorAll<HTMLElement>(".op-map-boundary");
+
+    await Promise.all(
+      Array.from(boundaryEls).map(async (el) => {
+        const url = el.dataset.url;
+        if (!url) return;
+
+        try {
+          const res = await fetch(url, { cache: "force-cache" });
+          if (!res.ok) return;
+          const geojson = (await res.json()) as GeoJSON.GeoJsonObject;
+
+          L.geoJSON(geojson, {
+            style: {
+              color,
+              weight: 2,
+              opacity: 0.65,
+              fillColor: color,
+              fillOpacity: 0.04,
+              // Boundaries are decorative overlays; no popup/interaction.
+              interactive: false,
+            },
+          }).addTo(map);
+        } catch {
+          // ignore: boundary overlay is non-critical
+        }
+      }),
+    );
+  }
+
+  async function addExitMarkers(
+    map: ReturnType<typeof getMapFromId>,
+    container: HTMLElement,
+    color: string,
+  ): Promise<void> {
+    if (!map) return;
+
+    const exitEls = container.querySelectorAll<HTMLElement>(
+      ".op-map-exit-marker",
+    );
+
+    await Promise.all(
+      Array.from(exitEls).map(async (el) => {
+        const lat = Number(el.dataset.lat);
+        const lng = Number(el.dataset.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const iconUrl = el.dataset.iconUrl;
+        const svg = iconUrl ? await loadSvg(iconUrl) : "";
+
+        const icon = new Icon({
+          svg: PinTeardropBorder,
+          color,
+          accentColor: "#fff",
+          contentColor: "#fff",
+          contentHtml: svg,
+          // The Ion car SVG is sized in `em`, so we nudge the wrapper font-size
+          // up so the icon reads clearly inside the pin's circle.
+          contentWrapperStyle: { fontSize: "1.35em" },
+          scale: 1,
+        });
+
+        L.marker([lat, lng], { icon, title: el.dataset.title })
+          .bindPopup(buildExitPopup(el.dataset))
+          .addTo(map);
+      }),
+    );
+  }
+
+  async function addMainMarkers(
+    map: ReturnType<typeof getMapFromId>,
+    container: HTMLElement,
+    color: string,
+  ): Promise<void> {
+    if (!map) return;
+
+    const markerEls = container.querySelectorAll<HTMLElement>(".op-map-marker");
+
+    await Promise.all(
+      Array.from(markerEls).map(async (el) => {
+        const lat = Number(el.dataset.lat);
+        const lng = Number(el.dataset.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        const iconUrl = el.dataset.iconUrl;
+        const svg = iconUrl ? await loadSvg(iconUrl) : "";
+
+        const icon = new Icon({
+          svg: PinTeardropBorder,
+          color,
+          accentColor: "#fff",
+          contentColor: "#fff",
+          contentHtml: svg,
+          contentWrapperStyle: { fontSize: "1.35em" },
+          scale: 1,
+        });
+
+        L.marker([lat, lng], { icon, title: el.dataset.title })
+          .bindPopup(buildPopup(el.dataset))
+          .addTo(map);
+      }),
+    );
+  }
+
+  function addMarkers(): boolean {
+    const container = document.querySelector<HTMLElement>(".op-map-markers");
+    if (!container || !container.dataset.mapId) return false;
+
+    const map = getMapFromId(container.dataset.mapId);
+    if (!map) return false;
+
+    const accent = getComputedStyle(document.documentElement)
+      .getPropertyValue("--color-accentStone")
+      .trim();
+    const color = accent || "#2f6a3a";
+
+    void addMainMarkers(map, container, color);
+    void addExitMarkers(map, container, color);
+    void addBoundaries(map, container, color);
+
+    return true;
+  }
+
+  if (!addMarkers()) {
+    customElements.whenDefined("astro-leaflet").then(() => {
+      addMarkers();
+    });
+  }
+</script>
+
+<style>
+  .op-map {
+    margin-top: 10vh;
+    width: 100%;
+    min-height: 50vh;
+  }
+  :global(.leaflet-popup-content-wrapper) {
+    background-color: var(--color-bgCard);
+    color: var(--color-txtPri);
+    border-radius: 0;
+  }
+
+  :global(.op-map-popup) {
+    font: inherit;
+    min-width: 240px;
+
+  }
+  :global(.op-map-popup__title) {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  :global(.op-map-popup__address),
+  :global(.op-map-popup__subtitle), 
+  :global(.leaflet-popup-content p) {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    opacity: 0.8;
+    white-space: pre-line;
+  }
+  :global(.op-map-popup__links) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    font-size: 0.875rem;
+    }
+  :global(.leaflet-container a) {
+    color: var(--color-info);
+  }
+  
+  :global(.op-map-popup__osm) {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+</style>

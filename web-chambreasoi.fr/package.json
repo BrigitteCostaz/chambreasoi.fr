@@ -22,36 +22,38 @@
     "check:fix": "biome check --write ."
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.5.1",
+    "@astrojs/cloudflare": "^13.5.3",
     "@astrojs/react": "^5.0.5",
     "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.4.0",
     "@sanity/client": "^7.22.0",
-    "@sanity/vision": "^5.25.1",
+    "@sanity/vision": "^5.26.0",
     "@unocss/reset": "^66.6.8",
-    "astro": "^6.3.3",
+    "astro": "^6.3.6",
     "astro-icon": "^1.1.5",
+    "astro-leaflet": "^1.12.0",
     "astro-seo-schema": "^6.0.0",
+    "leaflet-extra-markers": "^2.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "sanity": "^5.25.1",
+    "sanity": "^5.26.0",
     "schema-dts": "^2.0.0",
     "sharp": "^0.34.5",
-    "styled-components": "^6.4.1",
+    "styled-components": "^6.4.2",
     "vanilla-calendar-pro": "^3.1.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/node": "^10.1.1",
     "@biomejs/biome": "^2.4.15",
-    "@cloudflare/workers-types": "^4.20260518.1",
-    "@types/react": "^19.2.14",
+    "@cloudflare/workers-types": "^4.20260520.1",
+    "@types/react": "^19.2.15",
     "@unocss/astro": "^66.6.8",
     "@unocss/preset-web-fonts": "^66.6.8",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
     "unocss": "^66.6.8",
-    "wrangler": "4.92.0"
+    "wrangler": "4.93.0"
   }
 }
