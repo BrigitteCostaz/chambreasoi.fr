@@ -10,10 +10,7 @@ const orgData = await getOrgData();
 const fold = await getFoldContent();
 
 const amenitiesLabel = fold?.amenitiesLabel ?? "avec";
-const amenities = fold?.amenities ?? [
-  "un lit double",
-  "une salle de bain privative",
-];
+const amenities = fold?.amenities ?? ["un lit double", "une salle de bain privative"];
 const amenitiesSubtitle = [amenitiesLabel, ...amenities].join("\n");
 
 const mapId = "org-location-map";
@@ -76,8 +73,7 @@ const exitMarkers: OpMapExitMarker[] = [
     lat: 45.5365,
     lng: 5.968,
     title: "Sortie autoroute · Le Médipôle",
-    subtitle:
-      "Accès depuis l'A43 / A41\nSortie 20 : Baldoph / Challes-les-Eaux / Myans",
+    subtitle: "Accès depuis l'A43 / A41\nSortie 20 : Baldoph / Challes-les-Eaux / Myans",
     // osmWays: ["21830677", "26389545"],
     iconUrl: carIconUrl,
   },
@@ -113,10 +109,12 @@ const boundaries: OpMapBoundary[] = [
   options={{
     center,
     zoom: 14,
-    tileLayer: "https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}.png",
+    tileLayer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     tileLayerOptions: {
       subdomains: ["a", "b", "c"],
       maxZoom: 17,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
     },
   }}
   class="op-map"
@@ -158,12 +156,7 @@ const boundaries: OpMapBoundary[] = [
 
   {
     boundaries.map((b) => (
-      <div
-        class="op-map-boundary"
-        data-url={b.url}
-        data-name={b.name}
-        data-osm-id={b.osmId}
-      />
+      <div class="op-map-boundary" data-url={b.url} data-name={b.name} data-osm-id={b.osmId} />
     ))
   }
 </div>
@@ -305,12 +298,11 @@ const boundaries: OpMapBoundary[] = [
   async function addBoundaries(
     map: ReturnType<typeof getMapFromId>,
     container: HTMLElement,
-    color: string,
+    color: string
   ): Promise<void> {
     if (!map) return;
 
-    const boundaryEls =
-      container.querySelectorAll<HTMLElement>(".op-map-boundary");
+    const boundaryEls = container.querySelectorAll<HTMLElement>(".op-map-boundary");
 
     await Promise.all(
       Array.from(boundaryEls).map(async (el) => {
@@ -336,20 +328,18 @@ const boundaries: OpMapBoundary[] = [
         } catch {
           // ignore: boundary overlay is non-critical
         }
-      }),
+      })
     );
   }
 
   async function addExitMarkers(
     map: ReturnType<typeof getMapFromId>,
     container: HTMLElement,
-    color: string,
+    color: string
   ): Promise<void> {
     if (!map) return;
 
-    const exitEls = container.querySelectorAll<HTMLElement>(
-      ".op-map-exit-marker",
-    );
+    const exitEls = container.querySelectorAll<HTMLElement>(".op-map-exit-marker");
 
     await Promise.all(
       Array.from(exitEls).map(async (el) => {
@@ -375,14 +365,14 @@ const boundaries: OpMapBoundary[] = [
         L.marker([lat, lng], { icon, title: el.dataset.title })
           .bindPopup(buildExitPopup(el.dataset))
           .addTo(map);
-      }),
+      })
     );
   }
 
   async function addMainMarkers(
     map: ReturnType<typeof getMapFromId>,
     container: HTMLElement,
-    color: string,
+    color: string
   ): Promise<void> {
     if (!map) return;
 
@@ -410,7 +400,7 @@ const boundaries: OpMapBoundary[] = [
         L.marker([lat, lng], { icon, title: el.dataset.title })
           .bindPopup(buildPopup(el.dataset))
           .addTo(map);
-      }),
+      })
     );
   }
 
@@ -455,7 +445,6 @@ const boundaries: OpMapBoundary[] = [
   :global(.op-map-popup) {
     font: inherit;
     min-width: 240px;
-
   }
   :global(.op-map-popup__title) {
     margin: 0 0 0.25rem;
@@ -463,7 +452,7 @@ const boundaries: OpMapBoundary[] = [
     font-weight: 600;
   }
   :global(.op-map-popup__address),
-  :global(.op-map-popup__subtitle), 
+  :global(.op-map-popup__subtitle),
   :global(.leaflet-popup-content p) {
     margin: 0 0 0.5rem;
     font-size: 0.875rem;
@@ -478,11 +467,11 @@ const boundaries: OpMapBoundary[] = [
     flex-direction: column;
     gap: 0.125rem;
     font-size: 0.875rem;
-    }
+  }
   :global(.leaflet-container a) {
     color: var(--color-info);
   }
-  
+
   :global(.op-map-popup__osm) {
     margin-top: 0.25rem;
     font-size: 0.75rem;
