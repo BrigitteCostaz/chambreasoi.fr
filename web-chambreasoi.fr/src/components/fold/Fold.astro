@@ -338,7 +338,7 @@ const f = {
                 )}
 
                 {cell.type === "amenities" && (
-                  <ul class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] list-disc list-inside">
+                  <ul class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] [list-style-type:disc] [list-style-position:inside]">
                     <li class="pb-2">{f.amenitiesLabel}</li>
                     {f.amenities.map((item: string) => (
                       <li class="text-txtMuted">{item}</li>

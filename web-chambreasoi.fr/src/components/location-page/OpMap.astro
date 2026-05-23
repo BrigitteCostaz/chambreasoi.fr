@@ -113,6 +113,7 @@ const boundaries: OpMapBoundary[] = [
     tileLayerOptions: {
       subdomains: ["a", "b", "c"],
       maxZoom: 17,
+      
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
     },
@@ -412,7 +413,7 @@ const boundaries: OpMapBoundary[] = [
     if (!map) return false;
 
     const accent = getComputedStyle(document.documentElement)
-      .getPropertyValue("--color-accentStone")
+      .getPropertyValue("--color-accentForest")
       .trim();
     const color = accent || "#2f6a3a";
 

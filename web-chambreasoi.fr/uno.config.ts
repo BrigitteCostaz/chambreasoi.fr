@@ -64,9 +64,10 @@ export default defineConfig({
 
     square: "aspect-square",
 
-    "list-ui": "flex flex-col font-display font-medium leading-none list-inside",
+    "list-ui": "flex flex-col font-display font-medium leading-none [list-style-position:inside]",
 
-    "list-ui-disc": "flex flex-col font-display font-medium leading-none list-disc list-inside",
+    "list-ui-disc":
+      "flex flex-col font-display font-medium leading-none [list-style-type:disc] [list-style-position:inside]",
 
     "cta-top": "absolute p-0.8rem inset-x-0 top-0.8rem flex justify-center z-10",
 
