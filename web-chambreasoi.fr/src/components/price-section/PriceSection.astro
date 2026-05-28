@@ -71,7 +71,7 @@ const sanitySrcSet = buildSanityDprSrcSet({
 });
 
 const shouldRenderSanityImage = !!sanitySrc;
-const fallbackImage = resolveImage(fallbackImagePath);
+const fallbackImage = await resolveImage(fallbackImagePath);
 const shouldRenderFallback = !shouldRenderSanityImage && !!fallbackImage;
 
 /* =========================

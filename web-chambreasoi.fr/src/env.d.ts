@@ -21,14 +21,9 @@ interface Env extends CfEnvBindings {}
 // ---------------------------------------------------------------------------
 // Astro v6 × Cloudflare runtime typing
 //
-// Astro v6 removed `Astro.locals.runtime.env`.
-// On Cloudflare Workers, read bindings using:
-//
-//   import { env } from "cloudflare:workers";
-//   env.SANITY_PROJECT_ID; // ← typed as string
-//
-// If you want type-safety for Cloudflare bindings, prefer typing `env` from
-// `cloudflare:workers` rather than relying on `Astro.locals.runtime`.
+// Read bindings from `context.locals.runtime.env` in middleware/API routes.
+// The `App.Locals` augmentation below keeps the runtime env typed for those
+// entry points.
 // ---------------------------------------------------------------------------
 
 type Runtime = import("@astrojs/cloudflare").Runtime<CfEnvBindings>;

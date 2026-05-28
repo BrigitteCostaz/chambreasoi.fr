@@ -5,7 +5,7 @@ import { getPracticalInfoContent } from "@lib/sanity";
 import { getPracticalInfoRenderModel } from "../../data/adapters/practical-info";
 
 const practicalInfo = await getPracticalInfoContent();
-const renderModel = getPracticalInfoRenderModel(practicalInfo);
+const renderModel = await getPracticalInfoRenderModel(practicalInfo);
 const {
   p,
   accentClasses,

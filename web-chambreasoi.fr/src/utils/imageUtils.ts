@@ -1,7 +1,7 @@
 /**
  * Image utilities for resolving dynamic local image paths to ImageMetadata.
  *
- * Uses Vite's import.meta.glob to eagerly load all images from /src/assets/images/.
+ * Uses Vite's import.meta.glob to lazily load images from /src/assets/images/.
  * This is useful for:
  * - Fallback images when Sanity images are unavailable
  * - Static assets referenced dynamically (e.g., from config files)
@@ -10,14 +10,13 @@
  *   import { buildSanityImageUrl, buildSanityDprSrcSet } from "@lib/sanity";
  */
 
-// Use Vite's import.meta.glob to eagerly load all images
-const images = import.meta.glob<{ default: ImageMetadata }>(
-  "/src/assets/images/**/*.{jpg,jpeg,png,webp,avif,gif,svg}",
-  { eager: true }
+// Lazy image modules keyed by absolute source path.
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/images/**/*.{jpg,jpeg,png,webp,avif,gif,svg}"
 );
 
 // Cache for resolved images to avoid repeated lookups
-const imageCache = new Map<string, ImageMetadata | null>();
+const imageCache = new Map<string, Promise<ImageMetadata | null>>();
 
 /**
  * Normalize an image path from @images alias to absolute path.
@@ -44,7 +43,9 @@ function normalizePath(imagePath: string): string {
  * }
  * ```
  */
-export function resolveImage(imagePath: string | null | undefined): ImageMetadata | null {
+export async function resolveImage(
+  imagePath: string | null | undefined
+): Promise<ImageMetadata | null> {
   if (!imagePath) return null;
 
   // Check cache first
@@ -56,21 +57,23 @@ export function resolveImage(imagePath: string | null | undefined): ImageMetadat
   const normalizedPath = normalizePath(imagePath);
 
   // Look up the image in our glob map
-  const imageModule = images[normalizedPath];
+  const imageModuleLoader = imageModules[normalizedPath];
+  const imagePromise = (async () => {
+    if (!imageModuleLoader) {
+      console.warn(
+        `[resolveImage] Image not found: "${imagePath}"\n` +
+          `  Resolved to: "${normalizedPath}"\n` +
+          `  Available paths: ${Object.keys(imageModules).length} images indexed`
+      );
+      return null;
+    }
 
-  if (!imageModule?.default) {
-    console.warn(
-      `[resolveImage] Image not found: "${imagePath}"\n` +
-        `  Resolved to: "${normalizedPath}"\n` +
-        `  Available paths: ${Object.keys(images).length} images loaded`
-    );
-    imageCache.set(imagePath, null);
-    return null;
-  }
+    const imageModule = await imageModuleLoader();
+    return imageModule.default ?? null;
+  })();
 
-  const metadata = imageModule.default;
-  imageCache.set(imagePath, metadata);
-  return metadata;
+  imageCache.set(imagePath, imagePromise);
+  return imagePromise;
 }
 
 /**
@@ -87,8 +90,10 @@ export function resolveImage(imagePath: string | null | undefined): ImageMetadat
  * ]);
  * ```
  */
-export function resolveImages(imagePaths: (string | null | undefined)[]): (ImageMetadata | null)[] {
-  return imagePaths.map(resolveImage);
+export function resolveImages(
+  imagePaths: (string | null | undefined)[]
+): Promise<(ImageMetadata | null)[]> {
+  return Promise.all(imagePaths.map((imagePath) => resolveImage(imagePath)));
 }
 
 /**
@@ -104,8 +109,8 @@ export function resolveImages(imagePaths: (string | null | undefined)[]): (Image
  * }
  * ```
  */
-export function imageExists(imagePath: string | null | undefined): boolean {
-  return resolveImage(imagePath) !== null;
+export async function imageExists(imagePath: string | null | undefined): Promise<boolean> {
+  return (await resolveImage(imagePath)) !== null;
 }
 
 /**
@@ -123,11 +128,11 @@ export function imageExists(imagePath: string | null | undefined): boolean {
  * );
  * ```
  */
-export function resolveImageWithFallback(
+export async function resolveImageWithFallback(
   imagePath: string | null | undefined,
   fallbackPath: string
-): ImageMetadata | null {
-  return resolveImage(imagePath) ?? resolveImage(fallbackPath);
+): Promise<ImageMetadata | null> {
+  return (await resolveImage(imagePath)) ?? (await resolveImage(fallbackPath));
 }
 
 /**
@@ -137,7 +142,9 @@ export function resolveImageWithFallback(
  * @returns Array of all loaded image paths with @images alias
  */
 export function getAllImagePaths(): string[] {
-  return Object.keys(images).map((path) => path.replace(/^\/src\/assets\/images\//, "@images/"));
+  return Object.keys(imageModules).map((path) =>
+    path.replace(/^\/src\/assets\/images\//, "@images/")
+  );
 }
 
 /**

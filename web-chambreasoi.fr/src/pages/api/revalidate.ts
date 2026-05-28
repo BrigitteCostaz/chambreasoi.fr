@@ -1,5 +1,6 @@
-import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
+import { invalidateCmsCache } from "@config/cache";
+import { buildCloudflarePurgePayload } from "@lib/revalidate/purge";
 import {
   isTimestampFresh,
   parseSignatureHeader,
@@ -10,7 +11,7 @@ export const prerender = false;
 
 const SIGNATURE_HEADER_NAME = "sanity-webhook-signature";
 const SIGNATURE_TTL_SECONDS = 300;
-const runtimeEnv = env as Partial<{
+type RevalidateBindings = Partial<{
   SANITY_WEBHOOK_SECRET: string;
   CF_ZONE_ID: string;
   CF_API_TOKEN: string;
@@ -37,7 +38,7 @@ async function createSignature(payload: string, timestamp: number, secret: strin
   );
 }
 
-function getValidatedBindings() {
+function getValidatedBindings(runtimeEnv: RevalidateBindings) {
   const secret = runtimeEnv.SANITY_WEBHOOK_SECRET;
   const zoneId = runtimeEnv.CF_ZONE_ID;
   const apiToken = runtimeEnv.CF_API_TOKEN;
@@ -70,12 +71,14 @@ async function isValidSanitySignature(
   return timingSafeStringEqual(parsedSignature.signature, expected);
 }
 
-export const ALL: APIRoute = async ({ request }) => {
+export const ALL: APIRoute = async ({ request, locals }) => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const bindings = getValidatedBindings();
+  const runtimeEnv = ((locals as unknown as { runtime?: { env?: RevalidateBindings } }).runtime
+    ?.env ?? {}) as RevalidateBindings;
+  const bindings = getValidatedBindings(runtimeEnv);
   if (!bindings) {
     return new Response("Server misconfiguration", { status: 500 });
   }
@@ -96,10 +99,7 @@ export const ALL: APIRoute = async ({ request }) => {
         Authorization: `Bearer ${bindings.apiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        purge_everything: false,
-        files: ["/"],
-      }),
+      body: JSON.stringify(buildCloudflarePurgePayload()),
     }
   );
 
@@ -112,6 +112,8 @@ export const ALL: APIRoute = async ({ request }) => {
     });
     return new Response("Cloudflare cache purge failed", { status: 502 });
   }
+
+  invalidateCmsCache();
 
   return new Response("OK", { status: 200 });
 };

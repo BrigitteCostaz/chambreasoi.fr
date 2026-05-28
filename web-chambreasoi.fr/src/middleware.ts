@@ -10,12 +10,14 @@ import { getRuntimeEnv } from "@utils/runtime-env";
  * - Avoid importing `cloudflare:workers` in shared code so Node dev doesn't break
  *
  * How:
- * - `getRuntimeEnv()` dynamically tries to load Cloudflare bindings via a CF-only module.
+ * - `getRuntimeEnv()` prefers `context.locals.runtime.env` when present.
  * - If unavailable (Node dev), it falls back to process.env.
  * - We then overlay PUBLIC_* vars from import.meta.env for dev/build reliability.
  */
-export const onRequest = defineMiddleware(async (_context, next) => {
-  const runtimeEnv = await getRuntimeEnv();
+export const onRequest = defineMiddleware(async (context, next) => {
+  const runtimeEnv = getRuntimeEnv(
+    (context.locals as unknown as { runtime?: { env?: Record<string, unknown> } }).runtime?.env
+  );
 
   const mergedEnv: Record<string, unknown> = {
     ...runtimeEnv,

@@ -1,5 +1,6 @@
 import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 import { PRICING_SETTINGS_QUERY, type PricingSettingsResult } from "@chambreasoi/sanity/queries";
+import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import type {
   MoneyCents,
@@ -122,20 +123,33 @@ function buildPricingCatalog(
   } as const;
 }
 
-let pricingCache: PricingCatalog | null = null;
+type PricingCacheEntry = {
+  epoch: number;
+  value: PricingCatalog;
+};
+
+let pricingCache: PricingCacheEntry | null = null;
+
+registerCmsCacheResetter(() => {
+  pricingCache = null;
+});
 
 function reportPricingFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
   incrementFallbackCounter("pricing");
   console.warn("[fallback:pricing]", {
     criticality: "high",
     reason,
-    hasCachedValue: Boolean(pricingCache),
+    hasCachedValue: Boolean(pricingCache?.value),
     details: details instanceof Error ? details.message : details,
   });
 }
 
 export async function getPricing(): Promise<PricingCatalog> {
-  if (pricingCache) return pricingCache;
+  const cacheEpoch = getCmsCacheEpoch();
+
+  if (pricingCache && pricingCache.epoch === cacheEpoch) {
+    return pricingCache.value;
+  }
 
   try {
     const cms = await fetchSanity<PricingSettingsResult>(PRICING_SETTINGS_QUERY);
@@ -148,19 +162,25 @@ export async function getPricing(): Promise<PricingCatalog> {
       cms?.breakfastSurchargeCents
     );
 
-    pricingCache = buildPricingCatalog(baseNightly, breakfastSurcharge);
+    pricingCache = {
+      epoch: cacheEpoch,
+      value: buildPricingCatalog(baseNightly, breakfastSurcharge),
+    };
 
     if (!cms) {
       devLog("[pricing] Using TS fallback (document missing or empty).");
       reportPricingFallback("missing-document");
     }
 
-    return pricingCache;
+    return pricingCache.value;
   } catch (error) {
     devLog("[pricing] Sanity fetch failed, using TS fallback.", error);
     reportPricingFallback("fetch-error", error);
-    pricingCache = buildPricingCatalog(DEFAULT_BASE_NIGHTLY, DEFAULT_BREAKFAST_SURCHARGE);
-    return pricingCache;
+    pricingCache = {
+      epoch: cacheEpoch,
+      value: buildPricingCatalog(DEFAULT_BASE_NIGHTLY, DEFAULT_BREAKFAST_SURCHARGE),
+    };
+    return pricingCache.value;
   }
 }
 

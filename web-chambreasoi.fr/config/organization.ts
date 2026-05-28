@@ -4,6 +4,7 @@ import {
   ORGANIZATION_SETTINGS_QUERY,
   type OrganizationSettingsResult,
 } from "@chambreasoi/sanity/queries";
+import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
 import type { OrganizationConfig } from "@config/types";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { resolveNumber, resolveString, resolveStringArray } from "@utils/config-resolvers";
@@ -125,7 +126,16 @@ function mapSanityToOrgData(
   };
 }
 
-let orgDataCache: OrganizationConfig | null = null;
+type OrganizationCacheEntry = {
+  epoch: number;
+  value: OrganizationConfig;
+};
+
+let orgDataCache: OrganizationCacheEntry | null = null;
+
+registerCmsCacheResetter(() => {
+  orgDataCache = null;
+});
 
 function reportOrganizationFallback(
   reason: "missing-document" | "fetch-error",
@@ -135,13 +145,16 @@ function reportOrganizationFallback(
   console.warn("[fallback:organization]", {
     criticality: "high",
     reason,
-    hasCachedValue: Boolean(orgDataCache),
+    hasCachedValue: Boolean(orgDataCache?.value),
     details: details instanceof Error ? details.message : details,
   });
 }
 
 export async function getOrgData(): Promise<OrganizationConfig> {
-  if (orgDataCache) return orgDataCache;
+  const cacheEpoch = getCmsCacheEpoch();
+  if (orgDataCache && orgDataCache.epoch === cacheEpoch) {
+    return orgDataCache.value;
+  }
 
   try {
     const cms = await fetchSanity<OrganizationSettingsResult>(ORGANIZATION_SETTINGS_QUERY);
@@ -152,13 +165,19 @@ export async function getOrgData(): Promise<OrganizationConfig> {
       reportOrganizationFallback("missing-document");
     }
 
-    orgDataCache = merged;
-    return merged;
+    orgDataCache = {
+      epoch: cacheEpoch,
+      value: merged,
+    };
+    return orgDataCache.value;
   } catch (error) {
     devLog("[orgData] Sanity fetch failed, using TS fallback.", error);
     reportOrganizationFallback("fetch-error", error);
-    orgDataCache = ORG_DEFAULTS;
-    return orgDataCache;
+    orgDataCache = {
+      epoch: cacheEpoch,
+      value: ORG_DEFAULTS,
+    };
+    return orgDataCache.value;
   }
 }
 

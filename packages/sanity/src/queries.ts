@@ -51,6 +51,16 @@ export interface AccommodationSettingsResult {
   amenities: string[] | null
 }
 
+export interface AvailabilityDateResult {
+  date: string
+  available?: boolean
+}
+
+export interface AvailabilityMonthResult {
+  month: string
+  dates?: AvailabilityDateResult[]
+}
+
 // ---------------------------------------------------------------------------
 // Singleton settings
 // ---------------------------------------------------------------------------
@@ -99,6 +109,13 @@ export const ACCOMMODATION_SETTINGS_QUERY = /* groq */ `
     checkinTime,
     checkoutTime,
     amenities
+  }
+`
+
+export const AVAILABILITY_MONTHS_QUERY = /* groq */ `
+  *[_type == "availability" && !(_id in path("drafts.**"))] | order(month asc){
+    month,
+    dates[]{ date, available }
   }
 `
 

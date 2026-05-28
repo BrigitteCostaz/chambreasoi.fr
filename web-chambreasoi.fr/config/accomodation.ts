@@ -3,6 +3,7 @@ import {
   ACCOMMODATION_SETTINGS_QUERY,
   type AccommodationSettingsResult,
 } from "@chambreasoi/sanity/queries";
+import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
 import type { AccomodationConfig } from "@config/types";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { isNonEmptyString } from "@utils/config-resolvers";
@@ -29,20 +30,32 @@ const ACCOMMODATION_DEFAULTS: AccomodationConfig = {
   ],
 };
 
-let accommodationCache: AccomodationConfig | null = null;
+type AccommodationCacheEntry = {
+  epoch: number;
+  value: AccomodationConfig;
+};
+
+let accommodationCache: AccommodationCacheEntry | null = null;
+
+registerCmsCacheResetter(() => {
+  accommodationCache = null;
+});
 
 function reportAccommodationFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
   incrementFallbackCounter("accommodation");
   console.warn("[fallback:accommodation]", {
     criticality: "medium",
     reason,
-    hasCachedValue: Boolean(accommodationCache),
+    hasCachedValue: Boolean(accommodationCache?.value),
     details: details instanceof Error ? details.message : details,
   });
 }
 
 export async function getAccommodation(): Promise<AccomodationConfig> {
-  if (accommodationCache) return accommodationCache;
+  const cacheEpoch = getCmsCacheEpoch();
+  if (accommodationCache && accommodationCache.epoch === cacheEpoch) {
+    return accommodationCache.value;
+  }
 
   try {
     const cms = await fetchSanity<AccommodationSettingsResult>(ACCOMMODATION_SETTINGS_QUERY);
@@ -51,6 +64,8 @@ export async function getAccommodation(): Promise<AccomodationConfig> {
     const cmsAmenities = cms?.amenities;
 
     accommodationCache = {
+      epoch: cacheEpoch,
+      value: {
       checkinTime: isNonEmptyString(cmsCheckin) ? cmsCheckin : ACCOMMODATION_DEFAULTS.checkinTime,
       checkoutTime: isNonEmptyString(cmsCheckout)
         ? cmsCheckout
@@ -59,6 +74,7 @@ export async function getAccommodation(): Promise<AccomodationConfig> {
         Array.isArray(cmsAmenities) && cmsAmenities.length > 0
           ? cmsAmenities.filter((value): value is string => isNonEmptyString(value))
           : ACCOMMODATION_DEFAULTS.amenities,
+      },
     };
 
     if (!cms) {
@@ -66,12 +82,15 @@ export async function getAccommodation(): Promise<AccomodationConfig> {
       reportAccommodationFallback("missing-document");
     }
 
-    return accommodationCache;
+    return accommodationCache.value;
   } catch (error) {
     devLog("[accommodation] Sanity fetch failed, using TS fallback.", error);
     reportAccommodationFallback("fetch-error", error);
-    accommodationCache = ACCOMMODATION_DEFAULTS;
-    return ACCOMMODATION_DEFAULTS;
+    accommodationCache = {
+      epoch: cacheEpoch,
+      value: ACCOMMODATION_DEFAULTS,
+    };
+    return accommodationCache.value;
   }
 }
 

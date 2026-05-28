@@ -1,19 +1,13 @@
 ---
-import { sanityClient } from "sanity:client";
 import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalendar.astro";
 import Button from "@components/button/Button.astro";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getOrgData } from "@config/organization";
-
-type AvailabilityDate = {
-  date: string;
-  available?: boolean;
-};
-
-type AvailabilityMonth = {
-  month: string;
-  dates?: AvailabilityDate[];
-};
+import {
+  AVAILABILITY_MONTHS_QUERY,
+  fetchSanity,
+  type AvailabilityMonthResult,
+} from "@lib/sanity";
 
 function getMonthDays(month: string) {
   const year = Number(month.slice(0, 4));
@@ -29,12 +23,8 @@ function getMonthDays(month: string) {
 
 const now = new Date();
 const currentMonthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
-const availabilityMonths = await sanityClient.fetch<AvailabilityMonth[]>(
-  `*[_type == "availability" && !(_id in path("drafts.**"))] | order(month asc){
-    month,
-    dates[]{ date, available }
-  }`
-);
+const availabilityMonths =
+  (await fetchSanity<AvailabilityMonthResult[]>(AVAILABILITY_MONTHS_QUERY)) ?? [];
 const orgData = await getOrgData();
 const {
   contact: { phone },
@@ -122,27 +112,7 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
 </style>
 
 <script>
-  const revealEls = document.querySelectorAll<HTMLElement>("[data-reveal]");
+  import { initRevealOnIntersect } from "@utils/reveal";
 
-  revealEls.forEach((el) => {
-    const delay = el.dataset.revealDelay ?? "0";
-    el.style.setProperty("--reveal-delay", `${delay}ms`);
-  });
-
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-
-        requestAnimationFrame(() => {
-          (entry.target as HTMLElement).classList.add("is-visible");
-        });
-
-        revealObserver.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.1 }
-  );
-
-  revealEls.forEach((el) => revealObserver.observe(el));
+  initRevealOnIntersect({ threshold: 0.1 });
 </script>

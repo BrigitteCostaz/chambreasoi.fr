@@ -29,17 +29,31 @@ const roomPageContent = await getRoomPageContent();
 const serviceFeatureImage = null;
 // later, when needed:
 // const serviceFeatureImage = room03Image;
-const room01Image = resolveImage("@images/chambreasoi-room-01.png");
-const room02Image = resolveImage("@images/chambreasoi-room-02.png");
-const livingroom01Image = resolveImage("@images/chambreasoi-livingroom-01.png");
-const livingroom02Image = resolveImage("@images/chambreasoi-livingroom-02.png");
-const livingroom03Image = resolveImage("@images/chambreasoi-livingroom-03.png");
-const bathroom01Image = resolveImage("@images/chambreasoi-bathroom-01.png");
-const terrace01Image = resolveImage("@images/chambreasoi-terrace-01.png");
-const cuisineImage = resolveImage("@images/chambreasoi-cuisine.png");
-const gardenImage01 = resolveImage("@images/chambreasoi-garden-01.png");
-const gardenImage02 = resolveImage("@images/chambreasoi-garden-02.png");
-const gardenImage03 = resolveImage("@images/chambreasoi-garden-03.png");
+const [
+  room01Image,
+  room02Image,
+  livingroom01Image,
+  livingroom02Image,
+  livingroom03Image,
+  bathroom01Image,
+  terrace01Image,
+  cuisineImage,
+  gardenImage01,
+  gardenImage02,
+  gardenImage03,
+] = await Promise.all([
+  resolveImage("@images/chambreasoi-room-01.png"),
+  resolveImage("@images/chambreasoi-room-02.png"),
+  resolveImage("@images/chambreasoi-livingroom-01.png"),
+  resolveImage("@images/chambreasoi-livingroom-02.png"),
+  resolveImage("@images/chambreasoi-livingroom-03.png"),
+  resolveImage("@images/chambreasoi-bathroom-01.png"),
+  resolveImage("@images/chambreasoi-terrace-01.png"),
+  resolveImage("@images/chambreasoi-cuisine.png"),
+  resolveImage("@images/chambreasoi-garden-01.png"),
+  resolveImage("@images/chambreasoi-garden-02.png"),
+  resolveImage("@images/chambreasoi-garden-03.png"),
+]);
 
 const hasSanityAsset = (image: RoomPageImageResult | null | undefined) =>
   Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
@@ -591,25 +605,7 @@ const hasServiceFeatureImage = Boolean(
 </style>
 
 <script>
-  const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
+  import { initRevealOnIntersect } from "@utils/reveal";
 
-  elements.forEach((el) => {
-    const delay = el.dataset.revealDelay ?? "0";
-    el.style.setProperty("--reveal-delay", `${delay}ms`);
-  });
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        requestAnimationFrame(() => {
-          (entry.target as HTMLElement).classList.add("is-visible");
-        });
-        observer.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.1 }
-  );
-
-  elements.forEach((el) => observer.observe(el));
+  initRevealOnIntersect({ threshold: 0.1 });
 </script>

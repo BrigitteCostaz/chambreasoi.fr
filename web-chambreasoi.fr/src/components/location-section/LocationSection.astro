@@ -269,6 +269,8 @@ const l = {
 </style>
 
 <script>
+  import { initRevealOnIntersect } from "@utils/reveal";
+
   // ── Parallax layer shift (desktop only) ─────────────────────────────────────
   // Handles only the background translateY. Reveal logic is no longer here —
   // it lives in the shared IntersectionObserver below so it never reverses.
@@ -304,26 +306,7 @@ const l = {
   // Stamps --reveal-delay from data-reveal-delay so the CSS transition-delay
   // consumes it directly. unobserve() ensures it never reverses on scroll-up.
 
-  const revealEls = document.querySelectorAll<HTMLElement>("[data-reveal]");
-
-  revealEls.forEach((el) => {
-    el.style.setProperty("--reveal-delay", `${el.dataset.revealDelay ?? "0"}ms`);
-  });
-
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        requestAnimationFrame(() => {
-          (entry.target as HTMLElement).classList.add("is-visible");
-        });
-        revealObserver.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.15 }
-  );
-
-  revealEls.forEach((el) => revealObserver.observe(el));
+  initRevealOnIntersect({ threshold: 0.15 });
 </script>
 
 <style is:global>

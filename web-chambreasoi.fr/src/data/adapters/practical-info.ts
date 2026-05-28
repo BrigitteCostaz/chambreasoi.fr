@@ -28,9 +28,13 @@ const hasSanityAsset = (
     | undefined
 ) => Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
 
-export const getPracticalInfoRenderModel = (practicalInfo: PracticalInfoContentResult | null) => {
-  const fallbackKitchenImage = resolveImage("@images/chambreasoi-home-01.png");
-  const fallbackBookingImage = resolveImage("@images/chambreasoi-trinkets.png");
+export const getPracticalInfoRenderModel = async (
+  practicalInfo: PracticalInfoContentResult | null
+) => {
+  const [fallbackKitchenImage, fallbackBookingImage] = await Promise.all([
+    resolveImage("@images/chambreasoi-home-01.png"),
+    resolveImage("@images/chambreasoi-trinkets.png"),
+  ]);
 
   const p = {
     eyebrow: practicalInfo?.eyebrow ?? "Infos pratiques",
@@ -103,32 +107,34 @@ export const getPracticalInfoRenderModel = (practicalInfo: PracticalInfoContentR
       })
     : fallbackServiceImages;
 
-  const resolvedServiceImages = serviceImages.map((image) => {
-    const sanityImage = hasSanityAsset(image.sanityImage) ? image.sanityImage : null;
-    const sanitySrc = buildSanityImageUrl({
-      source: sanityImage,
-      width: serviceImageWidth,
-      height: serviceImageHeight,
-      quality: 80,
-      format: "webp",
-      fit: "crop",
-    });
-    const sanitySrcSet = buildSanityDprSrcSet({
-      source: sanityImage,
-      width: serviceImageWidth,
-      height: serviceImageHeight,
-      dprs: [1, 1.5, 2],
-      quality: 80,
-      format: "webp",
-      fit: "crop",
-    });
-    return {
-      ...image,
-      sanitySrc,
-      sanitySrcSet,
-      fallbackImage: image.fallbackImagePath ? resolveImage(image.fallbackImagePath) : null,
-    };
-  });
+  const resolvedServiceImages = await Promise.all(
+    serviceImages.map(async (image) => {
+      const sanityImage = hasSanityAsset(image.sanityImage) ? image.sanityImage : null;
+      const sanitySrc = buildSanityImageUrl({
+        source: sanityImage,
+        width: serviceImageWidth,
+        height: serviceImageHeight,
+        quality: 80,
+        format: "webp",
+        fit: "crop",
+      });
+      const sanitySrcSet = buildSanityDprSrcSet({
+        source: sanityImage,
+        width: serviceImageWidth,
+        height: serviceImageHeight,
+        dprs: [1, 1.5, 2],
+        quality: 80,
+        format: "webp",
+        fit: "crop",
+      });
+      return {
+        ...image,
+        sanitySrc,
+        sanitySrcSet,
+        fallbackImage: image.fallbackImagePath ? await resolveImage(image.fallbackImagePath) : null,
+      };
+    })
+  );
 
   const displayedServiceCards = p.serviceCards.slice(0, 5);
   const serviceDesktopPositionClasses =
