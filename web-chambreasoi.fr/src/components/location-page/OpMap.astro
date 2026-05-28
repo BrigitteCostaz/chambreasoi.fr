@@ -1,16 +1,22 @@
 ---
-import { Leaflet } from "astro-leaflet";
 import { getOrgData } from "@config/organization";
-import { getFoldContent } from "@lib/sanity";
+import hospitalIconUrl from "@icons/ic/sharp-local-hospital.svg?url";
 import bedIconUrl from "@icons/ion/bed-sharp.svg?url";
 import carIconUrl from "@icons/ion/car-sharp.svg?url";
-import hospitalIconUrl from "@icons/ic/sharp-local-hospital.svg?url";
+import { getFoldContent } from "@lib/sanity";
+import { Leaflet } from "astro-leaflet";
+import {
+  defaultBoundaries,
+  defaultExitMarkers,
+  defaultFoldAmenities,
+  defaultSecondaryMapMarker,
+} from "../../data/fallback/location-page";
 
 const orgData = await getOrgData();
 const fold = await getFoldContent();
 
-const amenitiesLabel = fold?.amenitiesLabel ?? "avec";
-const amenities = fold?.amenities ?? ["un lit double", "une salle de bain privative"];
+const amenitiesLabel = fold?.amenitiesLabel ?? defaultFoldAmenities.amenitiesLabel;
+const amenities = fold?.amenities ?? defaultFoldAmenities.amenities;
 const amenitiesSubtitle = [amenitiesLabel, ...amenities].join("\n");
 
 const mapId = "org-location-map";
@@ -43,13 +49,13 @@ const mapMarkers: OpMapMarker[] = [
     iconUrl: bedIconUrl,
   },
   {
-    lat: 45.545448,
-    lng: 5.96975,
-    title: "Médipôle de Savoie",
-    subtitle: "Hôpital privé · Urgences 24/7",
-    phone: "04 79 26 80 80",
-    phoneHref: "tel:+33479268080",
-    website: "https://medipole-de-savoie.fr",
+    lat: defaultSecondaryMapMarker.lat,
+    lng: defaultSecondaryMapMarker.lng,
+    title: defaultSecondaryMapMarker.title,
+    subtitle: defaultSecondaryMapMarker.subtitle,
+    phone: defaultSecondaryMapMarker.phone,
+    phoneHref: defaultSecondaryMapMarker.phoneHref,
+    website: defaultSecondaryMapMarker.website,
     //osmType: "way",
     //osmId: "164117082",
     iconUrl: hospitalIconUrl,
@@ -69,14 +75,14 @@ type OpMapExitMarker = {
 // (the Chambéry-sud "Le Médipôle" exit ramps off the A43/A41). We avoid
 // drawing the way polylines and just mark the exit location instead.
 const exitMarkers: OpMapExitMarker[] = [
-  {
-    lat: 45.5365,
-    lng: 5.968,
-    title: "Sortie autoroute · Le Médipôle",
-    subtitle: "Accès depuis l'A43 / A41\nSortie 20 : Baldoph / Challes-les-Eaux / Myans",
+  ...defaultExitMarkers.map((marker) => ({
+    lat: marker.lat,
+    lng: marker.lng,
+    title: marker.title,
+    subtitle: marker.subtitle,
     // osmWays: ["21830677", "26389545"],
     iconUrl: carIconUrl,
-  },
+  })),
 ];
 
 const center: [number, number] = [
@@ -90,18 +96,7 @@ type OpMapBoundary = {
   osmId: string;
 };
 
-const boundaries: OpMapBoundary[] = [
-  {
-    url: "/data/massif-des-bauges.geojson",
-    name: "Massif des Bauges",
-    osmId: "7466521",
-  },
-  {
-    url: "/data/massif-de-la-chartreuse.geojson",
-    name: "Massif de la Chartreuse",
-    osmId: "7468871",
-  },
-];
+const boundaries: OpMapBoundary[] = [...defaultBoundaries];
 ---
 
 <Leaflet
@@ -326,8 +321,11 @@ const boundaries: OpMapBoundary[] = [
               interactive: false,
             },
           }).addTo(map);
-        } catch {
-          // ignore: boundary overlay is non-critical
+        } catch (error) {
+          console.warn("[op-map] Boundary overlay fetch failed", {
+            url,
+            reason: error instanceof Error ? error.message : "unknown",
+          });
         }
       })
     );

@@ -12,7 +12,7 @@
 
 import { createImageUrlBuilder } from "@sanity/image-url";
 import type { ImageUrlBuilder } from "@sanity/image-url";
-import { sanityConfig } from "./config.ts";
+import { sanityConfig } from "./config";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -1,5 +1,6 @@
 import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 import { PRICING_SETTINGS_QUERY, type PricingSettingsResult } from "@chambreasoi/sanity/queries";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import type {
   MoneyCents,
   MoneyFormatter,
@@ -123,6 +124,16 @@ function buildPricingCatalog(
 
 let pricingCache: PricingCatalog | null = null;
 
+function reportPricingFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
+  incrementFallbackCounter("pricing");
+  console.warn("[fallback:pricing]", {
+    criticality: "high",
+    reason,
+    hasCachedValue: Boolean(pricingCache),
+    details: details instanceof Error ? details.message : details,
+  });
+}
+
 export async function getPricing(): Promise<PricingCatalog> {
   if (pricingCache) return pricingCache;
 
@@ -141,11 +152,13 @@ export async function getPricing(): Promise<PricingCatalog> {
 
     if (!cms) {
       devLog("[pricing] Using TS fallback (document missing or empty).");
+      reportPricingFallback("missing-document");
     }
 
     return pricingCache;
   } catch (error) {
     devLog("[pricing] Sanity fetch failed, using TS fallback.", error);
+    reportPricingFallback("fetch-error", error);
     pricingCache = buildPricingCatalog(DEFAULT_BASE_NIGHTLY, DEFAULT_BREAKFAST_SURCHARGE);
     return pricingCache;
   }

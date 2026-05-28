@@ -19,24 +19,25 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
-    "check:fix": "biome check --write ."
+    "check:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.5.4",
+    "@astrojs/cloudflare": "^13.5.5",
     "@astrojs/react": "^5.0.5",
     "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.4.0",
-    "@sanity/client": "^7.22.0",
-    "@sanity/vision": "^5.26.0",
+    "@sanity/client": "^7.22.1",
     "@unocss/reset": "^66.7.0",
-    "astro": "^6.3.7",
+    "astro": "^6.3.8",
     "astro-icon": "^1.1.5",
     "astro-leaflet": "^1.12.0",
     "astro-seo-schema": "^6.0.0",
     "leaflet-extra-markers": "^2.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "sanity": "^5.26.0",
+    "sanity": "^5.27.0",
     "schema-dts": "^2.0.0",
     "sharp": "^0.34.5",
     "styled-components": "^6.4.2",
@@ -45,8 +46,8 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/node": "^10.1.1",
-    "@biomejs/biome": "^2.4.15",
-    "@cloudflare/workers-types": "^4.20260522.1",
+    "@biomejs/biome": "^2.4.16",
+    "@cloudflare/workers-types": "^4.20260528.1",
     "@types/react": "^19.2.15",
     "@unocss/astro": "^66.7.0",
     "@unocss/preset-web-fonts": "^66.7.0",
@@ -54,6 +55,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
     "unocss": "^66.7.0",
-    "wrangler": "4.93.1"
+    "vitest": "^4.1.7",
+    "wrangler": "4.95.0"
   }
 }

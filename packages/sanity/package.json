@@ -11,12 +11,17 @@
     "./image": "./src/imageUrl.ts",
     "./queries": "./src/queries.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
   "dependencies": {
     "@sanity/client": "^7.14.1",
     "@sanity/image-url": "^2.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.8"
+    "typescript": "^5.8",
+    "vitest": "^4.1.7"
   }
 }

@@ -5,6 +5,7 @@ import {
   type OrganizationSettingsResult,
 } from "@chambreasoi/sanity/queries";
 import type { OrganizationConfig } from "@config/types";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { resolveNumber, resolveString, resolveStringArray } from "@utils/config-resolvers";
 
 const ORG_DEFAULTS: OrganizationConfig = {
@@ -126,6 +127,19 @@ function mapSanityToOrgData(
 
 let orgDataCache: OrganizationConfig | null = null;
 
+function reportOrganizationFallback(
+  reason: "missing-document" | "fetch-error",
+  details?: unknown
+): void {
+  incrementFallbackCounter("organization");
+  console.warn("[fallback:organization]", {
+    criticality: "high",
+    reason,
+    hasCachedValue: Boolean(orgDataCache),
+    details: details instanceof Error ? details.message : details,
+  });
+}
+
 export async function getOrgData(): Promise<OrganizationConfig> {
   if (orgDataCache) return orgDataCache;
 
@@ -135,12 +149,14 @@ export async function getOrgData(): Promise<OrganizationConfig> {
 
     if (!cms) {
       devLog("[orgData] Using TS fallback (document missing or empty).");
+      reportOrganizationFallback("missing-document");
     }
 
     orgDataCache = merged;
     return merged;
   } catch (error) {
     devLog("[orgData] Sanity fetch failed, using TS fallback.", error);
+    reportOrganizationFallback("fetch-error", error);
     orgDataCache = ORG_DEFAULTS;
     return orgDataCache;
   }

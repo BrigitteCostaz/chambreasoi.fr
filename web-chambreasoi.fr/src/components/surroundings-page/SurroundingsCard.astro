@@ -1,0 +1,77 @@
+---
+import Button from "@components/button/Button.astro";
+import PortableText from "@components/rich-text/PortableText.astro";
+import RichTextBlockRenderer from "@components/rich-text/RichTextBlock.astro";
+import type { ResolvedSurroundingsItem, ReservationStatus } from "./types";
+
+interface Props {
+  item: ResolvedSurroundingsItem;
+  reservationLabels: Record<ReservationStatus, string>;
+}
+
+const { item, reservationLabels } = Astro.props;
+---
+
+<article class="flex flex-col gap-[0.8rem] pt-[0.8rem]">
+  <div class="flex flex-col gap-[0.4rem]">
+    {
+      item.category ? (
+        <span class="text-[0.78rem] uppercase tracking-[0.08em] text-muted">{item.category}</span>
+      ) : null
+    }
+    <div class="flex flex-wrap items-center gap-[0.6rem]">
+      <h4 class="text-ui-lg font-medium leading-snug">{item.title}</h4>
+      {
+        item.reservationRequired ? (
+          <span class="border border-txtPri/10 px-[0.55rem] py-[0.18rem] text-[0.72rem] leading-none">
+            {reservationLabels[item.reservationRequired]}
+          </span>
+        ) : null
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-[0.6rem]">
+    {
+      item.body.sanityBlocks ? (
+        <PortableText blocks={item.body.sanityBlocks} class="text-pretty text-ui-sm leading-relaxed" />
+      ) : (
+        item.body.fallback.map((paragraph) => (
+          <RichTextBlockRenderer block={paragraph} class="text-pretty text-ui-sm leading-relaxed" />
+        ))
+      )
+    }
+  </div>
+
+  {
+    item.note ? (
+      item.note.sanityBlocks ? (
+        <PortableText
+          blocks={item.note.sanityBlocks}
+          class="text-balance text-[0.85rem] leading-relaxed text-muted"
+        />
+      ) : (
+        <RichTextBlockRenderer
+          block={item.note.fallback}
+          class="text-balance text-[0.85rem] leading-relaxed text-muted"
+        />
+      )
+    ) : null
+  }
+
+  {
+    item.url ? (
+      <Button
+        variant="link"
+        size="sm"
+        href={item.url}
+        target="_blank"
+        icon="ion/arrow-up-right-box-sharp"
+        iconSide="right"
+        class="mt-auto w-fit font-medium"
+      >
+        consulter le site
+      </Button>
+    ) : null
+  }
+</article>

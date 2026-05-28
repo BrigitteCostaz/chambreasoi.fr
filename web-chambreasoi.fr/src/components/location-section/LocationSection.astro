@@ -7,6 +7,7 @@ import { getLocationSectionContent } from "@lib/sanity";
  * Imports
  * ========================= */
 import { Icon } from "astro-icon/components";
+import { defaultLocationSectionContent } from "../../data/fallback/location-section";
 
 /* =========================
  * Final computed values
@@ -14,11 +15,11 @@ import { Icon } from "astro-icon/components";
 const location = await getLocationSectionContent();
 
 const l = {
-  introText: location?.introText ?? "À 15 min de Chambéry, entre lac et montagne",
-  mapLabel1: location?.mapLabel1 ?? "Dans le Parc naturel régional du Massif des Bauges",
-  mapLabel2: location?.mapLabel2 ?? "entre Chartreuse et lac du Bourget",
-  mapLabel3: location?.mapLabel3 ?? "avec une vue imprenable sur le mythique Mont Granier",
-  mapCta: location?.mapCta ?? "Découvrir les alentours",
+  introText: location?.introText ?? defaultLocationSectionContent.introText,
+  mapLabel1: location?.mapLabel1 ?? defaultLocationSectionContent.mapLabel1,
+  mapLabel2: location?.mapLabel2 ?? defaultLocationSectionContent.mapLabel2,
+  mapLabel3: location?.mapLabel3 ?? defaultLocationSectionContent.mapLabel3,
+  mapCta: location?.mapCta ?? defaultLocationSectionContent.mapCta,
 };
 ---
 

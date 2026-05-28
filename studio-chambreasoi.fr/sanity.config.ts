@@ -7,6 +7,7 @@ import {structure} from './schemaTypes/structure'
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID!
 const dataset = process.env.SANITY_STUDIO_DATASET!
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 export default defineConfig({
   name: 'default',
@@ -15,7 +16,7 @@ export default defineConfig({
   projectId,
   dataset,
 
-  plugins: [structureTool({structure}), visionTool()],
+  plugins: [structureTool({structure}), ...(isDevelopment ? [visionTool()] : [])],
 
   schema: {
     types: schemaTypes,

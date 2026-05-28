@@ -1,462 +1,108 @@
 ---
-import GridOverlay from "@components/layout/GridOverlay.astro";
-import RichTextBlockRenderer from "@components/rich-text/RichTextBlock.astro";
-import { Icon } from "astro-icon/components";
+import SurroundingsCardGrid from "@components/surroundings-page/SurroundingsCardGrid.astro";
+import SurroundingsPageIntro from "@components/surroundings-page/SurroundingsPageIntro.astro";
+import { getSurroundingsPageContent } from "@lib/sanity";
+import { resolveSurroundingsPageContent } from "../../data/adapters/surroundings";
+import { fallbackContent, reservationLabels } from "../../data/fallback/surroundings";
 
-type ReservationStatus = "obligatoire" | "conseillee";
-type RichTextMark = "strong" | "em";
-type RichTextInline = string | { text: string; href?: string; marks?: RichTextMark[] };
-type RichTextParagraphBlock = string | RichTextInline[];
-type RichTextBlock =
-  | RichTextParagraphBlock
-  | {
-      type: "list";
-      ordered?: boolean;
-      items: RichTextParagraphBlock[];
-    };
+const sanityContent = await getSurroundingsPageContent();
+const content = resolveSurroundingsPageContent({
+  sanityContent,
+  fallbackContent,
+  reservationLabels,
+});
 
-interface SurroundingsImage {
-  src: string;
-  alt: string;
-  caption?: string;
-}
-
-interface SurroundingsItem {
-  title: string;
-  category?: string;
-  body: RichTextBlock[];
-  url?: string;
-  note?: RichTextBlock;
-  reservationRequired?: ReservationStatus;
-}
-
-interface SurroundingsAccordion {
-  title: string;
-  description?: RichTextBlock;
-  items: SurroundingsItem[];
-}
-
-interface SurroundingsPageContent {
-  heroEyebrow: string;
-  heroTitle: string;
-  proximityStatement: RichTextBlock;
-  proximityIntro: RichTextBlock[];
-  proximityReassurance: RichTextBlock;
-  editorialLead: RichTextBlock;
-  sectionHeading: string;
-  sectionLead: RichTextBlock;
-  images: SurroundingsImage[];
-  accordions: [SurroundingsAccordion, SurroundingsAccordion, SurroundingsAccordion];
-}
-
-const reservationLabels: Record<ReservationStatus, string> = {
-  obligatoire: "Réservation obligatoire",
-  conseillee: "Réservation conseillée",
-};
-
-const content: SurroundingsPageContent = {
-  heroEyebrow: "Bons plans",
-  heroTitle: "Découvrir Challes-les-Eaux et ses environs",
-  proximityStatement: "Le centre de Challes les Eaux est tout près à pied de votre chambre",
-  proximityIntro: [
-    "Vous y trouverez tous les services utiles au quotidien : ",
-    {
-      type: "list",
-      items: [
-        [{ text: "mini market", marks: ["strong"] }],
-        [{ text: "boulangerie", marks: ["strong"] }],
-        [{ text: "pharmacie", marks: ["strong"] }],
-        [{ text: "laverie", marks: ["strong"] }],
-        [{ text: "maison de la presse", marks: ["strong"] }],
-      ],
-    },
-  ],
-  proximityReassurance:
-    "Toutes les adresses mentionnées ci-dessus sont accessibles à pied (5 à 10’)",
-  editorialLead:
-    "Ancienne station thermale, Challes-les-Eaux a conservé son charme et sa tranquillité, notamment au détour des parcs, des plans d’eau et des chemins de promenade.",
-  sectionHeading: "3 idées parmi nos coups de cœur pour une découverte flash",
-  sectionLead:
-    "Selon le temps dont vous disposez avant ou après votre installation, voici quelques pistes simples pour profiter de Challes-les-Eaux et de ses alentours.",
-  images: [
-    {
-      src: "https://static.photos/900x1200/1",
-      alt: "Vue placeholder évoquant une promenade calme autour de Challes-les-Eaux",
-      caption: "Promenades, parcs et plans d’eau à proximité de la chambre.",
-    },
-    {
-      src: "https://static.photos/1200x900/2",
-      alt: "Vue placeholder évoquant les paysages de Savoie autour de Challes-les-Eaux",
-      caption: "Quelques idées faciles pour découvrir les environs selon votre temps disponible.",
-    },
-    {
-      src: "https://static.photos/900x1200/1",
-      alt: "Vue placeholder évoquant une promenade calme autour de Challes-les-Eaux",
-      caption: "Promenades, parcs et plans d’eau à proximité de la chambre.",
-    },
-  ],
-  accordions: [
-    {
-      title: "Où faire ses courses à deux pas ?",
-      description:
-        "Les commerces du quotidien sont proches de la chambre, pratiques pour un petit déjeuner, un repas léger ou une course de dernière minute.",
-      items: [
-        {
-          title: "Mini market Vival",
-          body: [
-            "Une adresse utile pour les achats au quotidien, à rejoindre facilement à pied.",
-          ],
-        },
-        {
-          title: "Boucherie du Mont Saint Michel",
-          body: [
-            "Boucherie-traiteur avec charcuterie de qualité, plats cuisinés à réchauffer, pain et fromages de Savoie.",
-          ],
-        },
-        {
-          title: "Boulangerie Le Relais du Pain",
-          body: [
-            "Une boulangerie toute proche pour le pain, les viennoiseries ou une pause rapide.",
-          ],
-        },
-        {
-          title: "Pâtissier-chocolatier Cédric Pernot",
-          body: ["Une adresse réputée localement pour une touche sucrée pendant votre séjour."],
-          url: "https://cedric-pernot.fr",
-        },
-        {
-          title: "Marché local du vendredi",
-          body: ["Le marché se tient dans le centre du bourg le vendredi."],
-        },
-      ],
-    },
-    {
-      title: "Où manger à Challes et aux alentours ?",
-      description:
-        "Quelques options pour déjeuner, dîner, commander à emporter ou découvrir une table plus champêtre.",
-      items: [
-        {
-          title: "Brasseries et cafés",
-          body: [
-            "Plusieurs brasseries et cafés sont ouverts en journée et en soirée dans le centre.",
-          ],
-        },
-        {
-          title: "Au Bistro de Julie",
-          body: ["Une adresse de centre-bourg pour un repas à Challes-les-Eaux."],
-          url: "https://au-bistro-de-julie.eatbu.com",
-          reservationRequired: "conseillee",
-        },
-        {
-          title: "Le Nok",
-          body: ["Restaurant à Challes-les-Eaux, avec réservation possible en ligne."],
-          url: "https://nok-challes-les-eaux.eatbu.com",
-          reservationRequired: "conseillee",
-        },
-        {
-          title: "La Scuderia",
-          body: ["Pizzeria pour manger sur place ou commander à emporter."],
-          url: "https://la-scuderia.fr",
-          reservationRequired: "conseillee",
-        },
-        {
-          title: "Sushiko",
-          body: ["Cuisine japonaise à emporter, sur commande."],
-          url: "https://sushiko73.fr",
-          reservationRequired: "conseillee",
-        },
-        {
-          title: "Restaurant d’application du lycée hôtelier",
-          body: [
-            "Ouvert certains jours de la semaine et fermé pendant les vacances scolaires. Les réservations se font via le site du lycée.",
-          ],
-          reservationRequired: "obligatoire",
-        },
-        {
-          title: "La Ramée",
-          body: [
-            "À 3 km, dans un décor champêtre, cette ferme-auberge propose des spécialités savoyardes.",
-          ],
-          url: "https://restaurant-lafermederamee.com",
-          reservationRequired: "obligatoire",
-        },
-      ],
-    },
-    {
-      title: "Que faire dans les environs selon le temps disponible ?",
-      description:
-        "Des idées simples à choisir selon votre timing, de la petite balade à la découverte plus large des massifs voisins.",
-      items: [
-        {
-          title: "1 à 2 heures",
-          category: "Découverte à pied",
-          body: [
-            {
-              type: "list",
-              items: [
-                "Faire le tour du plan d’eau de Challes, avec son parcours santé et son plateau sportif. Depuis le petit pont de bois, vous pourrez observer les avions et planeurs de l’aérodrome.",
-                "Suivre le sentier au pied du Mont Saint Michel en passant par l’arboretum du château des Comtes de Challes et le parc du château de Triviers.",
-                "Emprunter le parcours d’orientation patrimonial : facile, accessible en toutes saisons, 3,5 km et 13 balises pour découvrir l’environnement local.",
-              ],
-            },
-          ],
-          note: "Itinéraire et fiche descriptive disponibles sur place.",
-        },
-        {
-          title: "2 à 3 heures avec un moyen de transport",
-          category: "Petite escapade",
-          body: [
-            "Rejoindre le lac Saint André, à 8 km, avec une belle vue sur Belledonne.",
-            "Passer par Myans, son église et sa crypte dédiée à la Vierge Noire, puis traverser le vignoble d’Apremont avant de descendre vers ce lac au pied du Mont Granier.",
-            "Comptez environ une demi-heure pour en faire le tour, davantage si vous prenez le temps d’une halte sur les pontons de pêche.",
-          ],
-        },
-        {
-          title: "Séjour plus long",
-          category: "Balades et randonnées",
-          body: [
-            "Les massifs de la Chartreuse et des Bauges sont à quelques kilomètres de la chambre et offrent un large choix de balades et randonnées entre vignoble, forêts et alpages.",
-            "Pour vos séjours touristiques, nous tenons à votre disposition des fiches explicatives, des cartes et des guides.",
-          ],
-        },
-        {
-          title: "Navette Synchrobus",
-          category: "Accès aux stations",
-          body: [
-            "Navette Synchrobus vers les stations (Féclaz / Grand Revard) — arrêt à quelques mètres. On vous explique tout à la réservation.",
-          ],
-        },
-        {
-          title: "À faire en ville",
-          category: "Sur place",
-          body: [
-            "Casino, cinéma et médiathèque complètent les possibilités de sortie à Challes-les-Eaux, selon vos envies et la saison.",
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-const [introImage] = content.images;
-const accordions = content.accordions.slice(0, 3);
+const accordions = content.accordions;
 ---
 
-<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <GridOverlay />
-
-  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
-    <div
-      class="flex items-center px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
-    >
-      <span class="heading-3">{content.heroEyebrow}</span>
-    </div>
-
-    <div
-      class="max-w-[76ch] flex flex-col gap-[2.4rem] pb-[2.4rem] lg:col-span-2 lg:col-start-2 lg:row-start-2 lg:pb-0"
-    >
-      <div class="flex flex-col gap-[1.25rem]">
-        <h1 class="heading-2 text-balance">{content.heroTitle}</h1>
-        <div class="flex flex-col mt-[2.4rem] gap-[.8rem] bg-accentStone/25 p-[0.8rem]">
-          <RichTextBlockRenderer
-            block={content.proximityStatement}
-            class="text-balance text-ui-lg font-medium leading-snug"
-          />
-          {
-            content.proximityIntro.map((block) => (
-              <RichTextBlockRenderer
-                block={block}
-                class="text-balance text-ui-sm leading-relaxed"
-              />
-            ))
-          }
-          <RichTextBlockRenderer
-            block={content.proximityReassurance}
-            class="text-balance text-ui-sm font-medium leading-relaxed"
-          />
-        </div>
-      </div>
-
-      <RichTextBlockRenderer
-        block={content.editorialLead}
-        class="text-pretty text-ui-md leading-relaxed"
-      />
-    </div>
-
-    {
-      introImage ? (
-        <figure class="group/image relative aspect-[4/3] overflow-hidden bg-accentForest/20 lg:col-span-1 lg:col-start-5 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[30rem]">
-          <img
-            src={introImage.src}
-            alt={introImage.alt}
-            width="900"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-            class="size-full object-cover object-center"
-          />
-          {introImage.caption ? (
-            <figcaption class="absolute inset-x-0 bottom-0 bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
-              {introImage.caption}
-            </figcaption>
-          ) : null}
-        </figure>
-      ) : null
-    }
-  </div>
-</section>
-
-<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <GridOverlay />
-
-  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-start">
-    <div
-      class="flex items-center px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
-    >
-      <span class="heading-3">Aux alentours</span>
-    </div>
-
-    <div
-      class="flex max-w-[76ch] flex-col gap-[1.2rem] px-[0.4rem] pb-[2.4rem] lg:col-span-3 lg:col-start-2 lg:row-start-2 lg:pb-0"
-    >
-      <h2 class="heading-2 text-balance">{content.sectionHeading}</h2>
-      <RichTextBlockRenderer
-        block={content.sectionLead}
-        class="text-pretty mt-[1.2rem] text-ui-md leading-relaxed"
-      />
-    </div>
-
-    <div
-      class="flex flex-col px-[0.4rem] lg:col-span-4 lg:col-start-1 lg:row-start-4 lg:mt-[3.2rem]"
-    >
-      {
-        accordions.map((accordion, index) => (
-          <details
-            class:list={[
-              "group block border-b border-txtPri/15 first:border-t",
-              index === 0 ? "bg-accentStone/25" : "",
-              index === 1 ? "bg-accentForest/20" : "",
-              index === 2 ? "bg-accentBistre/25" : "",
-            ]}
-          >
-            <summary class="grid cursor-pointer list-none grid-cols-4 border-txtPri/10">
-              <span class="flex items-start justify-center p-[0.8rem] lg:p-[1.2rem]">
-                <span class="flex size-[1.8rem] items-center justify-center bg-surface text-txtPri">
-                  <Icon
-                    name="ion/chevron-down-sharp"
-                    class="size-[1.2rem] shrink-0 transition-transform duration-300 group-open:rotate-180"
-                    aria-hidden="true"
-                  />
-                </span>
-              </span>
-              <h3 class="col-span-3 px-[0.8rem] pb-[3.2rem] pt-[1.2rem] text-balance text-ui-lg font-semibold uppercase leading-snug lg:px-[1.2rem] lg:pb-[4.8rem] lg:pt-[2.4rem]">
-                {accordion.title}
-              </h3>
-            </summary>
-
-            <div class="grid grid-cols-4">
-              <div class="col-span-3 col-start-2 flex flex-col gap-[1.6rem] px-[0.8rem] pb-[1.2rem] lg:col-span-2 lg:col-start-2 lg:px-[1.2rem] lg:pb-[1.6rem]">
-                {accordion.description ? (
-                  <RichTextBlockRenderer
-                    block={accordion.description}
-                    class="max-w-[68ch] text-balance text-ui-sm leading-relaxed"
-                  />
-                ) : null}
-
-                <div class="flex flex-col gap-[1.2rem]">
-                  {accordion.items.map((item, index) => (
-                    <div class="grid grid-cols-[2rem_1fr] gap-x-[0.8rem] pt-[0.8rem]">
-                      <div class="text-[0.85rem] leading-none text-muted tabular-nums">
-                        {(index + 1).toString().padStart(2, "0")}
-                      </div>
-                      <article class="flex flex-col gap-[0.8rem]">
-                        <div class="flex flex-col gap-[0.4rem]">
-                          {item.category ? (
-                            <span class="text-[0.78rem] uppercase tracking-[0.08em] text-muted">
-                              {item.category}
-                            </span>
-                          ) : null}
-                          <div class="flex flex-wrap items-center gap-[0.6rem]">
-                            <h4 class="text-ui-lg font-medium leading-snug">{item.title}</h4>
-                            {item.reservationRequired ? (
-                              <span class="rounded-full border border-txtPri/10 px-[0.55rem] py-[0.18rem] text-[0.72rem] leading-none">
-                                {reservationLabels[item.reservationRequired]}
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-
-                        <div class="flex flex-col gap-[0.6rem]">
-                          {item.body.map((paragraph) => (
-                            <RichTextBlockRenderer
-                              block={paragraph}
-                              class="text-pretty text-ui-sm leading-relaxed"
-                            />
-                          ))}
-                        </div>
-
-                        {item.note ? (
-                          <RichTextBlockRenderer
-                            block={item.note}
-                            class="text-balance text-[0.85rem] leading-relaxed text-muted"
-                          />
-                        ) : null}
-
-                        {item.url ? (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="mt-auto inline-flex w-fit items-center gap-[0.35rem] text-ui-sm font-medium underline underline-offset-4"
-                          >
-                            Voir le site
-                            <Icon
-                              name="ion/arrow-forward-sharp"
-                              class="size-[0.9rem]"
-                              aria-hidden="true"
-                            />
-                          </a>
-                        ) : null}
-                      </article>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </details>
-        ))
-      }
-    </div>
-
-    <div
-      class="grid grid-cols-1 gap-grid px-[0.4rem] lg:col-span-1 lg:col-start-5 lg:row-start-4 lg:mt-[3.2rem]"
-    >
-      {
-        content.images.map((image) => (
-          <figure class="group/image relative aspect-[4/5] overflow-hidden bg-accentStone/25">
-            <img
-              src={image.src}
-              alt={image.alt}
-              width="900"
-              height="1200"
-              loading="lazy"
-              decoding="async"
-              class="size-full object-cover object-center"
-            />
-            {image.caption ? (
-              <figcaption class="absolute inset-x-0 bottom-0 bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
-                {image.caption}
-              </figcaption>
-            ) : null}
-          </figure>
-        ))
-      }
-    </div>
-  </div>
-</section>
+<SurroundingsPageIntro content={content} />
+<SurroundingsCardGrid accordions={accordions} images={content.images} reservationLabels={reservationLabels} />
 
 <style>
   details > summary::-webkit-details-marker {
     display: none;
   }
+
+  .surroundings-accordion__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 500ms ease-in-out;
+  }
+
+  .surroundings-accordion[open]:not(.is-closing) .surroundings-accordion__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .surroundings-accordion.is-closing .surroundings-accordion__panel {
+    grid-template-rows: 0fr;
+  }
+
+  .surroundings-accordion__panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .surroundings-accordion.is-closing .surroundings-accordion__chevron {
+    transform: rotate(0deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surroundings-accordion__panel {
+      transition: none;
+    }
+  }
 </style>
+
+<script>
+  const ACCORDION_CLOSE_MS = 300;
+
+  const initSurroundingsAccordions = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    document.querySelectorAll<HTMLDetailsElement>(".surroundings-accordion").forEach((details) => {
+      const summary = details.querySelector("summary");
+      if (!summary || summary.dataset.accordionBound === "true") return;
+
+      summary.dataset.accordionBound = "true";
+
+      summary.addEventListener("click", (event) => {
+        if (prefersReducedMotion || !details.open) return;
+
+        event.preventDefault();
+        details.classList.add("is-closing");
+
+        const panel = details.querySelector<HTMLElement>(".surroundings-accordion__panel");
+        let finished = false;
+
+        const finishClose = () => {
+          if (finished) return;
+          finished = true;
+          details.classList.remove("is-closing");
+          details.open = false;
+        };
+
+        if (!panel) {
+          finishClose();
+          return;
+        }
+
+        panel.addEventListener(
+          "transitionend",
+          (transitionEvent) => {
+            if (
+              transitionEvent.target === panel &&
+              transitionEvent.propertyName === "grid-template-rows"
+            ) {
+              finishClose();
+            }
+          },
+          { once: true },
+        );
+
+        window.setTimeout(finishClose, ACCORDION_CLOSE_MS);
+      });
+    });
+  };
+
+  initSurroundingsAccordions();
+</script>

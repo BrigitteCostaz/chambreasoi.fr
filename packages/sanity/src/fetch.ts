@@ -13,8 +13,8 @@
  */
 
 import type { SanityClient } from "@sanity/client";
-import { getSanityClient } from "./client.ts";
-import type { SanityPublicConfig } from "./config.ts";
+import { getSanityClient } from "./client";
+import type { SanityPublicConfig } from "./config";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,6 +27,12 @@ interface FetchOptions {
   useCdn?: boolean;
   /** Additional client config overrides. */
   clientOverrides?: Partial<SanityPublicConfig>;
+}
+
+interface CacheKeyContext {
+  query: string;
+  params?: FetchParams;
+  options?: FetchOptions;
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +53,8 @@ const MAX_RAW_KEY_LENGTH = 2048;
  * Produces the same string regardless of insertion order.
  */
 function stableStringify(value: unknown): string {
-  if (value === null || value === undefined) return "null";
+  if (value === null) return "null";
+  if (value === undefined) return "__undefined";
   if (typeof value !== "object") return JSON.stringify(value);
 
   if (Array.isArray(value)) {
@@ -72,11 +79,15 @@ function simpleHash(str: string): string {
 }
 
 /**
- * Build a deduplication key from query + params.
+ * Build a deduplication key from query + params + options.
  * Falls back to a hash if the raw key exceeds `MAX_RAW_KEY_LENGTH`.
  */
-function buildCacheKey(query: string, params?: FetchParams): string {
-  const raw = params ? `${query}::${stableStringify(params)}` : query;
+function buildCacheKey({ query, params, options }: CacheKeyContext): string {
+  const normalizedOptions = {
+    useCdn: options?.useCdn ?? false,
+    clientOverrides: options?.clientOverrides ?? {},
+  };
+  const raw = `${query}::${stableStringify(params ?? null)}::${stableStringify(normalizedOptions)}`;
 
   if (raw.length <= MAX_RAW_KEY_LENGTH) return raw;
 
@@ -110,7 +121,7 @@ export async function fetchSanity<T>(
   params?: FetchParams,
   options?: FetchOptions,
 ): Promise<T | null> {
-  const key = buildCacheKey(query, params);
+  const key = buildCacheKey({ query, params, options });
 
   // Return existing in-flight promise if one exists
   if (inFlight.has(key)) {
@@ -142,6 +153,11 @@ export async function fetchSanity<T>(
     inFlight.delete(key);
   }
 }
+
+export const __test = {
+  buildCacheKey,
+  stableStringify,
+};
 
 // ---------------------------------------------------------------------------
 // Dev utilities

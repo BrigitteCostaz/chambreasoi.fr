@@ -21,9 +21,9 @@
     "build:web": "pnpm --filter web-chambreasoi-fr build",
     "build:studio": "pnpm --filter chambreasoifr build",
     "deploy:web": "pnpm --filter web-chambreasoi-fr deploy",
-    "install:all": "pnpm install"
-  },
-  "devDependencies": {
-    "wrangler": "4.93.1"
+    "install:all": "pnpm install",
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "test": "pnpm --filter web-chambreasoi-fr test && pnpm --filter @chambreasoi/sanity test && pnpm --filter chambreasoifr typecheck",
+    "ci:verify": "pnpm test && pnpm typecheck"
   }
 }

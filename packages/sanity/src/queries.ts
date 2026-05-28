@@ -438,3 +438,103 @@ export const ROOM_PAGE_CONTENT_QUERY = /* groq */ `
     }
   }
 `
+
+// ---------------------------------------------------------------------------
+// surroundingsPageContent
+// ---------------------------------------------------------------------------
+
+export type SurroundingsReservationStatus = "obligatoire" | "conseillee"
+
+export interface SurroundingsLinkMarkDefResult {
+  _key: string
+  _type: string
+  href: string | null
+}
+
+export interface SurroundingsTextSpanResult {
+  _key: string
+  _type: string
+  text: string | null
+  marks: string[] | null
+}
+
+export interface SurroundingsTextBlockResult {
+  _key: string
+  _type: string
+  style: string | null
+  listItem?: string | null
+  level?: number | null
+  markDefs: SurroundingsLinkMarkDefResult[] | null
+  children: SurroundingsTextSpanResult[] | null
+}
+
+export interface SurroundingsAccordionItemResult {
+  _key: string
+  title: string | null
+  category: string | null
+  body: SurroundingsTextBlockResult[] | null
+  url: string | null
+  note: SurroundingsTextBlockResult[] | null
+  reservationRequired: SurroundingsReservationStatus | null
+}
+
+export interface SurroundingsAccordionResult {
+  _key: string
+  title: string | null
+  description: SurroundingsTextBlockResult[] | null
+  items: SurroundingsAccordionItemResult[] | null
+}
+
+export interface SurroundingsPageContentResult {
+  heroEyebrow: string | null
+  heroTitle: string | null
+  proximityStatement: SurroundingsTextBlockResult[] | null
+  proximityIntro: SurroundingsTextBlockResult[] | null
+  proximityReassurance: SurroundingsTextBlockResult[] | null
+  editorialLead: SurroundingsTextBlockResult[] | null
+  accordions: SurroundingsAccordionResult[] | null
+}
+
+const SURROUNDINGS_PORTABLE_TEXT_PROJECTION = /* groq */ `
+  _key,
+  _type,
+  style,
+  listItem,
+  level,
+  markDefs[]{
+    _key,
+    _type,
+    href
+  },
+  children[]{
+    _key,
+    _type,
+    text,
+    marks
+  }
+`
+
+export const SURROUNDINGS_PAGE_CONTENT_QUERY = /* groq */ `
+  *[_type == "surroundingsPageContent"][0]{
+    heroEyebrow,
+    heroTitle,
+    proximityStatement[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    proximityIntro[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    proximityReassurance[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    editorialLead[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    accordions[]{
+      _key,
+      title,
+      description[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+      items[]{
+        _key,
+        title,
+        category,
+        body[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+        url,
+        note[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+        reservationRequired
+      }
+    }
+  }
+`

@@ -3,42 +3,29 @@ import { Image } from "astro:assets";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import {
-  buildSanityDprSrcSet,
-  buildSanityImageUrl,
-  getRoomPageContent,
-  type RoomPageAccent,
-  type RoomPageCardResult,
-  type RoomPageImageResult,
-  type RoomPageSectionResult,
-} from "@lib/sanity";
+  getGalleryImageDimensions,
+  getGalleryLayoutClasses,
+  getGallerySizes,
+} from "@lib/la-chambre/gallery-layout";
+import { getRoomPageContent, type RoomPageImageResult } from "@lib/sanity";
 import { resolveImage } from "@utils/imageUtils";
 import { Icon } from "astro-icon/components";
-
-type Accent = RoomPageAccent;
-type GalleryOrientation = "landscape" | "portrait";
-
-interface ContentCard {
-  _key?: string;
-  title: string;
-  body: string;
-  accent: Accent;
-}
-
-interface GalleryImage {
-  image: ImageMetadata | null;
-  alt: string;
-  sanityImage?: RoomPageImageResult | null;
-  sanitySrc?: string | null;
-  sanitySrcSet?: string | null;
-}
+import { type GalleryImage, getSection } from "../data/adapters/la-chambre";
+import {
+  accentClasses,
+  defaultPrivateCards,
+  defaultServiceCards,
+  defaultSharedCards,
+  leftCardPositions,
+  mobileInterleavedCardOrdersNoHero,
+  mobileInterleavedCardOrdersWithHero,
+  mobileInterleavedGalleryOrdersNoHero,
+  mobileInterleavedGalleryOrdersWithHero,
+  rightCardPositions,
+} from "../data/fallback/la-chambre";
 
 const roomPageContent = await getRoomPageContent();
 
-const accentClasses: Record<Accent, string> = {
-  stone: "bg-accentStone/25",
-  forest: "bg-accentForest/20",
-  bistre: "bg-accentBistre/25",
-};
 const serviceFeatureImage = null;
 // later, when needed:
 // const serviceFeatureImage = room03Image;
@@ -53,263 +40,9 @@ const cuisineImage = resolveImage("@images/chambreasoi-cuisine.png");
 const gardenImage01 = resolveImage("@images/chambreasoi-garden-01.png");
 const gardenImage02 = resolveImage("@images/chambreasoi-garden-02.png");
 const gardenImage03 = resolveImage("@images/chambreasoi-garden-03.png");
-const defaultPrivateCards: ContentCard[] = [
-  {
-    title: "La chambre",
-    body: "Une chambre équipée d'un lit double avec draps et couette, d'un chauffage individuel, du wifi, d'un dressing ainsi que d'un petit bureau pour travailler ou vous installer confortablement.",
-    accent: "stone",
-  },
-  {
-    title: "La terrasse",
-    body: "Depuis votre chambre, vous accédez directement à la terrasse, idéale pour savourer vos petits-déjeuners ou profiter du soleil en toute tranquillité lorsque le temps le permet.",
-    accent: "forest",
-  },
-  {
-    title: "La salle de bain",
-    body: "Vous disposez également d'une salle de bain privative avec douche ainsi que du linge de toilette fourni pour votre confort.",
-    accent: "bistre",
-  },
-];
-
-const defaultSharedCards: ContentCard[] = [
-  {
-    title: "La cuisine équipée",
-    body: "La partie cuisine, accessible de 18h à 20h30, comprend un réfrigérateur, une bouilloire, des plaques chauffantes et un micro-ondes pour chauffer ou réchauffer vos plats.",
-    accent: "stone",
-  },
-  {
-    title: "La salle à manger",
-    body: "Un espace salle à manger est prévu pour prendre vos petits-déjeuners ou vos repas sur place dans un cadre convivial.",
-    accent: "forest",
-  },
-  {
-    title: "Le salon",
-    body: "Un coin salon avec téléviseur est également à votre disposition pour vos moments de détente.",
-    accent: "bistre",
-  },
-];
-
-const defaultServiceCards: ContentCard[] = [
-  {
-    title: "Chauffage individuel",
-    body: "La chambre est équipée d'un chauffage individuel pour un confort optimal en toute saison.",
-    accent: "forest",
-  },
-  {
-    title: "Parking et local vélo sécurisé",
-    body: "Un parking pour voiture ou moto est disponible devant la maison, ainsi qu'un abri sécurisé pouvant accueillir jusqu'à deux vélos.",
-    accent: "bistre",
-  },
-  {
-    title: "Connexion wifi",
-    body: "Une connexion wifi est disponible pour rester connecté pendant votre séjour.",
-    accent: "stone",
-  },
-];
-
-const rightCardPositions = [
-  "lg:col-start-3 lg:row-start-3",
-  "lg:col-start-5 lg:row-start-3",
-  "lg:col-start-4 lg:row-start-3",
-] as const;
-
-const leftCardPositions = [
-  "lg:col-start-1 lg:row-start-3",
-  "lg:col-start-2 lg:row-start-3",
-  "lg:col-start-3 lg:row-start-3",
-] as const;
-
-const mobileInterleavedCardOrdersWithHero = [
-  "max-lg:order-4 lg:order-none",
-  "max-lg:order-6 lg:order-none",
-  "max-lg:order-8 lg:order-none",
-] as const;
-const mobileInterleavedGalleryOrdersWithHero = [
-  "max-lg:order-5 lg:order-none",
-  "max-lg:order-7 lg:order-none",
-  "max-lg:order-9 lg:order-none",
-] as const;
-const mobileInterleavedCardOrdersNoHero = [
-  "max-lg:order-3 lg:order-none",
-  "max-lg:order-5 lg:order-none",
-  "max-lg:order-7 lg:order-none",
-] as const;
-const mobileInterleavedGalleryOrdersNoHero = [
-  "max-lg:order-4 lg:order-none",
-  "max-lg:order-6 lg:order-none",
-  "max-lg:order-8 lg:order-none",
-] as const;
-
-const galleryColumnStartClasses = {
-  1: "lg:col-start-1",
-  2: "lg:col-start-2",
-  3: "lg:col-start-3",
-  4: "lg:col-start-4",
-  5: "lg:col-start-5",
-} as const;
 
 const hasSanityAsset = (image: RoomPageImageResult | null | undefined) =>
   Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
-
-const getSanityDimensions = (image: RoomPageImageResult | null | undefined) =>
-  image?.asset?.metadata?.dimensions ?? null;
-
-const getGalleryOrientation = (image: GalleryImage | null): GalleryOrientation => {
-  const sanityDimensions = getSanityDimensions(image?.sanityImage);
-  const width = sanityDimensions?.width ?? image?.image?.width ?? null;
-  const height = sanityDimensions?.height ?? image?.image?.height ?? null;
-
-  return width && height && height > width ? "portrait" : "landscape";
-};
-
-const getGalleryColumnSpan = (image: GalleryImage | null) =>
-  getGalleryOrientation(image) === "portrait" ? 1 : 2;
-
-const getGalleryColumnStart = (images: GalleryImage[], index: number, startColumn = 1) =>
-  images
-    .slice(0, index)
-    .reduce(
-      (column, item) => column + (item.sanityImage || item.image ? getGalleryColumnSpan(item) : 0),
-      startColumn
-    );
-const getGalleryLayoutClasses = (images: GalleryImage[], index: number, startColumn = 1) => {
-  const image = images[index] ?? null;
-  const orientation = getGalleryOrientation(image);
-  const spanClass = orientation === "portrait" ? "lg:col-span-1" : "lg:col-span-2";
-  const aspectClass = orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]";
-  const columnStart = getGalleryColumnStart(
-    images,
-    index,
-    startColumn
-  ) as keyof typeof galleryColumnStartClasses;
-  return [
-    aspectClass,
-    spanClass,
-    galleryColumnStartClasses[columnStart] ?? galleryColumnStartClasses[1],
-  ];
-};
-const getGalleryImageDimensions = (image: GalleryImage | null) =>
-  getGalleryOrientation(image) === "portrait"
-    ? { width: 825, height: 1100 }
-    : { width: 1100, height: 825 };
-
-const getGallerySizes = (image: GalleryImage | null) =>
-  getGalleryOrientation(image) === "portrait"
-    ? "(min-width: 1024px) 20vw, 100vw"
-    : "(min-width: 1024px) 40vw, 100vw";
-
-const normalizeCards = (
-  sanityCards: RoomPageCardResult[] | null | undefined,
-  fallbackCards: ContentCard[]
-): ContentCard[] =>
-  sanityCards?.length
-    ? sanityCards.map((card, index) => {
-        const fallback =
-          fallbackCards[index] ?? fallbackCards[index % fallbackCards.length] ?? fallbackCards[0];
-        return {
-          _key: card._key,
-          title: card.title ?? fallback.title,
-          body: card.body ?? fallback.body,
-          accent: card.accent ?? fallback.accent,
-        };
-      })
-    : fallbackCards;
-
-const withSanityImageSources = (
-  image: GalleryImage,
-  width: number,
-  height: number
-): GalleryImage => {
-  const sanityImage = hasSanityAsset(image.sanityImage) ? image.sanityImage : null;
-
-  return {
-    ...image,
-    sanityImage,
-    sanitySrc: buildSanityImageUrl({
-      source: sanityImage,
-      width,
-      height,
-      quality: 80,
-      format: "webp",
-      fit: "crop",
-    }),
-    sanitySrcSet: buildSanityDprSrcSet({
-      source: sanityImage,
-      width,
-      height,
-      dprs: [1, 1.5, 2],
-      quality: 80,
-      format: "webp",
-      fit: "crop",
-    }),
-  };
-};
-
-const resolveFeatureImage = (
-  fallbackImage: ImageMetadata | null,
-  fallbackAlt: string,
-  sanityImage: RoomPageImageResult | null | undefined,
-  loading: "eager" | "lazy"
-) => ({
-  ...withSanityImageSources(
-    {
-      image: fallbackImage,
-      alt: sanityImage?.alt ?? fallbackAlt,
-      sanityImage,
-    },
-    1400,
-    1000
-  ),
-  loading,
-});
-
-const resolveGalleryImages = (
-  fallbackImages: GalleryImage[],
-  sanityImages: RoomPageImageResult[] | null | undefined
-) => {
-  const images = sanityImages?.length
-    ? sanityImages.map((sanityImage, index) => {
-        const fallback =
-          fallbackImages[index] ??
-          fallbackImages[index % fallbackImages.length] ??
-          fallbackImages[0];
-        return {
-          ...fallback,
-          alt: sanityImage.alt ?? fallback.alt,
-          sanityImage,
-        };
-      })
-    : fallbackImages;
-
-  return images.map((image) => {
-    const dimensions = getGalleryImageDimensions(image);
-    return withSanityImageSources(image, dimensions.width, dimensions.height);
-  });
-};
-
-const getSection = (
-  sanitySection: RoomPageSectionResult | null | undefined,
-  fallback: {
-    eyebrow: string;
-    heading: string;
-    introText?: string;
-    featureImage: GalleryImage;
-    cards: ContentCard[];
-    galleryImages: GalleryImage[];
-  }
-) => ({
-  eyebrow: sanitySection?.eyebrow ?? fallback.eyebrow,
-  heading: sanitySection?.heading ?? fallback.heading,
-  introText: sanitySection?.introText ?? fallback.introText ?? null,
-  featureImage: resolveFeatureImage(
-    fallback.featureImage.image,
-    fallback.featureImage.alt,
-    sanitySection?.featureImage,
-    fallback.eyebrow === "Un séjour tout confort" ? "eager" : "lazy"
-  ),
-  cards: normalizeCards(sanitySection?.cards, fallback.cards),
-  galleryImages: resolveGalleryImages(fallback.galleryImages, sanitySection?.galleryImages),
-});
 
 const defaultPrivateGalleryImages: GalleryImage[] = [
   {
@@ -419,7 +152,7 @@ const hasServiceFeatureImage = Boolean(
       <a
         href="#sejour-confort"
         aria-label="Aller à la section suivante"
-        class="absolute bottom-[1.6rem] left-1/2 z-20 -translate-x-1/2 rounded-full p-2 transition-transform hover:translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-txtPri lg:bottom-[2.4rem]"
+        class="absolute bottom-[1.6rem] left-1/2 z-20 -translate-x-1/2 rounded-full p-2 transition-transform hover:translate-y-1 focus-visible:outline focus-visible:outline-offset-4 focus-visible:outline-txtPri lg:bottom-[2.4rem]"
       >
         <Icon name="ion/chevron-down-sharp" class="text-txtPri size-[2.4rem]" />
       </a>

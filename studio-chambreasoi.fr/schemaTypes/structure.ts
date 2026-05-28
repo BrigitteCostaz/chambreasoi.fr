@@ -2,6 +2,18 @@ import { ComposeIcon, CreditCardIcon, HomeIcon, PinIcon } from '@sanity/icons'
 import type { StructureResolver } from 'sanity/structure'
 import { SINGLETON_TYPES } from './lib/singletons'
 
+const singletonItem = (
+  S: Parameters<StructureResolver>[0],
+  id: string,
+  title: string,
+  icon: typeof ComposeIcon = ComposeIcon,
+) =>
+  S.listItem()
+    .title(title)
+    .id(id)
+    .icon(icon)
+    .child(S.document().schemaType(id).documentId(id).title(title))
+
 export const structure: StructureResolver = (S) =>
   S.list()
     .title('Contenu')
@@ -41,6 +53,16 @@ export const structure: StructureResolver = (S) =>
         .id('availability')
         .icon(ComposeIcon)
         .child(S.documentTypeList('availability').title('Disponibilités par mois')),
+
+      S.divider(),
+
+      singletonItem(S, 'foldContent', 'Accueil - Fold', ComposeIcon),
+      singletonItem(S, 'headlineContent', 'Accueil - Headline', ComposeIcon),
+      singletonItem(S, 'locationPageContent', 'Page - Localisation', PinIcon),
+      singletonItem(S, 'locationSectionContent', 'Section - Localisation', PinIcon),
+      singletonItem(S, 'practicalInfoContent', 'Page - Infos pratiques', ComposeIcon),
+      singletonItem(S, 'roomPageContent', 'Page - La chambre', HomeIcon),
+      singletonItem(S, 'surroundingsPageContent', 'Page - Bons plans', ComposeIcon),
 
       S.divider(),
 

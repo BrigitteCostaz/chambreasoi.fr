@@ -4,6 +4,7 @@ import {
   type AccommodationSettingsResult,
 } from "@chambreasoi/sanity/queries";
 import type { AccomodationConfig } from "@config/types";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { isNonEmptyString } from "@utils/config-resolvers";
 
 const ACCOMMODATION_DEFAULTS: AccomodationConfig = {
@@ -30,6 +31,16 @@ const ACCOMMODATION_DEFAULTS: AccomodationConfig = {
 
 let accommodationCache: AccomodationConfig | null = null;
 
+function reportAccommodationFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
+  incrementFallbackCounter("accommodation");
+  console.warn("[fallback:accommodation]", {
+    criticality: "medium",
+    reason,
+    hasCachedValue: Boolean(accommodationCache),
+    details: details instanceof Error ? details.message : details,
+  });
+}
+
 export async function getAccommodation(): Promise<AccomodationConfig> {
   if (accommodationCache) return accommodationCache;
 
@@ -52,11 +63,13 @@ export async function getAccommodation(): Promise<AccomodationConfig> {
 
     if (!cms) {
       devLog("[accommodation] Using TS fallback (document missing or empty).");
+      reportAccommodationFallback("missing-document");
     }
 
     return accommodationCache;
   } catch (error) {
     devLog("[accommodation] Sanity fetch failed, using TS fallback.", error);
+    reportAccommodationFallback("fetch-error", error);
     accommodationCache = ACCOMMODATION_DEFAULTS;
     return ACCOMMODATION_DEFAULTS;
   }

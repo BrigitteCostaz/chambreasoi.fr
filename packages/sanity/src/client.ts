@@ -9,7 +9,7 @@
  */
 
 import { createClient, type SanityClient } from "@sanity/client";
-import { sanityConfig, type SanityPublicConfig } from "./config.ts";
+import { sanityConfig, type SanityPublicConfig } from "./config";
 
 // ---------------------------------------------------------------------------
 // Memoized client singleton

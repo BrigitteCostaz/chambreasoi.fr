@@ -4,11 +4,13 @@
  * ========================= */
 import { Image } from "astro:assets";
 import Button from "@components/button/Button.astro";
+import FoldDesktopBlock from "@components/fold/FoldDesktopBlock.astro";
 import { getOrgData } from "@config/organization";
 import { getPricing } from "@config/pricing";
 import { buildSanityDprSrcSet, buildSanityImageUrl, getFoldContent } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
 import { resolveImage } from "@utils/imageUtils";
+import { defaultFoldContent, defaultFoldImageAlt } from "../../data/fallback/fold";
 
 /* =========================
  * Types / Props
@@ -47,10 +49,7 @@ const {
 const coverWidth = 800;
 const coverHeight = 1200;
 
-const imageAlt =
-  altOverride ??
-  sanityImageSource?.alt ??
-  "Extérieur d'une maison contemporaine avec façade gris foncé et bardage bois, dotée d'une baie vitrée coulissante avec rideaux blancs donnant sur une terrasse en bois, encadrée par un olivier en pot et un petit tabouret avec des jonquilles en fleurs, avec une crête rocheuse visible en arrière-plan";
+const imageAlt = altOverride ?? sanityImageSource?.alt ?? defaultFoldImageAlt;
 
 const sanitySrc = buildSanityImageUrl({
   source: sanityImageSource,
@@ -104,16 +103,6 @@ const mobileColorsReversed = [...mobileColors].reverse();
 const leftColors = desktopColors.slice(0, 3);
 const leftColorsReversed = desktopColorsReversed.slice(2, 5).reverse();
 
-// RIGHT BLOCK
-const rightColors = desktopColors.slice(3, 5);
-const rightColorsReversed = desktopColorsReversed.slice(0, 2).reverse();
-
-/* =========================
- * Styling helpers
- * ========================= */
-const separatorClasses =
-  "after:content-[''] after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-px after:bg-txtMuted/30";
-
 /* =========================
  * Data fetching
  * ========================= */
@@ -132,13 +121,13 @@ const fold = await getFoldContent();
 // Fallback strings mirror the original hardcoded content
 // and are used whenever the Sanity document has not been created yet.
 const f = {
-  seoTitle: fold?.seoTitle ?? "Une chambre d'hôtes à Challes-les-Eaux en Savoie",
-  mosaicTile1Text: fold?.mosaicTile1Text ?? "Une chambre d'hôtes",
-  mosaicTile2Line1: fold?.mosaicTile2Line1 ?? "à Challes-les-Eaux",
-  mosaicTile2Line2: fold?.mosaicTile2Line2 ?? "en Savoie",
-  amenitiesLabel: fold?.amenitiesLabel ?? "avec",
-  amenities: fold?.amenities ?? ["un lit double", "une salle de bain privative"],
-  bookingNote: fold?.bookingNote ?? "réservations par téléphone uniquement",
+  seoTitle: fold?.seoTitle ?? defaultFoldContent.seoTitle,
+  mosaicTile1Text: fold?.mosaicTile1Text ?? defaultFoldContent.mosaicTile1Text,
+  mosaicTile2Line1: fold?.mosaicTile2Line1 ?? defaultFoldContent.mosaicTile2Line1,
+  mosaicTile2Line2: fold?.mosaicTile2Line2 ?? defaultFoldContent.mosaicTile2Line2,
+  amenitiesLabel: fold?.amenitiesLabel ?? defaultFoldContent.amenitiesLabel,
+  amenities: fold?.amenities ?? defaultFoldContent.amenities,
+  bookingNote: fold?.bookingNote ?? defaultFoldContent.bookingNote,
 };
 ---
 
@@ -238,222 +227,25 @@ const f = {
       </div>
     </div>
 
-    <!-- Desktop -->
-    <div class="hidden w-full flex-row gap-grid xl:flex xl:flex-1">
-      <!-- LEFT BLOCK -->
-      <div class="relative flex flex-1 flex-col gap-grid">
-        <!-- Row 1 -->
-        <div class="relative w-full">
-          <div class="pointer-events-none absolute inset-0">
-            <div class="grid h-full grid-cols-3 gap-grid">
-              {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
-            </div>
-          </div>
-
-          <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
-            {
-              squareCells.map((cell) => (
-                <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
-                  {cell.type === "heading" && (
-                    <span aria-hidden="true" class="heading-1">
-                      {f.mosaicTile1Text}
-                    </span>
-                  )}
-
-                  {cell.type === "availability" && (
-                    <div class="flex flex-col font-display justify-start  gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]">
-                      <p class="text-primary">à partir de {baseNightly1PersonEuroFR} la nuitée</p>
-
-                      <p class="text-muted tracking-wider">{f.bookingNote}</p>
-                    </div>
-                  )}
-                </div>
-              ))
-            }
-          </div>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="relative flex flex-1">
-          <div class="pointer-events-none absolute inset-0">
-            <div class="grid h-full grid-cols-3 gap-grid">
-              {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
-            </div>
-          </div>
-
-          <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
-            <div></div>
-
-            <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
-              <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
-              <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
-            </div>
-
-            <div
-              class="flex flex-col justify-start gap-3 p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
-            >
-              <ul class="list-ui-disc text-ui-lg text-primary">
-                <li class="pb-2">{f.amenitiesLabel}</li>
-                {f.amenities.map((item: string) => <li class="text-muted">{item}</li>)}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div class="absolute p-0.8rem inset-x-0 bottom-0.8rem flex justify-center z-10 xl:hidden">
-        <Button
-          class="inline-flex font-sans w-full items-center justify-center"
-          variant="primary"
-          size="sm"
-          href="/la-chambre"
-        >
-          Découvrir la chambre
-        </Button>
-      </div>
-    </div>
   </div>
 
-  <!-- Desktop -->
-  <div class="hidden w-full flex-row gap-grid xl:flex xl:flex-1">
-    <!-- LEFT BLOCK -->
-    <div class="relative flex flex-1 flex-col gap-grid">
-      <!-- Row 1 -->
-      <div class="relative w-full">
-        <div class="pointer-events-none absolute inset-0">
-          <div class="grid h-full grid-cols-3 gap-grid">
-            {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
-          </div>
-        </div>
-
-        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
-          {
-            squareCells.map((cell) => (
-              <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
-                {cell.type === "heading" && (
-                  <span aria-hidden="true" class="heading-1">
-                    {f.mosaicTile1Text}
-                  </span>
-                )}
-
-                {cell.type === "amenities" && (
-                  <ul class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] [list-style-type:disc] [list-style-position:inside]">
-                    <li class="pb-2">{f.amenitiesLabel}</li>
-                    {f.amenities.map((item: string) => (
-                      <li class="text-txtMuted">{item}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))
-          }
-        </div>
-      </div>
-
-      <!-- Row 2 -->
-      <div class="relative flex flex-1">
-        <div class="pointer-events-none absolute inset-0">
-          <div class="grid h-full grid-cols-3 gap-grid">
-            {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
-          </div>
-        </div>
-
-        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
-          <div></div>
-
-          <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
-            <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
-            <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
-          </div>
-
-          <div
-            class="flex flex-col justify-end font-display font-medium p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
-          >
-            <div>
-              <p class="text-primary pb-2">
-                à partir de {baseNightly1PersonEuroFR} la nuitée
-              </p>
-
-              <p class="text-muted uppercase tracking-wider pb-6">
-                {f.bookingNote}
-              </p>
-            </div>
-
-            <Button
-              variant="accent"
-              size="sm"
-              icon="ion/call-sharp"
-              href={phoneLink}
-              class="inline-flex font-sans font-400 w-full items-center justify-center"
-            >
-              {phoneDisplay}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT BLOCK -->
-    <div class="relative flex flex-col" style="flex: 0 0 calc(40% - 0.2rem);">
-      <div class="fold-image-container">
-        {
-          shouldRenderSanityImage ? (
-            <img
-              src={sanitySrc}
-              srcset={sanitySrcSet ?? undefined}
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              alt={imageAlt}
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-              class="fold-image"
-            />
-          ) : shouldRenderFallback ? (
-            <Image
-              src={fallbackImage!}
-              alt={imageAlt}
-              width={coverWidth}
-              height={coverHeight}
-              densities={[1, 1.5, 2]}
-              loading="eager"
-              decoding="async"
-              class="fold-image"
-            />
-          ) : null
-        }
-      </div>
-
-      <div
-        class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1 lg:translate-x-0"
-      >
-      </div>
-
-      <div class="relative w-full border-b-[0.4rem] border-bgBase box-content">
-        <div class="relative z-10 grid w-full grid-cols-2 gap-grid">
-          <div class="aspect-square"></div>
-          <div class="aspect-square"></div>
-        </div>
-      </div>
-
-      <div class="relative flex-1">
-        <div class="relative z-10 grid w-full h-full grid-cols-2">
-          <div></div>
-
-          <div class="flex items-end p-.8rem">
-            <Button
-              class="inline-flex font-sans w-full items-center justify-center"
-              variant="primary"
-              size="sm"
-              href="/la-chambre"
-            >
-              Découvrir la chambre
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <FoldDesktopBlock
+    leftColors={leftColors}
+    leftColorsReversed={leftColorsReversed}
+    squareCells={squareCells}
+    f={f}
+    baseNightly1PersonEuroFR={baseNightly1PersonEuroFR}
+    phoneLink={phoneLink}
+    phoneDisplay={phoneDisplay}
+    shouldRenderSanityImage={shouldRenderSanityImage}
+    sanitySrc={sanitySrc}
+    sanitySrcSet={sanitySrcSet}
+    shouldRenderFallback={shouldRenderFallback}
+    fallbackImage={fallbackImage}
+    imageAlt={imageAlt}
+    coverWidth={coverWidth}
+    coverHeight={coverHeight}
+  />
 </div>
 
 <style>

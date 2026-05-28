@@ -5,6 +5,7 @@ import {locationPageContent} from './documents/locationPageContent'
 import {locationSectionContent} from './documents/locationSectionContent'
 import {practicalInfoContent} from './documents/practicalInfoContent'
 import {roomPageContent} from './documents/roomPageContent'
+import {surroundingsPageContent} from './documents/surroundingsPageContent'
 import {accommodationSettings} from './singletons/accommodationSettings'
 import {organizationSettings} from './singletons/organizationSettings'
 import {pricingSettings} from './singletons/pricingSettings'
@@ -17,6 +18,7 @@ export const schemaTypes = [
   locationSectionContent,
   practicalInfoContent,
   roomPageContent,
+  surroundingsPageContent,
   organizationSettings,
   pricingSettings,
   accommodationSettings,

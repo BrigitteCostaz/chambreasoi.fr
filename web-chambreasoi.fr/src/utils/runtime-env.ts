@@ -24,12 +24,11 @@ export type RuntimeEnv = Record<string, unknown>;
 /**
  * Read Cloudflare bindings via a Cloudflare-only module.
  *
- * This expects you to create:
- *   `src/utils/cf-env.ts`
- *
- * with something like:
- *   import { env } from "cloudflare:workers";
- *   export function getCloudflareEnv() { return env; }
+ * Contract:
+ * - Loads `src/utils/cf-env.ts` via dynamic import.
+ * - Expects that module to export `getCloudflareEnv(): object`.
+ * - If the import fails (Node runtime) or export is missing, this returns `undefined`
+ *   and callers fall back to `process.env`.
  */
 async function tryGetCloudflareEnv(): Promise<RuntimeEnv | undefined> {
   try {

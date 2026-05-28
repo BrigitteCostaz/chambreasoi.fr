@@ -8,6 +8,7 @@ import sanity from "@sanity/astro";
 import { defineConfig } from "astro/config";
 import icon from "astro-icon";
 import unocss from "unocss/astro";
+import { appAliases } from "./config/aliases.mjs";
 
 /**
  * Load `web-chambreasoi.fr/.env` into process.env for config-time evaluation.
@@ -165,23 +166,13 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        // Mirror tsconfig paths for runtime resolution (config/ lives outside src/)
-        "@components": new URL("./src/components", import.meta.url).pathname,
-        "@components/": new URL("./src/components/", import.meta.url).pathname,
-        "@config": new URL("./config", import.meta.url).pathname,
-        "@config/": new URL("./config/", import.meta.url).pathname,
-        "@icons": new URL("./src/icons", import.meta.url).pathname,
-        "@icons/": new URL("./src/icons/", import.meta.url).pathname,
-        "@images": new URL("./src/assets/images", import.meta.url).pathname,
-        "@images/": new URL("./src/assets/images/", import.meta.url).pathname,
-        "@layouts": new URL("./src/layouts", import.meta.url).pathname,
-        "@layouts/": new URL("./src/layouts/", import.meta.url).pathname,
-        "@lib": new URL("./src/lib", import.meta.url).pathname,
-        "@lib/": new URL("./src/lib", import.meta.url).pathname,
-        "@styles": new URL("./src/styles", import.meta.url).pathname,
-        "@styles/": new URL("./src/styles/", import.meta.url).pathname,
-        "@utils": new URL("./src/utils", import.meta.url).pathname,
-        "@utils/": new URL("./src/utils/", import.meta.url).pathname,
+        ...Object.fromEntries(
+          Object.entries(appAliases).flatMap(([alias, relativePath]) => [
+            [alias, new URL(relativePath, import.meta.url).pathname],
+            [`${alias}/`, new URL(`${relativePath}/`, import.meta.url).pathname,
+            ],
+          ])
+        ),
 
         ...(process.env.NODE_ENV === "production"
           ? { "react-dom/server": "react-dom/server.edge" }

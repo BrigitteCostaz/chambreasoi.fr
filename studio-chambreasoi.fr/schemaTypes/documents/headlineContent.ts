@@ -32,7 +32,7 @@ export const headlineContent = defineType({
 
   preview: {
     select: {
-      title: 'headline',
+      title: 'headLineText',
     },
     prepare({ title }) {
       return {

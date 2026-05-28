@@ -66,6 +66,8 @@ import {
   type PracticalInfoContentResult,
   ROOM_PAGE_CONTENT_QUERY,
   type RoomPageContentResult,
+  SURROUNDINGS_PAGE_CONTENT_QUERY,
+  type SurroundingsPageContentResult,
 } from "@chambreasoi/sanity/queries";
 
 /**
@@ -108,4 +110,11 @@ export async function getPracticalInfoContent(): Promise<PracticalInfoContentRes
  */
 export async function getRoomPageContent(): Promise<RoomPageContentResult | null> {
   return fetchSanity<RoomPageContentResult>(ROOM_PAGE_CONTENT_QUERY);
+}
+
+/**
+ * Fetch the first surroundingsPageContent document from Sanity.
+ */
+export async function getSurroundingsPageContent(): Promise<SurroundingsPageContentResult | null> {
+  return fetchSanity<SurroundingsPageContentResult>(SURROUNDINGS_PAGE_CONTENT_QUERY);
 }

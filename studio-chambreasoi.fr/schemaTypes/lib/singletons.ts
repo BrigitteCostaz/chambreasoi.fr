@@ -8,6 +8,13 @@ export const SINGLETON_TYPES = new Set([
   'organizationSettings',
   'pricingSettings',
   'accommodationSettings',
+  'foldContent',
+  'headlineContent',
+  'locationPageContent',
+  'locationSectionContent',
+  'practicalInfoContent',
+  'roomPageContent',
+  'surroundingsPageContent',
 ])
 
 export const singletonDocumentActions: DocumentActionsResolver = (prev, context) => {

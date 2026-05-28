@@ -1,88 +1,26 @@
 ---
 import { Image } from "astro:assets";
 import GridOverlay from "@components/layout/GridOverlay.astro";
-import { getPricing } from "@config/pricing";
-import {
-  buildSanityDprSrcSet,
-  buildSanityImageUrl,
-  getPracticalInfoContent,
-  type PracticalInfoAccent,
-  type PracticalInfoContentResult,
-  type PracticalInfoTextBlockResult,
-} from "@lib/sanity";
-import { formatEuroFR } from "@utils/currency";
-import { resolveImage } from "@utils/imageUtils";
+import { getPracticalInfoContent } from "@lib/sanity";
+import { getPracticalInfoRenderModel } from "../../data/adapters/practical-info";
 
-const pricing = await getPricing();
 const practicalInfo = await getPracticalInfoContent();
-
-const fallbackKitchenImage = resolveImage("@images/chambreasoi-home-01.png");
-const fallbackBookingImage = resolveImage("@images/chambreasoi-trinkets.png");
-const tariffColClasses = [
-  "lg:row-start-3 lg:col-start-2",
-  "lg:row-start-4 lg:col-start-2",
-  "lg:row-start-5 lg:col-start-2",
-  "lg:row-start-6 lg:col-start-2",
-] as const;
-const tariffAccentClasses = [
-  "bg-accentStone/25",
-  "bg-accentForest/20",
-  "bg-accentBistre/25",
-  "bg-accentStone/25",
-] as const;
-const accentClasses: Record<PracticalInfoAccent, string> = {
-  stone: "bg-accentStone/25",
-  forest: "bg-accentForest/20",
-  bistre: "bg-accentBistre/25",
-};
-const bookingCardPositionClasses = [
-  "lg:col-start-3 lg:row-start-3",
-  "lg:col-start-4 lg:row-start-3",
-  "lg:col-start-5 lg:row-start-3",
-  "lg:col-start-3 lg:row-start-4",
-  "lg:col-start-4 lg:row-start-4",
-  "lg:col-start-5 lg:row-start-4",
-] as const;
-const serviceDesktopPositionClassesByCount = {
-  1: ["lg:col-start-5 lg:row-start-3"],
-  2: ["lg:col-start-4 lg:row-start-3", "lg:col-start-5 lg:row-start-3"],
-  3: [
-    "lg:col-start-3 lg:row-start-3",
-    "lg:col-start-4 lg:row-start-3",
-    "lg:col-start-5 lg:row-start-3",
-  ],
-  4: [
-    "lg:col-start-2 lg:row-start-3",
-    "lg:col-start-3 lg:row-start-3",
-    "lg:col-start-4 lg:row-start-3",
-    "lg:col-start-5 lg:row-start-3",
-  ],
-  5: [
-    "lg:col-start-1 lg:row-start-3",
-    "lg:col-start-2 lg:row-start-3",
-    "lg:col-start-3 lg:row-start-3",
-    "lg:col-start-4 lg:row-start-3",
-    "lg:col-start-5 lg:row-start-3",
-  ],
-} as const;
-
-type SanityImageSource = {
-  asset?: { _ref?: string; _id?: string; url?: string } | null;
-  alt?: string | null;
-};
-
-type ServiceImage = {
-  alt: string;
-  placeholderSrc: string;
-  sanityImage?: SanityImageSource | null;
-  fallbackImagePath?: string;
-};
-
-const serviceImageWidth = 1400;
-const serviceImageHeight = 1000;
-
-type BookingCard = NonNullable<PracticalInfoContentResult["bookingCards"]>[number];
-type ServiceCard = NonNullable<PracticalInfoContentResult["serviceCards"]>[number];
+const renderModel = getPracticalInfoRenderModel(practicalInfo);
+const {
+  p,
+  accentClasses,
+  bookingCardPositionClasses,
+  bookingSanitySrc,
+  bookingSanitySrcSet,
+  fallbackBookingImage,
+  resolvedServiceImages,
+  displayedServiceCards,
+  serviceDesktopPositionClasses,
+  mobileServiceItemCount,
+  getServiceImage,
+  serviceImageWidth,
+  serviceImageHeight,
+} = renderModel;
 
 const slugifyId = (value: string): string =>
   value
@@ -92,289 +30,8 @@ const slugifyId = (value: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const getServiceCardId = (card: ServiceCard, index: number): string =>
+const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: number): string =>
   slugifyId(card.category ?? card.title ?? `service-card-${index + 1}`);
-
-const textBlock = (
-  key: string,
-  children: Array<string | { text: string; strong: true }>
-): PracticalInfoTextBlockResult => ({
-  _key: key,
-  _type: "block",
-  style: "normal",
-  children: children.map((child, index) => {
-    const isStrong = typeof child !== "string";
-    return {
-      _key: `${key}-${index}`,
-      _type: "span",
-      text: isStrong ? child.text : child,
-      marks: isStrong ? ["strong"] : [],
-    };
-  }),
-});
-
-const hasSanityAsset = (image: SanityImageSource | null | undefined) =>
-  Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
-
-const defaultBookingCards: BookingCard[] = [
-  {
-    _key: "arrival",
-    title: "Arrivée",
-    body: [
-      textBlock("arrival-body", [
-        "Votre chambre sera disponible à partir de ",
-        { text: "15h", strong: true },
-        " le jour de votre arrivée. Vous pouvez toutefois déposer vos bagages en dehors de ces horaires, sur demande lors de la réservation.",
-      ]),
-    ],
-    secondaryText: null,
-    accent: "stone",
-  },
-  {
-    _key: "departure",
-    title: "Départ",
-    body: [
-      textBlock("departure-body", [
-        "Le jour de votre départ, merci de libérer votre chambre avant ",
-        { text: "11h", strong: true },
-        ".",
-      ]),
-    ],
-    secondaryText: null,
-    accent: "forest",
-  },
-  {
-    _key: "booking",
-    title: "Réservation",
-    body: [
-      textBlock("booking-body", [
-        "Les réservations se font ",
-        { text: "uniquement par téléphone", strong: true },
-        ".",
-      ]),
-    ],
-    secondaryText: null,
-    accent: "bistre",
-  },
-  {
-    _key: "payment",
-    title: "Paiement",
-    body: [
-      textBlock("payment-body", [
-        "Le paiement s'effectue à l'arrivée par chèque, carte bancaire ou en espèces.",
-      ]),
-    ],
-    secondaryText:
-      "Vous trouverez 2 distributeurs automatiques dans le centre de Challes-les-Eaux.",
-    accent: "stone",
-  },
-  {
-    _key: "pets",
-    title: "Animaux",
-    body: [
-      textBlock("pets-body", [
-        "Les animaux de compagnie ne sont pas acceptés dans l'établissement.",
-      ]),
-    ],
-    secondaryText: null,
-    accent: "forest",
-  },
-  {
-    _key: "smoking",
-    title: "Tabac",
-    body: [
-      textBlock("smoking-body", [
-        "L'établissement est entièrement non-fumeur. Il est interdit de fumer dans les chambres et les espaces communs. Un espace fumeur est disponible à l'extérieur.",
-      ]),
-    ],
-    secondaryText: null,
-    accent: "bistre",
-  },
-];
-
-const defaultServiceCards: ServiceCard[] = [
-  {
-    _key: "health",
-    category: "Santé",
-    title: "Pour la clinique Médipôle",
-    body: [
-      textBlock("health-body", [
-        "Pour les personnes séjournant chez nous dans le cadre d'un rendez-vous ou d'une visite à la clinique Médipôle, nous proposons un ",
-        { text: "accompagnement en voiture gratuit", strong: true },
-        ", à convenir lors de votre réservation par téléphone.",
-      ]),
-    ],
-    accent: "stone",
-  },
-  {
-    _key: "children",
-    category: "Enfants",
-    title: "Parents solos",
-    body: [
-      textBlock("children-body", [
-        "Nous proposons ",
-        { text: "2 couchages pour enfants (3–10 ans)", strong: true },
-        " dans une chambre attenante, au tarif de ",
-        { text: "10 € par enfant", strong: true },
-        ". À demander au moment de la réservation.",
-      ]),
-    ],
-    accent: "forest",
-  },
-  {
-    _key: "discovery",
-    category: "Découverte",
-    title: "Séjours touristiques",
-    body: [
-      textBlock("discovery-body", [
-        "Vous disposerez de ",
-        { text: "carnets et guides de randonnées", strong: true },
-        " de la région, ainsi que de conseils sur les sites à consulter pour préparer vos promenades autour de Challes-les-Eaux.",
-      ]),
-    ],
-    accent: "bistre",
-  },
-];
-
-const fallbackServiceImages: ServiceImage[] = [
-  {
-    alt: "Extérieur d'une maison contemporaine de plain-pied avec façade gris foncé, bardage bois et grande terrasse en bois, dotée de larges baies vitrées coulissantes donnant sur la terrasse, avec un pot de fleurs sur un petit tabouret et un aperçu des espaces de vie intérieurs",
-    placeholderSrc: "@images/chambreasoi-service-detail-02.png",
-    fallbackImagePath: "@images/chambreasoi-service-detail-02.png",
-  },
-  {
-    alt: "Fauteuil de style Art Déco avec tissu à motifs géométriques et coussin jaune surmonté d'un chapeau marron, à côté d'une table basse en bois brut avec des livres empilés et une petite plante en pot près d'une fenêtre",
-    placeholderSrc: "@images/chambreasoi-service-detail-04.png",
-    fallbackImagePath: "@images/chambreasoi-service-detail-04.png",
-  },
-  {
-    alt: "Bureau en bois clair avec un tiroir blanc et une chaise en bois à assise paillée, placés contre un mur blanc avec une œuvre encadrée au-dessus, vus depuis un lit blanc au premier plan",
-    placeholderSrc: "@images/chambreasoi-service-detail-05.png",
-    fallbackImagePath: "@images/chambreasoi-service-detail-05.png",
-  },
-  {
-    alt: "Table à manger sombre dressée avec deux verres à vin vides, des assiettes blanches empilées et des couverts, un arrosoir vert et des branches nues bourgeonnantes dans un vase, avec une œuvre d'art abstraite encadrée aux couleurs vives au mur et un poêle à bois noir en arrière-plan",
-    placeholderSrc: "@images/chambreasoi-service-detail-03.png",
-    fallbackImagePath: "@images/chambreasoi-service-detail-03.png",
-  },
-  {
-    alt: "Gros plan sur un lit fait avec draps blancs à côté d'un rideau transparent, avec la lumière du soleil projetant des ombres diagonales sur un parquet en bois",
-    placeholderSrc: "@images/chambreasoi-service-detail-01.png",
-    fallbackImagePath: "@images/chambreasoi-service-detail-01.png",
-  },
-];
-
-const p = {
-  eyebrow: practicalInfo?.eyebrow ?? "Infos pratiques",
-  tariffsHeading: practicalInfo?.tariffsHeading ?? "Tarifs pour une nuitée",
-  kitchenImage: practicalInfo?.kitchenImage ?? null,
-  kitchenImageAlt: practicalInfo?.kitchenImage?.alt ?? "Cuisine de la maison d'hôtes",
-  bookingHeading: practicalInfo?.bookingHeading ?? "Modalités de réservation",
-  bookingEyebrow: practicalInfo?.bookingEyebrow ?? null,
-  bookingImage: practicalInfo?.bookingImage ?? null,
-  bookingImageAlt: practicalInfo?.bookingImage?.alt ?? "Détail de la décoration et des équipements",
-  bookingCards: practicalInfo?.bookingCards?.length
-    ? practicalInfo.bookingCards
-    : defaultBookingCards,
-  servicesEyebrow: practicalInfo?.servicesEyebrow ?? "Services",
-  servicesHeading: practicalInfo?.servicesHeading ?? "Accompagnements",
-  serviceCards: practicalInfo?.serviceCards?.length
-    ? practicalInfo.serviceCards
-    : defaultServiceCards,
-};
-
-const kitchenSanitySource = hasSanityAsset(p.kitchenImage) ? p.kitchenImage : null;
-const kitchenSanitySrc = buildSanityImageUrl({
-  source: kitchenSanitySource,
-  width: 1400,
-  height: 914,
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-const kitchenSanitySrcSet = buildSanityDprSrcSet({
-  source: kitchenSanitySource,
-  width: 1400,
-  height: 914,
-  dprs: [1, 1.5, 2],
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const bookingSanitySource = hasSanityAsset(p.bookingImage) ? p.bookingImage : null;
-const bookingSanitySrc = buildSanityImageUrl({
-  source: bookingSanitySource,
-  width: 900,
-  height: 1200,
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-const bookingSanitySrcSet = buildSanityDprSrcSet({
-  source: bookingSanitySource,
-  width: 900,
-  height: 1200,
-  dprs: [1, 1.5, 2],
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const serviceImages: ServiceImage[] = practicalInfo?.serviceImages?.length
-  ? practicalInfo.serviceImages.map((image, index) => {
-      const fallback =
-        fallbackServiceImages[index] ?? fallbackServiceImages[index % fallbackServiceImages.length];
-      return {
-        ...fallback,
-        alt: image.alt ?? fallback.alt,
-        sanityImage: hasSanityAsset(image) ? image : null,
-      };
-    })
-  : fallbackServiceImages;
-
-const resolvedServiceImages = serviceImages.map((image) => {
-  const sanityImage = hasSanityAsset(image.sanityImage) ? image.sanityImage : null;
-  const sanitySrc = buildSanityImageUrl({
-    source: sanityImage,
-    width: serviceImageWidth,
-    height: serviceImageHeight,
-    quality: 80,
-    format: "webp",
-    fit: "crop",
-  });
-
-  const sanitySrcSet = buildSanityDprSrcSet({
-    source: sanityImage,
-    width: serviceImageWidth,
-    height: serviceImageHeight,
-    dprs: [1, 1.5, 2],
-    quality: 80,
-    format: "webp",
-    fit: "crop",
-  });
-
-  const fallbackImage = image.fallbackImagePath ? resolveImage(image.fallbackImagePath) : null;
-
-  return {
-    ...image,
-    sanitySrc,
-    sanitySrcSet,
-    fallbackImage,
-  };
-});
-
-const displayedServiceCards = p.serviceCards.slice(0, 5);
-const serviceDesktopPositionClasses =
-  serviceDesktopPositionClassesByCount[
-    displayedServiceCards.length as keyof typeof serviceDesktopPositionClassesByCount
-  ] ?? serviceDesktopPositionClassesByCount[5];
-const mobileServiceItemCount = Math.max(
-  displayedServiceCards.length,
-  Math.min(resolvedServiceImages.length, 4)
-);
-const getServiceImage = (index: number) =>
-  resolvedServiceImages[index] ?? resolvedServiceImages[index % resolvedServiceImages.length];
 ---
 
 <section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
@@ -401,68 +58,87 @@ const getServiceImage = (index: number) =>
         </div>
       </div>
 
-      {
-        kitchenSanitySrc ? (
-          <figure
-            data-reveal
-            data-reveal-delay="100"
-            class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
-          >
-            <img
-              src={kitchenSanitySrc}
-              srcset={kitchenSanitySrcSet ?? undefined}
-              alt={p.kitchenImageAlt}
-              width={1400}
-              height={1050}
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              loading="lazy"
-              decoding="async"
-              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-            />
-          </figure>
-        ) : fallbackKitchenImage ? (
-          <figure
-            data-reveal
-            data-reveal-delay="100"
-            class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
-          >
-            <Image
-              src={fallbackKitchenImage}
-              alt={p.kitchenImageAlt}
-              width={1400}
-              height={1050}
-              sizes="(min-width: 1024px) 60vw, 100vw"
-              loading="lazy"
-              decoding="async"
-              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-            />
-          </figure>
-        ) : null
-      }
+      <figure
+        data-reveal
+        data-reveal-delay="100"
+        class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
+      >
+        <img
+          src="https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format"
+          srcset="https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format 1x, https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format&dpr=1.5 1.5x, https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format&dpr=2 2x"
+          alt="Vue d'ensemble d'une maison contemporaine de plain-pied avec bardage bois sombre et façade grise, dans un jardin paysagé avec arbustes et arbres dénudés, avec une impressionnante falaise calcaire émergeant de nuages bas en arrière-plan"
+          width={1400}
+          height={1050}
+          sizes="(min-width: 1024px) 60vw, 100vw"
+          loading="lazy"
+          decoding="async"
+          class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+        />
+      </figure>
 
-      {
-        pricing.publicRates.map((rate, i) => (
-          <article
-            data-reveal
-            data-reveal-delay={String(120 + i * 40)}
-            class:list={[
-              "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem]",
-              tariffColClasses[i] ?? tariffColClasses[0],
-              tariffAccentClasses[i] ?? tariffAccentClasses[0],
-            ]}
-          >
-            <div class="flex flex-col gap-[0.2rem]">
-              <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
-            </div>
-            <p class="text-balance text-ui-sm leading-relaxed">
-              <span class="text-ui-sm font-medium tabular-nums">
-                {formatEuroFR(rate.priceCents)}
-              </span>
-              <span class="text-muted"> TTC</span>
-            </p>
-          </article>
-        ))
-      }
+      <article
+        data-reveal
+        data-reveal-delay="120"
+        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-3 lg:col-start-2 bg-accentStone/25"
+      >
+        <div class="flex flex-col gap-[0.2rem]">
+          <h3 class="text-ui-sm font-medium leading-snug text-balance">
+            1 personne, sans petit-déjeuner
+          </h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          <span class="text-ui-sm font-medium tabular-nums">33&nbsp;€</span>
+          <span class="text-muted"> TTC</span>
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="160"
+        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-4 lg:col-start-2 bg-accentForest/20"
+      >
+        <div class="flex flex-col gap-[0.2rem]">
+          <h3 class="text-ui-sm font-medium leading-snug text-balance">
+            1 personne, avec petit-déjeuner
+          </h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          <span class="text-ui-sm font-medium tabular-nums">38&nbsp;€</span>
+          <span class="text-muted"> TTC</span>
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="200"
+        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-5 lg:col-start-2 bg-accentBistre/25"
+      >
+        <div class="flex flex-col gap-[0.2rem]">
+          <h3 class="text-ui-sm font-medium leading-snug text-balance">
+            2 personnes, sans petit-déjeuner
+          </h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          <span class="text-ui-sm font-medium tabular-nums">38&nbsp;€</span>
+          <span class="text-muted"> TTC</span>
+        </p>
+      </article>
+
+      <article
+        data-reveal
+        data-reveal-delay="240"
+        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-6 lg:col-start-2 bg-accentStone/25"
+      >
+        <div class="flex flex-col gap-[0.2rem]">
+          <h3 class="text-ui-sm font-medium leading-snug text-balance">
+            2 personnes, avec petit-déjeuner
+          </h3>
+        </div>
+        <p class="text-balance text-ui-sm leading-relaxed">
+          <span class="text-ui-sm font-medium tabular-nums">48&nbsp;€</span>
+          <span class="text-muted"> TTC</span>
+        </p>
+      </article>
     </div>
 
     <!-- Infos pratiques / modalités: separate 5-col grid -->

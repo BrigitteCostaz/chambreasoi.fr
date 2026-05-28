@@ -1,9 +1,32 @@
-# Sanity Clean Content Studio
+# studio-chambreasoi.fr
 
-Congratulations, you have now installed the Sanity Content Studio, an open-source real-time content editing environment connected to the Sanity backend.
+Sanity Studio workspace for Chambreasoi editorial content.
 
-Now you can do the following things:
+## Local development
+From repo root:
+```bash
+pnpm --filter chambreasoifr dev
+```
 
-- [Read “getting started” in the docs](https://www.sanity.io/docs/introduction/getting-started?utm_source=readme)
-- [Join the Sanity community](https://www.sanity.io/community/join?utm_source=readme)
-- [Extend and build plugins](https://www.sanity.io/docs/content-studio/extending?utm_source=readme)
+## Build and deploy
+```bash
+pnpm --filter chambreasoifr build
+pnpm --filter chambreasoifr deploy
+```
+
+## Verification
+```bash
+pnpm --filter chambreasoifr typecheck
+```
+
+## Environment variables
+Required:
+- `SANITY_STUDIO_PROJECT_ID`
+- `SANITY_STUDIO_DATASET`
+
+The CLI now fails fast if these are missing (`sanity.cli.ts`).
+
+## Content governance
+- Singleton enforcement is configured in `schemaTypes/lib/singletons.ts`.
+- Desk structure routes singleton documents via fixed IDs in `schemaTypes/structure.ts`.
+- Vision tool is enabled only outside production in `sanity.config.ts`.
