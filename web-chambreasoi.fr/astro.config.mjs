@@ -95,6 +95,11 @@ const dataset = isDev
     process.env.SANITY_DATASET ||
     process.env.SANITY_STUDIO_DATASET ||
     "production";
+
+// Keep fetchSanity (@chambreasoi/sanity) on the same dataset as @sanity/astro in local dev.
+if (isDev) {
+  process.env.PUBLIC_SANITY_DATASET = dataset;
+}
 /**
  * Studio is ENABLED by default (opt-out, not opt-in).
  *

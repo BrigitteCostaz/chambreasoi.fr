@@ -1,24 +1,20 @@
 ---
-import GridOverlay from "@components/layout/GridOverlay.astro";
 import { Icon } from "astro-icon/components";
 import PortableText from "@components/rich-text/PortableText.astro";
 import RichTextBlockRenderer from "@components/rich-text/RichTextBlock.astro";
 import SurroundingsCard from "./SurroundingsCard.astro";
+import SurroundingsGalleryImages from "./SurroundingsGalleryImages.astro";
 import type { ResolvedSurroundingsPageContent, ReservationStatus } from "./types";
 
 interface Props {
   accordions: ResolvedSurroundingsPageContent["accordions"];
-  images: ResolvedSurroundingsPageContent["images"];
   reservationLabels: Record<ReservationStatus, string>;
 }
 
-const { accordions, images, reservationLabels } = Astro.props;
+const { accordions, reservationLabels } = Astro.props;
 ---
 
-<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
-  <GridOverlay />
-  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-start">
-    <div class="flex flex-col px-[0.4rem] lg:col-span-4 lg:col-start-1 lg:row-start-4 lg:mt-[3.2rem]">
+<div class="flex flex-col lg:col-span-4 lg:col-start-1 lg:row-start-4 lg:mt-[3.2rem]">
       {
         accordions.map((accordion, index) => {
           const accordionBg =
@@ -28,7 +24,7 @@ const { accordions, images, reservationLabels } = Astro.props;
             <details class="surroundings-accordion group block border-b border-txtPri/15 first:border-t">
               <summary class="grid cursor-pointer gap-grid list-none grid-cols-4 border-txtPri/10">
                 <span class="flex items-end justify-end p-[0.8rem]">
-                  <span class="flex size-[1rem] items-start justify-center text-txtPri">
+                  <span class="flex size-[1.5rem] items-start justify-center text-txtPri">
                     <Icon
                       name="ion/chevron-down-sharp"
                       class="surroundings-accordion__chevron size-[1.5rem] shrink-0 transition-transform duration-300 group-open:rotate-180"
@@ -39,7 +35,7 @@ const { accordions, images, reservationLabels } = Astro.props;
 
                 <h3
                   class:list={[
-                    "col-span-3 col-start-2 p-[0.8rem] min-h-[120px] flex items-end justify-start text-balance text-ui-lg font-semibold",
+                    "col-span-3 col-start-2 p-[0.8rem] min-h-[143px] flex items-end justify-start text-balance text-ui-lg font-semibold",
                     accordionBg,
                   ]}
                 >
@@ -61,7 +57,7 @@ const { accordions, images, reservationLabels } = Astro.props;
                           accordion.description.sanityBlocks ? (
                             <PortableText
                               blocks={accordion.description.sanityBlocks}
-                              class="max-w-[68ch] text-balance text-ui-md leading-relaxed"
+                              class="max-w-[68ch] text-balance text-ui-md leading-relaxed mt-[1.2rem]"
                             />
                           ) : (
                             <RichTextBlockRenderer
@@ -79,6 +75,8 @@ const { accordions, images, reservationLabels } = Astro.props;
                           ))
                         }
                       </div>
+
+                      <SurroundingsGalleryImages images={accordion.galleryImages ?? []} variant="accordion" />
                     </div>
                   </div>
                 </div>
@@ -87,31 +85,4 @@ const { accordions, images, reservationLabels } = Astro.props;
           );
         })
       }
-    </div>
-
-    <div class="grid grid-cols-1 gap-grid px-[0.4rem] lg:col-span-1 lg:col-start-5 lg:row-start-4 lg:mt-[3.2rem]">
-      {
-        images.map((image) => (
-          <figure class="group/image relative aspect-[4/5] overflow-hidden bg-accentStone/25">
-            <img
-              src={image.src}
-              alt={image.alt}
-              width="900"
-              height="1200"
-              loading="lazy"
-              decoding="async"
-              class="size-full object-cover object-center"
-            />
-            {
-              image.caption ? (
-                <figcaption class="absolute inset-x-0 bottom-0 bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
-                  {image.caption}
-                </figcaption>
-              ) : null
-            }
-          </figure>
-        ))
-      }
-    </div>
-  </div>
-</section>
+</div>

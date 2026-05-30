@@ -4,11 +4,14 @@ import HeadLineSection from "@components/headline-section/HeadlineSection.astro"
 import LocationSection from "@components/location-section/LocationSection.astro";
 import PriceSection from "@components/price-section/PriceSection.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { getFoldContent } from "@lib/sanity";
+
+const fold = await getFoldContent();
 ---
 
 <BaseLayout>
-  <Fold />
+  <Fold image={fold?.coverImage ?? null} />
   <HeadLineSection />
   <LocationSection />
-  <PriceSection />
+  <PriceSection image={fold?.priceCoverImage ?? null} />
 </BaseLayout>

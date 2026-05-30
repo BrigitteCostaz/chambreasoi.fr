@@ -1,11 +1,22 @@
 ---
+import GridOverlay from "@components/layout/GridOverlay.astro";
 import SurroundingsCardGrid from "@components/surroundings-page/SurroundingsCardGrid.astro";
+import SurroundingsGalleryImages from "@components/surroundings-page/SurroundingsGalleryImages.astro";
 import SurroundingsPageIntro from "@components/surroundings-page/SurroundingsPageIntro.astro";
-import { getSurroundingsPageContent } from "@lib/sanity";
+import { sanityConfig } from "@chambreasoi/sanity/config";
+import { devLog, getSurroundingsPageContent } from "@lib/sanity";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { resolveSurroundingsPageContent } from "../../data/adapters/surroundings";
 import { fallbackContent, reservationLabels } from "../../data/fallback/surroundings";
 
 const sanityContent = await getSurroundingsPageContent();
+const { projectId, dataset } = sanityConfig();
+
+if (!sanityContent) {
+  incrementFallbackCounter("surroundings");
+}
+
+devLog("surroundingsPageContent", sanityContent ? "cms" : "fallback", { projectId, dataset });
 const content = resolveSurroundingsPageContent({
   sanityContent,
   fallbackContent,
@@ -16,7 +27,14 @@ const accordions = content.accordions;
 ---
 
 <SurroundingsPageIntro content={content} />
-<SurroundingsCardGrid accordions={accordions} images={content.images} reservationLabels={reservationLabels} />
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <GridOverlay />
+  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-start">
+    <SurroundingsCardGrid accordions={accordions} reservationLabels={reservationLabels} />
+    <SurroundingsGalleryImages images={content.galleryImages} variant="page" />
+  </div>
+</section>
 
 <style>
   details > summary::-webkit-details-marker {

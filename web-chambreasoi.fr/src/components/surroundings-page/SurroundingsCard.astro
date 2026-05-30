@@ -12,7 +12,7 @@ interface Props {
 const { item, reservationLabels } = Astro.props;
 ---
 
-<article class="flex flex-col gap-[0.8rem] pt-[0.8rem]">
+<article class="flex flex-col gap-[1rem] py-[1.4rem] first:pt-0 lg:py-[1.8rem]">
   <div class="flex flex-col gap-[0.4rem]">
     {
       item.category ? (
@@ -20,7 +20,7 @@ const { item, reservationLabels } = Astro.props;
       ) : null
     }
     <div class="flex flex-wrap items-center gap-[0.6rem]">
-      <h4 class="text-ui-lg font-medium leading-snug">{item.title}</h4>
+      <h4 class="text-ui-lg font-semibold leading-snug">{item.title}</h4>
       {
         item.reservationRequired ? (
           <span class="border border-txtPri/10 px-[0.55rem] py-[0.18rem] text-[0.72rem] leading-none">
@@ -31,13 +31,13 @@ const { item, reservationLabels } = Astro.props;
     </div>
   </div>
 
-  <div class="flex flex-col gap-[0.6rem]">
+  <div class="flex flex-col gap-[0.8rem]">
     {
       item.body.sanityBlocks ? (
-        <PortableText blocks={item.body.sanityBlocks} class="text-pretty text-ui-sm leading-relaxed" />
+        <PortableText blocks={item.body.sanityBlocks} class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90" />
       ) : (
         item.body.fallback.map((paragraph) => (
-          <RichTextBlockRenderer block={paragraph} class="text-pretty text-ui-sm leading-relaxed" />
+          <RichTextBlockRenderer block={paragraph} class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90" />
         ))
       )
     }

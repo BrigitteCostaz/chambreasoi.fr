@@ -1,6 +1,7 @@
 import type {
   SurroundingsAccordionItemResult,
   SurroundingsAccordionResult,
+  SurroundingsPageContentResult,
   SurroundingsTextBlockResult,
 } from "@lib/sanity";
 
@@ -28,6 +29,23 @@ export interface SurroundingsImage {
   caption?: string;
 }
 
+export interface WikimediaPhotoCredit {
+  commonsFileUrl: string;
+  title: string;
+  author: string;
+  licenseUrl: string;
+  licenseLabel: string;
+}
+
+export interface SurroundingsGalleryImage {
+  src: string;
+  srcSet?: string | null;
+  alt: string;
+  width?: number;
+  height?: number;
+  photoCredit?: WikimediaPhotoCredit;
+}
+
 export interface SurroundingsItem {
   title: string;
   category?: string;
@@ -41,6 +59,7 @@ export interface SurroundingsAccordion {
   title: string;
   description?: RichTextBlock;
   items: SurroundingsItem[];
+  galleryImages: SurroundingsGalleryImage[];
 }
 
 export interface SurroundingsPageContent {
@@ -51,6 +70,7 @@ export interface SurroundingsPageContent {
   proximityReassurance: RichTextBlock;
   editorialLead: RichTextBlock;
   images: SurroundingsImage[];
+  galleryImages: SurroundingsGalleryImage[];
   accordions: [SurroundingsAccordion, SurroundingsAccordion, SurroundingsAccordion];
 }
 
@@ -77,6 +97,7 @@ export type ResolvedSurroundingsAccordion = {
   title: string;
   description?: RichTextSlot;
   items: ResolvedSurroundingsItem[];
+  galleryImages: SurroundingsGalleryImage[];
 };
 
 export type ResolvedSurroundingsPageContent = {
@@ -87,6 +108,7 @@ export type ResolvedSurroundingsPageContent = {
   proximityReassurance: RichTextSlot;
   editorialLead: RichTextSlot;
   images: SurroundingsImage[];
+  galleryImages: SurroundingsGalleryImage[];
   accordions: [
     ResolvedSurroundingsAccordion,
     ResolvedSurroundingsAccordion,
@@ -95,15 +117,7 @@ export type ResolvedSurroundingsPageContent = {
 };
 
 export type SurroundingsContentInput = {
-  sanityContent: {
-    heroEyebrow: string | null;
-    heroTitle: string | null;
-    proximityStatement: SurroundingsTextBlockResult[] | null;
-    proximityIntro: SurroundingsTextBlockResult[] | null;
-    proximityReassurance: SurroundingsTextBlockResult[] | null;
-    editorialLead: SurroundingsTextBlockResult[] | null;
-    accordions: SurroundingsAccordionResult[] | null;
-  } | null;
+  sanityContent: SurroundingsPageContentResult | null;
   fallbackContent: SurroundingsPageContent;
   reservationLabels: Record<ReservationStatus, string>;
 };

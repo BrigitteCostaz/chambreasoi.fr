@@ -29,10 +29,25 @@ function getNodeProcessEnv(): RuntimeEnv {
 }
 
 /**
+ * Read Cloudflare Worker bindings when running on Workers.
+ *
+ * Astro v6 removed `context.locals.runtime.env`; use this helper instead.
+ * Safe in Node dev: dynamic import fails and returns undefined.
+ */
+export async function getCloudflareBindings(): Promise<RuntimeEnv | undefined> {
+  try {
+    const { env } = await import("cloudflare:workers");
+    return env as RuntimeEnv;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Return the best available runtime env object.
  *
  * Precedence:
- * 1) Request-local runtime bindings (Cloudflare Workers)
+ * 1) Cloudflare Worker bindings (`cloudflare:workers` env)
  * 2) process.env (Node dev)
  */
 export function getRuntimeEnv(requestEnv?: RuntimeEnv): RuntimeEnv {

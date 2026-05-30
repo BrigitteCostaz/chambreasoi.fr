@@ -2,11 +2,11 @@
 /* =========================
  * Imports
  * ========================= */
-import { Image } from "astro:assets";
 import Button from "@components/button/Button.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
 import { getOrgData } from "@config/organization";
 import { getPricing } from "@config/pricing";
-import { buildSanityDprSrcSet, buildSanityImageUrl, getFoldContent } from "@lib/sanity";
+import { getFoldContent } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
 import { resolveImage } from "@utils/imageUtils";
 import { defaultFoldContent, defaultFoldImageAlt } from "../../data/fallback/fold";
@@ -49,29 +49,8 @@ const coverWidth = 800;
 const coverHeight = 1200;
 
 const imageAlt = altOverride ?? sanityImageSource?.alt ?? defaultFoldImageAlt;
-
-const sanitySrc = buildSanityImageUrl({
-  source: sanityImageSource,
-  width: coverWidth,
-  height: coverHeight,
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const sanitySrcSet = buildSanityDprSrcSet({
-  source: sanityImageSource,
-  width: coverWidth,
-  height: coverHeight,
-  dprs: [1, 1.5, 2],
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const shouldRenderSanityImage = !!sanitySrc;
 const fallbackImage = await resolveImage(fallbackImagePath);
-const shouldRenderFallback = !shouldRenderSanityImage && !!fallbackImage;
+const coverImageStyle = "object-fit: cover; object-position: center;";
 
 /* =========================
  * Static Config
@@ -174,33 +153,19 @@ const f = {
 
     <!-- Part 2: Photo + CTA -->
     <div class="relative overflow-hidden flex-1 min-h-[240px] mt-[0.4rem]">
-      {
-        shouldRenderSanityImage ? (
-          <img
-            src={sanitySrc}
-            srcset={sanitySrcSet ?? undefined}
-            sizes="100vw"
-            alt={imageAlt}
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            class="absolute inset-0 w-full h-full"
-            style="object-fit: cover; object-position: center;"
-          />
-        ) : shouldRenderFallback ? (
-          <Image
-            src={fallbackImage!}
-            alt={imageAlt}
-            width={coverWidth}
-            height={coverHeight}
-            densities={[1, 1.5, 2]}
-            loading="eager"
-            decoding="async"
-            class="absolute inset-0 w-full h-full"
-            style="object-fit: cover; object-position: center;"
-          />
-        ) : null
-      }
+      <SanityPicture
+        source={sanityImageSource}
+        alt={imageAlt}
+        width={coverWidth}
+        height={coverHeight}
+        sizes="100vw"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        fallback={fallbackImage}
+        class="absolute inset-0 w-full h-full"
+        style={coverImageStyle}
+      />
 
       <!-- CTA -->
       <div class="cta-top">
@@ -287,31 +252,18 @@ const f = {
     </div>
     <div class="relative flex flex-col" style="flex: 0 0 calc(40% - 0.2rem);">
       <div class="fold-image-container">
-        {
-          shouldRenderSanityImage ? (
-            <img
-              src={sanitySrc!}
-              srcset={sanitySrcSet ?? undefined}
-              sizes="(max-width: 1024px) 100vw, 40vw"
-              alt={imageAlt}
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-              class="fold-image"
-            />
-          ) : shouldRenderFallback ? (
-            <Image
-              src={fallbackImage!}
-              alt={imageAlt}
-              width={coverWidth}
-              height={coverHeight}
-              densities={[1, 1.5, 2]}
-              loading="eager"
-              decoding="async"
-              class="fold-image"
-            />
-          ) : null
-        }
+        <SanityPicture
+          source={sanityImageSource}
+          alt={imageAlt}
+          width={coverWidth}
+          height={coverHeight}
+          sizes="(max-width: 1024px) 100vw, 40vw"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          fallback={fallbackImage}
+          class="fold-image"
+        />
       </div>
       <div class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1 lg:translate-x-0">
       </div>

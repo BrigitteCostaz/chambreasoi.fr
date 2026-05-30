@@ -120,6 +120,39 @@ export const AVAILABILITY_MONTHS_QUERY = /* groq */ `
 `
 
 // ---------------------------------------------------------------------------
+// Shared CMS image projection
+// ---------------------------------------------------------------------------
+
+export interface CmsImageResult {
+  asset: {
+    _ref?: string
+    _id?: string
+    url?: string
+    metadata?: {
+      dimensions?: {
+        width?: number
+        height?: number
+      } | null
+    } | null
+  } | null
+  alt: string | null
+}
+
+const CMS_IMAGE_PROJECTION = /* groq */ `
+  "asset": asset.asset->{
+    _id,
+    url,
+    metadata{
+      dimensions{
+        width,
+        height
+      }
+    }
+  },
+  alt
+`
+
+// ---------------------------------------------------------------------------
 // foldContent
 // ---------------------------------------------------------------------------
 
@@ -131,6 +164,8 @@ export interface FoldContentResult {
   amenitiesLabel: string | null
   amenities: string[] | null
   bookingNote: string | null
+  coverImage: CmsImageResult | null
+  priceCoverImage: CmsImageResult | null
 }
 
 export const FOLD_CONTENT_QUERY = /* groq */ `
@@ -141,7 +176,13 @@ export const FOLD_CONTENT_QUERY = /* groq */ `
     mosaicTile2Line2,
     amenitiesLabel,
     amenities,
-    bookingNote
+    bookingNote,
+    coverImage{
+      ${CMS_IMAGE_PROJECTION}
+    },
+    priceCoverImage{
+      ${CMS_IMAGE_PROJECTION}
+    }
   }
 `
 // ---------------------------------------------------------------------------
@@ -369,20 +410,7 @@ export const PRACTICAL_INFO_CONTENT_QUERY = /* groq */ `
 
 export type RoomPageAccent = "stone" | "forest" | "bistre"
 
-export interface RoomPageImageResult {
-  asset: {
-    _ref?: string
-    _id?: string
-    url?: string
-    metadata?: {
-      dimensions?: {
-        width?: number
-        height?: number
-      } | null
-    } | null
-  } | null
-  alt: string | null
-}
+export type RoomPageImageResult = CmsImageResult
 
 export interface RoomPageCardResult {
   _key: string
@@ -408,19 +436,7 @@ export interface RoomPageContentResult {
   serviceSection: RoomPageSectionResult | null
 }
 
-const ROOM_PAGE_IMAGE_PROJECTION = /* groq */ `
-  "asset": asset.asset->{
-    _id,
-    url,
-    metadata{
-      dimensions{
-        width,
-        height
-      }
-    }
-  },
-  alt
-`
+const ROOM_PAGE_IMAGE_PROJECTION = CMS_IMAGE_PROJECTION
 
 const ROOM_PAGE_SECTION_PROJECTION = /* groq */ `
   eyebrow,
@@ -499,7 +515,23 @@ export interface SurroundingsAccordionResult {
   _key: string
   title: string | null
   description: SurroundingsTextBlockResult[] | null
+  galleryImages: SurroundingsGalleryImageResult[] | null
   items: SurroundingsAccordionItemResult[] | null
+}
+
+export interface SurroundingsGalleryPhotoCreditResult {
+  commonsFileUrl: string | null
+  title: string | null
+  author: string | null
+  licenseUrl: string | null
+  licenseLabel: string | null
+}
+
+export interface SurroundingsGalleryImageResult {
+  _key: string
+  asset: CmsImageResult["asset"]
+  alt: string | null
+  photoCredit: SurroundingsGalleryPhotoCreditResult | null
 }
 
 export interface SurroundingsPageContentResult {
@@ -509,6 +541,7 @@ export interface SurroundingsPageContentResult {
   proximityIntro: SurroundingsTextBlockResult[] | null
   proximityReassurance: SurroundingsTextBlockResult[] | null
   editorialLead: SurroundingsTextBlockResult[] | null
+  galleryImages: SurroundingsGalleryImageResult[] | null
   accordions: SurroundingsAccordionResult[] | null
 }
 
@@ -532,17 +565,39 @@ const SURROUNDINGS_PORTABLE_TEXT_PROJECTION = /* groq */ `
 `
 
 export const SURROUNDINGS_PAGE_CONTENT_QUERY = /* groq */ `
-  *[_type == "surroundingsPageContent"][0]{
+  *[_type == "surroundingsPageContent" && _id == "surroundingsPageContent"][0]{
     heroEyebrow,
     heroTitle,
     proximityStatement[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
     proximityIntro[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
     proximityReassurance[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
     editorialLead[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    galleryImages[]{
+      _key,
+      ${CMS_IMAGE_PROJECTION},
+      photoCredit{
+        commonsFileUrl,
+        title,
+        author,
+        licenseUrl,
+        licenseLabel
+      }
+    },
     accordions[]{
       _key,
       title,
       description[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+      galleryImages[]{
+        _key,
+        ${CMS_IMAGE_PROJECTION},
+        photoCredit{
+          commonsFileUrl,
+          title,
+          author,
+          licenseUrl,
+          licenseLabel
+        }
+      },
       items[]{
         _key,
         title,

@@ -1,23 +1,20 @@
 import { defineMiddleware } from "astro:middleware";
 import { setWorkerEnv } from "@chambreasoi/sanity/config";
-import { getRuntimeEnv } from "@utils/runtime-env";
+import { getCloudflareBindings, getRuntimeEnv } from "@utils/runtime-env";
 
 /**
  * Middleware that provides a consistent env object to `@chambreasoi/sanity`.
  *
  * Goal:
  * - Use Cloudflare Workers bindings in production (when running on Workers)
- * - Avoid importing `cloudflare:workers` in shared code so Node dev doesn't break
+ * - Fall back to process.env in Node dev
  *
  * How:
- * - `getRuntimeEnv()` prefers `context.locals.runtime.env` when present.
- * - If unavailable (Node dev), it falls back to process.env.
- * - We then overlay PUBLIC_* vars from import.meta.env for dev/build reliability.
+ * - `getCloudflareBindings()` reads `import { env } from "cloudflare:workers"` (Astro v6).
+ * - We overlay PUBLIC_* vars from import.meta.env for dev/build reliability.
  */
-export const onRequest = defineMiddleware(async (context, next) => {
-  const runtimeEnv = getRuntimeEnv(
-    (context.locals as unknown as { runtime?: { env?: Record<string, unknown> } }).runtime?.env
-  );
+export const onRequest = defineMiddleware(async (_context, next) => {
+  const runtimeEnv = getRuntimeEnv(await getCloudflareBindings());
 
   const mergedEnv: Record<string, unknown> = {
     ...runtimeEnv,

@@ -1,5 +1,23 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
-import { ComposeIcon } from '@sanity/icons'
+import { ComposeIcon, ImageIcon } from '@sanity/icons'
+
+const imageWithAlt = [
+  defineField({
+    name: 'asset',
+    title: 'Image',
+    type: 'image',
+    options: {
+      hotspot: true,
+    },
+    validation: (rule) => rule.required(),
+  }),
+  defineField({
+    name: 'alt',
+    title: 'Texte alternatif',
+    type: 'string',
+    validation: (rule) => rule.required().max(300),
+  }),
+]
 
 /*
  * foldContent — document type
@@ -101,6 +119,24 @@ export const foldContent = defineType({
       description:
         'Texte en majuscules atténué affiché sous le tarif. Ex : "réservations par téléphone uniquement"',
       validation: (rule) => rule.required().max(120),
+    }),
+
+    // -------------------------------------------------------------------------
+    // Editorial images (home page)
+    // -------------------------------------------------------------------------
+    defineField({
+      name: 'coverImage',
+      title: 'Image du fold (accueil)',
+      type: 'object',
+      icon: ImageIcon,
+      fields: imageWithAlt,
+    }),
+    defineField({
+      name: 'priceCoverImage',
+      title: 'Image de la section tarifs (accueil)',
+      type: 'object',
+      icon: ImageIcon,
+      fields: imageWithAlt,
     }),
   ],
 

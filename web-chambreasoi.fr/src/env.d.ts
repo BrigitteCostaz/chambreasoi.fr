@@ -16,21 +16,9 @@ interface CfEnvBindings {
   readonly ASSETS: Fetcher;
 }
 
-interface Env extends CfEnvBindings {}
-
-// ---------------------------------------------------------------------------
-// Astro v6 × Cloudflare runtime typing
-//
-// Read bindings from `context.locals.runtime.env` in middleware/API routes.
-// The `App.Locals` augmentation below keeps the runtime env typed for those
-// entry points.
-// ---------------------------------------------------------------------------
-
-type Runtime = import("@astrojs/cloudflare").Runtime<CfEnvBindings>;
-
-declare namespace App {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  interface Locals extends Runtime {}
+// Astro v6: read bindings via `import { env } from "cloudflare:workers"` (see runtime-env.ts).
+declare module "cloudflare:workers" {
+  interface Env extends CfEnvBindings {}
 }
 
 // ---------------------------------------------------------------------------

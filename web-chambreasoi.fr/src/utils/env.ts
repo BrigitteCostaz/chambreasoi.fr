@@ -4,7 +4,7 @@
  * Goals:
  * - Provide a single place to read required env vars.
  * - Work in:
- *   - Cloudflare runtime (`context.locals.runtime.env`)
+ *   - Cloudflare runtime (`import { env } from "cloudflare:workers"`)
  *   - Server-side Node (process.env)
  *   - Vite/Astro build-time (import.meta.env for PUBLIC_ vars)
  *

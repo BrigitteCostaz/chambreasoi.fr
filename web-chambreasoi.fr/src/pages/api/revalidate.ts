@@ -6,6 +6,7 @@ import {
   parseSignatureHeader,
   timingSafeStringEqual,
 } from "@lib/security/webhookSignature";
+import { getCloudflareBindings, getRuntimeEnv } from "@utils/runtime-env";
 
 export const prerender = false;
 
@@ -71,13 +72,12 @@ async function isValidSanitySignature(
   return timingSafeStringEqual(parsedSignature.signature, expected);
 }
 
-export const ALL: APIRoute = async ({ request, locals }) => {
+export const ALL: APIRoute = async ({ request }) => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const runtimeEnv = ((locals as unknown as { runtime?: { env?: RevalidateBindings } }).runtime
-    ?.env ?? {}) as RevalidateBindings;
+  const runtimeEnv = getRuntimeEnv(await getCloudflareBindings()) as RevalidateBindings;
   const bindings = getValidatedBindings(runtimeEnv);
   if (!bindings) {
     return new Response("Server misconfiguration", { status: 500 });

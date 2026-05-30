@@ -2,10 +2,9 @@
 /* =========================
  * Imports
  * ========================= */
-import { Image } from "astro:assets";
 import GridOverlay from "@components/layout/GridOverlay.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
 import { getPricing } from "@config/pricing";
-import { buildSanityDprSrcSet, buildSanityImageUrl } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
 import { resolveImage } from "@utils/imageUtils";
 
@@ -51,28 +50,7 @@ const imageAlt =
   sanityImageSource?.alt ??
   "Vase en terre cuite avec de hautes tiges de fleurs sauvages séchées sur une table d'appoint ronde en bois, accompagné d'un bol en céramique bleu foncé, d'un bocal en verre et de galets";
 
-const sanitySrc = buildSanityImageUrl({
-  source: sanityImageSource,
-  width: coverWidth,
-  height: coverHeight,
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const sanitySrcSet = buildSanityDprSrcSet({
-  source: sanityImageSource,
-  width: coverWidth,
-  height: coverHeight,
-  dprs: [1, 1.5, 2],
-  quality: 80,
-  format: "webp",
-  fit: "crop",
-});
-
-const shouldRenderSanityImage = !!sanitySrc;
 const fallbackImage = await resolveImage(fallbackImagePath);
-const shouldRenderFallback = !shouldRenderSanityImage && !!fallbackImage;
 
 /* =========================
  * Data fetching
@@ -110,31 +88,18 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
 
   <!-- HERO IMAGE (desktop only) -->
   <div class="hero-image">
-    {
-      shouldRenderSanityImage ? (
-        <img
-          src={sanitySrc}
-          srcset={sanitySrcSet ?? undefined}
-          sizes="(max-width: 1024px) 100vw, 40vw"
-          alt={imageAlt}
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-          class="block w-full h-auto"
-        />
-      ) : shouldRenderFallback ? (
-        <Image
-          src={fallbackImage!}
-          alt={imageAlt}
-          width={coverWidth}
-          height={coverHeight}
-          densities={[1, 1.5, 2]}
-          loading="eager"
-          decoding="async"
-          class="block w-full h-auto"
-        />
-      ) : null
-    }
+    <SanityPicture
+      source={sanityImageSource}
+      alt={imageAlt}
+      width={coverWidth}
+      height={coverHeight}
+      sizes="(max-width: 1024px) 100vw, 40vw"
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      fallback={fallbackImage}
+      class="block w-full h-auto"
+    />
   </div>
 
   <!-- PRICING WRAPPER: overlay on desktop, in-flow on mobile/tablet -->
@@ -142,29 +107,17 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
     <div class="pricing-grid">
       <!-- Mobile/tablet background image -->
       <div class="pricing-grid-bg" aria-hidden="true">
-        {
-          shouldRenderSanityImage ? (
-            <img
-              src={sanitySrc}
-              srcset={sanitySrcSet ?? undefined}
-              sizes="100vw"
-              alt=""
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
-          ) : shouldRenderFallback ? (
-            <Image
-              src={fallbackImage!}
-              alt=""
-              width={coverWidth}
-              height={coverHeight}
-              densities={[1, 1.5, 2]}
-              loading="eager"
-              decoding="async"
-            />
-          ) : null
-        }
+        <SanityPicture
+          source={sanityImageSource}
+          alt=""
+          width={coverWidth}
+          height={coverHeight}
+          sizes="100vw"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          fallback={fallbackImage}
+        />
       </div>
 
       <!-- Col 1 -->

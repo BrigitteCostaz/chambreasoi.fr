@@ -46,7 +46,7 @@ let workerEnv: Record<string, unknown> | undefined;
  * import { setWorkerEnv } from "@chambreasoi/sanity/config";
  *
  * export const onRequest = defineMiddleware((context, next) => {
- *   setWorkerEnv(context.locals.runtime.env);
+ *   setWorkerEnv(env); // import { env } from "cloudflare:workers"
  *   return next();
  * });
  * ```

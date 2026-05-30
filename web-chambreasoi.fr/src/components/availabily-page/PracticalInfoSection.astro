@@ -1,7 +1,10 @@
 ---
 import { Image } from "astro:assets";
 import GridOverlay from "@components/layout/GridOverlay.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
+import { getPricing, getPublicRates } from "@config/pricing";
 import { getPracticalInfoContent } from "@lib/sanity";
+import { formatEuroFR } from "@utils/currency";
 import { getPracticalInfoRenderModel } from "../../data/adapters/practical-info";
 
 const practicalInfo = await getPracticalInfoContent();
@@ -13,6 +16,9 @@ const {
   bookingSanitySrc,
   bookingSanitySrcSet,
   fallbackBookingImage,
+  fallbackKitchenImage,
+  tariffColClasses,
+  tariffAccentClasses,
   resolvedServiceImages,
   displayedServiceCards,
   serviceDesktopPositionClasses,
@@ -21,6 +27,10 @@ const {
   serviceImageWidth,
   serviceImageHeight,
 } = renderModel;
+
+const pricing = await getPricing();
+const publicRates = getPublicRates(pricing);
+const kitchenImageSource = p.kitchenImage;
 
 const slugifyId = (value: string): string =>
   value
@@ -63,82 +73,44 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
         data-reveal-delay="100"
         class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
       >
-        <img
-          src="https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format"
-          srcset="https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format 1x, https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format&dpr=1.5 1.5x, https://cdn.sanity.io/images/vq8mnl17/production/76f069375b114930f1ed46360b1c159ed7f396fc-2800x1778.png?rect=39,0,2723,1778&w=1400&h=914&fm=webp&q=80&fit=crop&auto=format&dpr=2 2x"
-          alt="Vue d'ensemble d'une maison contemporaine de plain-pied avec bardage bois sombre et façade grise, dans un jardin paysagé avec arbustes et arbres dénudés, avec une impressionnante falaise calcaire émergeant de nuages bas en arrière-plan"
+        <SanityPicture
+          source={kitchenImageSource}
+          alt={p.kitchenImageAlt}
           width={1400}
           height={1050}
           sizes="(min-width: 1024px) 60vw, 100vw"
           loading="lazy"
           decoding="async"
+          quality={80}
+          format="webp"
+          fit="crop"
+          dprs={[1, 1.5, 2]}
+          fallback={fallbackKitchenImage}
           class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
         />
       </figure>
 
-      <article
-        data-reveal
-        data-reveal-delay="120"
-        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-3 lg:col-start-2 bg-accentStone/25"
-      >
-        <div class="flex flex-col gap-[0.2rem]">
-          <h3 class="text-ui-sm font-medium leading-snug text-balance">
-            1 personne, sans petit-déjeuner
-          </h3>
-        </div>
-        <p class="text-balance text-ui-sm leading-relaxed">
-          <span class="text-ui-sm font-medium tabular-nums">33&nbsp;€</span>
-          <span class="text-muted"> TTC</span>
-        </p>
-      </article>
-
-      <article
-        data-reveal
-        data-reveal-delay="160"
-        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-4 lg:col-start-2 bg-accentForest/20"
-      >
-        <div class="flex flex-col gap-[0.2rem]">
-          <h3 class="text-ui-sm font-medium leading-snug text-balance">
-            1 personne, avec petit-déjeuner
-          </h3>
-        </div>
-        <p class="text-balance text-ui-sm leading-relaxed">
-          <span class="text-ui-sm font-medium tabular-nums">38&nbsp;€</span>
-          <span class="text-muted"> TTC</span>
-        </p>
-      </article>
-
-      <article
-        data-reveal
-        data-reveal-delay="200"
-        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-5 lg:col-start-2 bg-accentBistre/25"
-      >
-        <div class="flex flex-col gap-[0.2rem]">
-          <h3 class="text-ui-sm font-medium leading-snug text-balance">
-            2 personnes, sans petit-déjeuner
-          </h3>
-        </div>
-        <p class="text-balance text-ui-sm leading-relaxed">
-          <span class="text-ui-sm font-medium tabular-nums">38&nbsp;€</span>
-          <span class="text-muted"> TTC</span>
-        </p>
-      </article>
-
-      <article
-        data-reveal
-        data-reveal-delay="240"
-        class="flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem] lg:row-start-6 lg:col-start-2 bg-accentStone/25"
-      >
-        <div class="flex flex-col gap-[0.2rem]">
-          <h3 class="text-ui-sm font-medium leading-snug text-balance">
-            2 personnes, avec petit-déjeuner
-          </h3>
-        </div>
-        <p class="text-balance text-ui-sm leading-relaxed">
-          <span class="text-ui-sm font-medium tabular-nums">48&nbsp;€</span>
-          <span class="text-muted"> TTC</span>
-        </p>
-      </article>
+      {
+        publicRates.map((rate, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(120 + index * 40)}
+            class:list={[
+              "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem]",
+              tariffColClasses[index],
+              tariffAccentClasses[index],
+            ]}
+          >
+            <div class="flex flex-col gap-[0.2rem]">
+              <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">
+              <span class="text-ui-sm font-medium tabular-nums">{formatEuroFR(rate.priceCents)}</span>
+              <span class="text-muted"> TTC</span>
+            </p>
+          </article>
+        ))
+      }
     </div>
 
     <!-- Infos pratiques / modalités: separate 5-col grid -->
