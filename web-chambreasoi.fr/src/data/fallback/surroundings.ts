@@ -55,12 +55,7 @@ export const fallbackContent: SurroundingsPageContent = {
       title: "Où faire ses courses à deux pas ? (5 à 10' à pied)",
       description:
         "Les commerces du quotidien sont proches de la chambre, pratiques pour un petit déjeuner, un repas léger ou une course de dernière minute.",
-      galleryImages: [
-        {
-          src: "https://static.photos/900x1200/1",
-          alt: "Vue placeholder évoquant une promenade calme autour de Challes-les-Eaux",
-        },
-      ],
+      galleryImages: [],
       items: [
         { title: "Mini market Vival", body: ["Une adresse utile pour les achats au quotidien."] },
         {
@@ -90,12 +85,7 @@ export const fallbackContent: SurroundingsPageContent = {
       title: "Où manger à Challes et aux alentours ?",
       description:
         "Quelques options pour déjeuner, dîner, commander à emporter ou découvrir une table plus champêtre.",
-      galleryImages: [
-        {
-          src: "https://static.photos/1200x900/2",
-          alt: "Vue placeholder évoquant les paysages de Savoie autour de Challes-les-Eaux",
-        },
-      ],
+      galleryImages: [],
       items: [
         {
           title: "Brasseries et cafés",
@@ -149,16 +139,7 @@ export const fallbackContent: SurroundingsPageContent = {
       title: "Que faire dans les environs selon le temps disponible ?",
       description:
         "Des idées simples à choisir selon votre timing, de la petite balade à la découverte plus large des massifs voisins.",
-      galleryImages: [
-        {
-          src: "https://static.photos/900x1200/3",
-          alt: "Vue placeholder évoquant un centre-ville piéton et accueillant",
-        },
-        {
-          src: "https://static.photos/1200x900/4",
-          alt: "Vue placeholder évoquant un plan d'eau et des arbres en bordure de promenade",
-        },
-      ],
+      galleryImages: [],
       items: [
         {
           title: "1 à 2 heures",

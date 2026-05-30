@@ -393,7 +393,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
           <figure
             data-reveal
             data-reveal-delay={String(480 + index * 80)}
-            class="group/image relative aspect-[4/3.5] overflow-hidden bg-accentStone/25"
+            class="group/image relative aspect-[4/2.8] overflow-hidden bg-accentStone/25"
           >
             <div class="service-image-container">
               {image.sanitySrc ? (
@@ -404,7 +404,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
                   alt={image.alt}
                   loading="lazy"
                   decoding="async"
-                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
                 />
               ) : image.fallbackImage ? (
                 <Image
@@ -415,7 +415,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
                   densities={[1, 1.5, 2]}
                   loading="lazy"
                   decoding="async"
-                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
                 />
               ) : (
                 <img
@@ -425,7 +425,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
                   alt={image.alt}
                   loading="lazy"
                   decoding="async"
-                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
                 />
               )}
             </div>

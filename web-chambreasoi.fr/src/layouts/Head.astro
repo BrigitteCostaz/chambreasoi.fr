@@ -71,9 +71,10 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
   <title>{pageTitle}</title>
   {pageDescription ? <meta name="description" content={pageDescription} /> : null}
 
+  <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="canonical" href={canonicalURL} />
 
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
   <meta name="geo.region" content={HeadData.meta.geoRegion} />
   <meta name="geo.placename" content={HeadData.meta.geoPlaceName} />
@@ -88,9 +89,6 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
   <meta property="og:locale" content="fr_FR" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={pageTitle} />
-  {pageDescription ? <meta name="twitter:description" content={pageDescription} /> : null}
-  <meta name="twitter:image" content={ogImageURL} />
 
   {HeadData.favicons?.faviconIco ? <link rel="icon" href={HeadData.favicons.faviconIco} /> : null}
   {

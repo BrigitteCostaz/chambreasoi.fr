@@ -26,6 +26,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^13.6.0",
     "@astrojs/react": "^5.0.6",
+    "@astrojs/sitemap": "^3.7.3",
     "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.4.0",
     "@sanity/client": "^7.22.1",

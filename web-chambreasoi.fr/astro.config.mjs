@@ -10,6 +10,8 @@ import icon from "astro-icon";
 import unocss from "unocss/astro";
 import { appAliases } from "./config/aliases.mjs";
 
+import sitemap from "@astrojs/sitemap";
+
 /**
  * Load `web-chambreasoi.fr/.env` into process.env for config-time evaluation.
  *
@@ -130,27 +132,25 @@ export default defineConfig({
     },
   },
 
-  integrations: [
-    unocss({
-      // injectReset: true,
-      configFile: "uno.config.ts",
-    }),
-    react(),
-
-    // Sanity integration:
-    // - Always configure the client (projectId/dataset), but only mount Studio routes when enabled.
-    sanity({
-      projectId,
-      dataset,
-      apiVersion: "2024-01-01",
-      useCdn: import.meta.env.PROD,
-      studioBasePath: enableSanityStudio ? "/studio" : undefined,
-    }),
-
-    icon({
-      iconDir: "src/icons",
-    }),
-  ],
+  integrations: [unocss({
+    // injectReset: true,
+    configFile: "uno.config.ts",
+  }), react(), // Sanity integration:
+  // - Always configure the client (projectId/dataset), but only mount Studio routes when enabled.
+  sanity({
+    projectId,
+    dataset,
+    apiVersion: "2024-01-01",
+    useCdn: import.meta.env.PROD,
+    studioBasePath: enableSanityStudio ? "/studio" : undefined,
+  }), icon({
+    iconDir: "src/icons",
+  }), sitemap({
+    filter: (page) => {
+      const pathname = new URL(page).pathname;
+      return !pathname.startsWith("/api/") && !pathname.startsWith("/studio/");
+    },
+  })],
 
   devToolbar: {
     enabled: false,
