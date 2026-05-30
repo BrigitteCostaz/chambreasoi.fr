@@ -37,6 +37,27 @@ export interface OrganizationSettingsResult {
   googleReviewUrl: string | null
   googleSameAs: string[] | null
   googlePriceRange: string | null
+  websiteDeveloper: {
+    name: string | null
+    url: string | null
+    email: string | null
+    siret: string | null
+  } | null
+  websiteHosting: {
+    name: string | null
+    address: string | null
+    url: string | null
+    privacyPolicyUrl: string | null
+  } | null
+  mentionsLastUpdated: string | null
+  mentionsLastUpdatedIso: string | null
+  photoCredits: Array<{
+    name: string | null
+    description: string | null
+    url: string | null
+    licenseUrl: string | null
+    licenseLabel: string | null
+  }> | null
 }
 
 export interface PricingSettingsResult {
@@ -92,7 +113,28 @@ export const ORGANIZATION_SETTINGS_QUERY = /* groq */ `
     googleLongitude,
     googleReviewUrl,
     googleSameAs,
-    googlePriceRange
+    googlePriceRange,
+    websiteDeveloper{
+      name,
+      url,
+      email,
+      siret
+    },
+    websiteHosting{
+      name,
+      address,
+      url,
+      privacyPolicyUrl
+    },
+    mentionsLastUpdated,
+    mentionsLastUpdatedIso,
+    photoCredits[]{
+      name,
+      description,
+      url,
+      licenseUrl,
+      licenseLabel
+    }
   }
 `
 
@@ -294,14 +336,7 @@ export const LOCATION_PAGE_CONTENT_QUERY = /* groq */ `
 
 export type PracticalInfoAccent = "stone" | "forest" | "bistre"
 
-export interface PracticalInfoImageResult {
-  asset: {
-    _ref?: string
-    _id?: string
-    url?: string
-  } | null
-  alt: string | null
-}
+export type PracticalInfoImageResult = CmsImageResult
 
 export interface PracticalInfoTextSpanResult {
   _key: string
@@ -334,6 +369,10 @@ export interface PracticalInfoServiceCardResult {
 }
 
 export interface PracticalInfoContentResult {
+  availabilityEyebrow: string | null
+  availabilityHeading: string | null
+  availabilityIntro: string | null
+  reservationIntro: string | null
   eyebrow: string | null
   tariffsHeading: string | null
   kitchenImage: PracticalInfoImageResult | null
@@ -348,18 +387,20 @@ export interface PracticalInfoContentResult {
 }
 
 export const PRACTICAL_INFO_CONTENT_QUERY = /* groq */ `
-  *[_type == "practicalInfoContent"][0]{
+  *[_type == "practicalInfoContent" && _id == "practicalInfoContent"][0]{
+    availabilityEyebrow,
+    availabilityHeading,
+    availabilityIntro,
+    reservationIntro,
     eyebrow,
     tariffsHeading,
     kitchenImage{
-      "asset": asset.asset,
-      alt
+      ${CMS_IMAGE_PROJECTION}
     },
     bookingHeading,
     bookingEyebrow,
     bookingImage{
-      "asset": asset.asset,
-      alt
+      ${CMS_IMAGE_PROJECTION}
     },
     bookingCards[]{
       _key,
@@ -398,8 +439,7 @@ export const PRACTICAL_INFO_CONTENT_QUERY = /* groq */ `
       accent
     },
     serviceImages[]{
-      "asset": asset.asset,
-      alt
+      ${CMS_IMAGE_PROJECTION}
     }
   }
 `
@@ -534,6 +574,13 @@ export interface SurroundingsGalleryImageResult {
   photoCredit: SurroundingsGalleryPhotoCreditResult | null
 }
 
+export interface SurroundingsIntroImageResult {
+  asset: CmsImageResult["asset"]
+  alt: string | null
+  caption: string | null
+  photoCredit: SurroundingsGalleryPhotoCreditResult | null
+}
+
 export interface SurroundingsPageContentResult {
   heroEyebrow: string | null
   heroTitle: string | null
@@ -541,6 +588,7 @@ export interface SurroundingsPageContentResult {
   proximityIntro: SurroundingsTextBlockResult[] | null
   proximityReassurance: SurroundingsTextBlockResult[] | null
   editorialLead: SurroundingsTextBlockResult[] | null
+  introImage: SurroundingsIntroImageResult | null
   galleryImages: SurroundingsGalleryImageResult[] | null
   accordions: SurroundingsAccordionResult[] | null
 }
@@ -572,6 +620,17 @@ export const SURROUNDINGS_PAGE_CONTENT_QUERY = /* groq */ `
     proximityIntro[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
     proximityReassurance[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
     editorialLead[]{${SURROUNDINGS_PORTABLE_TEXT_PROJECTION}},
+    introImage{
+      ${CMS_IMAGE_PROJECTION},
+      caption,
+      photoCredit{
+        commonsFileUrl,
+        title,
+        author,
+        licenseUrl,
+        licenseLabel
+      }
+    },
     galleryImages[]{
       _key,
       ${CMS_IMAGE_PROJECTION},

@@ -41,7 +41,10 @@ registerCmsCacheResetter(() => {
   accommodationCache = null;
 });
 
-function reportAccommodationFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
+function reportAccommodationFallback(
+  reason: "missing-document" | "fetch-error",
+  details?: unknown
+): void {
   incrementFallbackCounter("accommodation");
   console.warn("[fallback:accommodation]", {
     criticality: "medium",
@@ -66,14 +69,14 @@ export async function getAccommodation(): Promise<AccomodationConfig> {
     accommodationCache = {
       epoch: cacheEpoch,
       value: {
-      checkinTime: isNonEmptyString(cmsCheckin) ? cmsCheckin : ACCOMMODATION_DEFAULTS.checkinTime,
-      checkoutTime: isNonEmptyString(cmsCheckout)
-        ? cmsCheckout
-        : ACCOMMODATION_DEFAULTS.checkoutTime,
-      amenities:
-        Array.isArray(cmsAmenities) && cmsAmenities.length > 0
-          ? cmsAmenities.filter((value): value is string => isNonEmptyString(value))
-          : ACCOMMODATION_DEFAULTS.amenities,
+        checkinTime: isNonEmptyString(cmsCheckin) ? cmsCheckin : ACCOMMODATION_DEFAULTS.checkinTime,
+        checkoutTime: isNonEmptyString(cmsCheckout)
+          ? cmsCheckout
+          : ACCOMMODATION_DEFAULTS.checkoutTime,
+        amenities:
+          Array.isArray(cmsAmenities) && cmsAmenities.length > 0
+            ? cmsAmenities.filter((value): value is string => isNonEmptyString(value))
+            : ACCOMMODATION_DEFAULTS.amenities,
       },
     };
 

@@ -42,6 +42,38 @@ export const practicalInfoContent = defineType({
   icon: ComposeIcon,
   fields: [
     defineField({
+      name: 'availabilityEyebrow',
+      title: 'Libellé disponibilités',
+      type: 'string',
+      initialValue: 'Disponibilités',
+      validation: (rule) => rule.required().max(60),
+    }),
+    defineField({
+      name: 'availabilityHeading',
+      title: 'Titre disponibilités',
+      type: 'string',
+      initialValue: 'Agenda',
+      validation: (rule) => rule.required().max(90),
+    }),
+    defineField({
+      name: 'availabilityIntro',
+      title: 'Introduction disponibilités',
+      type: 'text',
+      rows: 3,
+      initialValue:
+        'Consultez les disponibilités de la chambre pour préparer votre séjour.',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'reservationIntro',
+      title: 'Texte réservation (avant le téléphone)',
+      type: 'text',
+      rows: 2,
+      initialValue:
+        'Pour réserver une date ou poser une question sur votre venue, contactez-nous au',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
       name: 'eyebrow',
       title: 'Libellé de section',
       type: 'string',

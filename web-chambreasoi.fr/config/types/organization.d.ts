@@ -1,4 +1,12 @@
 /* config/types/organization.d.ts */
+export interface PhotoCreditEntry {
+  name: string;
+  description: string;
+  url?: string;
+  licenseUrl?: string;
+  licenseLabel?: string;
+}
+
 export interface OrganizationConfig {
   contact: {
     email: string;
@@ -52,6 +60,13 @@ export interface OrganizationConfig {
       privacyPolicyUrl: string;
     };
   };
+
+  dates: {
+    lastUpdated: string;
+    lastUpdatedIso: string;
+  };
+
+  photoCredits: PhotoCreditEntry[];
 
   googleBusiness: {
     cid?: string;

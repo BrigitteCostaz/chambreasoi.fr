@@ -3,11 +3,21 @@ import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalend
 import Button from "@components/button/Button.astro";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getOrgData } from "@config/organization";
-import {
-  AVAILABILITY_MONTHS_QUERY,
-  fetchSanity,
-  type AvailabilityMonthResult,
-} from "@lib/sanity";
+import { AVAILABILITY_MONTHS_QUERY, fetchSanity, type AvailabilityMonthResult } from "@lib/sanity";
+
+type Props = {
+  availabilityEyebrow: string;
+  availabilityHeading: string;
+  availabilityIntro: string;
+  reservationIntro: string;
+};
+
+const {
+  availabilityEyebrow,
+  availabilityHeading,
+  availabilityIntro,
+  reservationIntro,
+} = Astro.props;
 
 function getMonthDays(month: string) {
   const year = Number(month.slice(0, 4));
@@ -49,14 +59,14 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
       data-reveal-delay="0"
       class="flex items-center gap-grid px-[0.4rem] pb-[3.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:py-[4.8rem]"
     >
-      <span class="heading-3">Disponibilités</span>
+      <span class="heading-3">{availabilityEyebrow}</span>
     </div>
 
     <div class="px-[0.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-2">
       <div data-reveal data-reveal-delay="120" class="max-w-[72ch]">
-        <h1 class="heading-2 text-balance">Agenda</h1>
+        <h1 class="heading-2 text-balance">{availabilityHeading}</h1>
         <div class="mt-[1.6rem] max-w-[65ch] space-y-[0.8rem] text-balance text-ui-lg font-medium">
-          <slot name="intro" />
+          <p>{availabilityIntro}</p>
         </div>
       </div>
 
@@ -75,13 +85,9 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
         class="mt-[2.4rem] flex flex-col gap-[1.6rem] sm:block lg:col-span-4 lg:col-start-2 lg:mt-[3.2rem]"
       >
         <div class="space-y-[0.8rem] text-balance text-ui-lg font-medium lg:max-w-[48ch]">
-          <p class="sm:hidden">
-            Pour réserver une date ou poser une question sur votre venue, contactez-nous au
-          </p>
+          <p class="sm:hidden">{reservationIntro}</p>
           <p class="hidden sm:block">
-            Pour réserver une date ou poser une question sur votre venue, contactez-nous au {
-              phone.display
-            }
+            {reservationIntro} {phone.display}
           </p>
         </div>
 
@@ -110,9 +116,3 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
     transform: translateY(0);
   }
 </style>
-
-<script>
-  import { initRevealOnIntersect } from "@utils/reveal";
-
-  initRevealOnIntersect({ threshold: 0.1 });
-</script>

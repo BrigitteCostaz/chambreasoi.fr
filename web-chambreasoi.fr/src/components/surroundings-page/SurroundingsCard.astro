@@ -34,10 +34,16 @@ const { item, reservationLabels } = Astro.props;
   <div class="flex flex-col gap-[0.8rem]">
     {
       item.body.sanityBlocks ? (
-        <PortableText blocks={item.body.sanityBlocks} class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90" />
+        <PortableText
+          blocks={item.body.sanityBlocks}
+          class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90"
+        />
       ) : (
         item.body.fallback.map((paragraph) => (
-          <RichTextBlockRenderer block={paragraph} class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90" />
+          <RichTextBlockRenderer
+            block={paragraph}
+            class="text-pretty text-ui-sm leading-[1.55] text-txtPri/90"
+          />
         ))
       )
     }
@@ -67,7 +73,7 @@ const { item, reservationLabels } = Astro.props;
         href={item.url}
         target="_blank"
         icon="ion/arrow-up-right-box-sharp"
-        iconSide="right"
+        iconSide="left"
         class="mt-auto w-fit font-medium"
       >
         consulter le site

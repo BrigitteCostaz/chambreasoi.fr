@@ -1,0 +1,333 @@
+---
+import Button from "@components/button/Button.astro";
+import type { OrganizationConfig } from "@config/types";
+
+type Props = {
+  org: OrganizationConfig;
+};
+
+const { org } = Astro.props;
+
+const fullAddress = [
+  org.address.street,
+  `${org.address.postalCode} ${org.address.city}`,
+  org.address.region,
+  org.address.country,
+].join(", ");
+
+const activity = `${org.legal.activityLabel} (${org.legal.activityCode})`;
+const editorName = org.legal.name;
+---
+
+<article class="legal-article flex flex-col gap-[3rem] text-ui-sm leading-relaxed">
+  <section aria-labelledby="legal-editor">
+    <h2 id="legal-editor" class="legal-section-title">Éditeur du site</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Nom</dt>
+        <dd>{editorName}</dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Activité</dt>
+        <dd>{activity}</dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Adresse</dt>
+        <dd>{fullAddress}</dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Téléphone</dt>
+        <dd>
+          <a href={org.contact.phone.link}>{org.contact.phone.display}</a>
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>E-mail</dt>
+        <dd>
+          <a href={`mailto:${org.contact.email}`}>{org.contact.email}</a>
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Site web</dt>
+        <dd>
+          <a href={org.website.url} rel="noopener noreferrer">{org.website.url}</a>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="legal-dev">
+    <h2 id="legal-dev" class="legal-section-title">Conception et développement</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Développeur</dt>
+        <dd>
+          <a href={org.website.developer.url} rel="noopener noreferrer" target="_blank">
+            {org.website.developer.name}
+          </a>
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>E-mail</dt>
+        <dd>
+          <a href={`mailto:${org.website.developer.email}`}>{org.website.developer.email}</a>
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>SIRET</dt>
+        <dd>{org.website.developer.siret}</dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Technologies</dt>
+        <dd>Astro, UnoCSS, Sanity CMS, Cloudflare Pages</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="legal-host">
+    <h2 id="legal-host" class="legal-section-title">Hébergement</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Hébergeur</dt>
+        <dd>
+          <a href={org.website.hosting.url} rel="noopener noreferrer" target="_blank">
+            {org.website.hosting.name}
+          </a>
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Adresse</dt>
+        <dd>{org.website.hosting.address}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="legal-ip">
+    <h2 id="legal-ip" class="legal-section-title">Propriété intellectuelle</h2>
+    <p>
+      L'ensemble du contenu de ce site — textes, photographies, reproductions d'œuvres,
+      illustrations, mise en page et charte graphique — est la propriété exclusive de {editorName} ou
+      de leurs auteurs respectifs, et est protégé par le droit d'auteur français et les conventions internationales.
+      Toute reproduction, représentation, diffusion ou rediffusion, en tout ou partie, sur quelque support
+      que ce soit, sans l'autorisation expresse et écrite de l'éditeur, est interdite et constituerait
+      une contrefaçon sanctionnée par les articles L.335-2 et suivants du Code de la propriété intellectuelle.
+    </p>
+  </section>
+
+  <section aria-labelledby="legal-liability">
+    <h2 id="legal-liability" class="legal-section-title">Responsabilité</h2>
+    <p>
+      Les informations contenues sur ce site sont fournies à titre indicatif. L'éditeur s'efforce de
+      maintenir ces informations à jour et exactes, mais ne saurait être tenu responsable des
+      erreurs ou omissions, ni des dommages directs ou indirects pouvant résulter de l'utilisation
+      de ces informations. Les liens hypertextes vers des sites tiers sont proposés à titre
+      informatif ; l'éditeur n'exerce aucun contrôle sur leur contenu et décline toute
+      responsabilité quant aux informations qui y sont diffusées.
+    </p>
+  </section>
+
+  <section aria-labelledby="legal-data">
+    <h2 id="legal-data" class="legal-section-title">Données personnelles</h2>
+    <p>
+      Ce site ne collecte pas de données personnelles. Conformément au Règlement Général sur la
+      Protection des Données (RGPD — UE 2016/679) et à la loi Informatique et Libertés, vous
+      disposez d'un droit d'accès, de rectification, d'effacement et de portabilité des données vous
+      concernant. Pour exercer ces droits, contactez l'éditeur à l'adresse{" "}
+      <a href={`mailto:${org.contact.email}`}>{org.contact.email}</a>.
+    </p>
+  </section>
+
+  <section aria-labelledby="legal-credits">
+    <h2 id="legal-credits" class="legal-section-title">Crédits</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Photographies</dt>
+        <dd>
+          {
+            org.photoCredits.length > 0 ? (
+              <ul class="legal-credits-list">
+                {org.photoCredits.map((credit) => (
+                  <li>
+                    {credit.url ? (
+                      <a href={credit.url} rel="noopener noreferrer" target="_blank">
+                        {credit.name}
+                      </a>
+                    ) : (
+                      credit.name
+                    )}
+                    {" — "}
+                    {credit.description}
+                    {credit.licenseUrl && credit.licenseLabel ? (
+                      <>
+                        {" "}
+                        (
+                        <a href={credit.licenseUrl} rel="noopener noreferrer" target="_blank">
+                          {credit.licenseLabel}
+                        </a>
+                        )
+                      </>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              "—"
+            )
+          }
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Icônes</dt>
+        <dd>
+          <ul class="legal-credits-list">
+            <li>
+              <a href="https://ionic.io/ionicons" rel="noopener noreferrer" target="_blank">
+                Ionicons
+              </a> — licence MIT
+            </li>
+            <li>
+              <a
+                href="https://github.com/material-icons/material-icons"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Google Material Icons
+              </a> — licence Apache 2.0
+            </li>
+          </ul>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="legal-fonts">
+    <h2 id="legal-fonts" class="legal-section-title">Polices de caractères</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Karla</dt>
+        <dd>
+          <a href="https://fonts.bunny.net" rel="noopener noreferrer" target="_blank">Bunny Fonts</a
+          >
+          {" "}— licence SIL OFL
+        </dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>General Sans</dt>
+        <dd>auto-hébergée — Indian Type Foundry (usage libre)</dd>
+      </div>
+      <div class="legal-dl__row">
+        <dt>Victor Mono</dt>
+        <dd>auto-hébergée — licence SIL OFL</dd>
+      </div>
+    </dl>
+    <p class="legal-fonts-note">
+      Karla est servie via{" "}
+      <a href="https://fonts.bunny.net" rel="noopener noreferrer" target="_blank">Bunny Fonts</a>,
+      un service respectueux de la vie privée qui ne dépose pas de cookies tiers. General Sans et
+      Victor Mono sont auto-hébergées sur ce site.
+    </p>
+  </section>
+
+  <section aria-labelledby="legal-services">
+    <h2 id="legal-services" class="legal-section-title">Services tiers</h2>
+    <dl class="legal-dl">
+      <div class="legal-dl__row">
+        <dt>Gestion de contenu</dt>
+        <dd>
+          <a href="https://www.sanity.io" rel="noopener noreferrer" target="_blank">Sanity.io</a>
+          {" "}— CMS headless (San Francisco, CA, États-Unis)
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="legal-updated">
+    <h2 id="legal-updated" class="legal-section-title">Dernière mise à jour</h2>
+    <p>
+      Ces mentions légales ont été mises à jour le{" "}
+      <time datetime={org.dates.lastUpdatedIso}>{org.dates.lastUpdated}</time>.
+    </p>
+  </section>
+
+  <div class="pt-[0.4rem]">
+    <Button
+      variant="primary"
+      size="sm"
+      href="/"
+      icon="ion/arrow-forward-sharp"
+      class="legal-back-button"
+    >
+      Retour à l'accueil
+    </Button>
+  </div>
+</article>
+
+<style>
+  .legal-section-title {
+    font-size: clamp(16px, calc(16px + 4 * (100vw - 360px) / 920), 20px);
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 0 0 1rem;
+  }
+
+  .legal-dl {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .legal-dl__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.125rem 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .legal-dl__row {
+      grid-template-columns: 12rem 1fr;
+    }
+  }
+
+  .legal-dl dt {
+    font-weight: 600;
+  }
+
+  .legal-dl dd {
+    color: color-mix(in oklch, var(--color-txtPri) 80%, transparent);
+    margin: 0;
+  }
+
+  .legal-credits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .legal-fonts-note {
+    margin: 1rem 0 0;
+    font-size: clamp(14px, calc(14px + 2 * (100vw - 360px) / 920), 16px);
+    color: color-mix(in oklch, var(--color-txtPri) 70%, transparent);
+  }
+
+  .legal-article a:not(.button) {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .legal-article a:not(.button):hover {
+    opacity: 0.75;
+  }
+
+  .legal-article code {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.9em;
+  }
+
+  .legal-back-button :global(.button__icon) {
+    transform: rotate(180deg);
+  }
+</style>

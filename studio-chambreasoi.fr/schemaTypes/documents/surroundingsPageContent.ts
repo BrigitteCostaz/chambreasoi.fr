@@ -46,8 +46,9 @@ const DEFAULT_CC_BY_SA_LICENSE_LABEL = 'CC BY-SA 4.0'
 const wikimediaPhotoCreditFields = [
   defineField({
     name: 'commonsFileUrl',
-    title: 'URL du fichier Wikimedia Commons',
-    description: 'Lien vers la page du fichier (https://commons.wikimedia.org/wiki/File:…).',
+    title: 'URL du fichier Wikimedia Commons (optionnel)',
+    description:
+      'Lien vers la page du fichier (https://commons.wikimedia.org/wiki/File:…). Si vide, le titre s’affiche sans lien.',
     type: 'url',
     validation: (rule) =>
       rule.uri({
@@ -58,7 +59,7 @@ const wikimediaPhotoCreditFields = [
   defineField({
     name: 'title',
     title: 'Titre du fichier',
-    description: 'Texte du lien vers le fichier (titre affiché entre guillemets).',
+    description: 'Titre affiché entre guillemets (lien cliquable uniquement si l’URL Commons est renseignée).',
     type: 'string',
     validation: (rule) => rule.max(500),
   }),
@@ -88,6 +89,32 @@ const wikimediaPhotoCreditFields = [
   }),
 ]
 
+const validateWikimediaPhotoCredit = (value: unknown) => {
+  if (!value || typeof value !== 'object') {
+    return true
+  }
+
+  const credit = value as Record<string, string | undefined>
+  const hasAnyField = wikimediaPhotoCreditFields.some(
+    (field) => typeof credit[field.name] === 'string' && credit[field.name]!.trim().length > 0,
+  )
+
+  if (!hasAnyField) {
+    return true
+  }
+
+  const requiredFields = ['title', 'author'] as const
+  const missing = requiredFields.filter(
+    (name) => typeof credit[name] !== 'string' || credit[name]!.trim().length === 0,
+  )
+
+  if (missing.length > 0) {
+    return 'Renseignez le titre du fichier et l’auteur pour le crédit photo.'
+  }
+
+  return true
+}
+
 const galleryImageObject = defineArrayMember({
   type: 'object',
   icon: ImageIcon,
@@ -116,44 +143,19 @@ const galleryImageObject = defineArrayMember({
         collapsed: true,
       },
       fields: wikimediaPhotoCreditFields,
-      validation: (rule) =>
-        rule.custom((value) => {
-          if (!value || typeof value !== 'object') {
-            return true
-          }
-
-          const credit = value as Record<string, string | undefined>
-          const hasAnyField = wikimediaPhotoCreditFields.some(
-            (field) => typeof credit[field.name] === 'string' && credit[field.name]!.trim().length > 0,
-          )
-
-          if (!hasAnyField) {
-            return true
-          }
-
-          const requiredFields = ['commonsFileUrl', 'title', 'author'] as const
-          const missing = requiredFields.filter(
-            (name) => typeof credit[name] !== 'string' || credit[name]!.trim().length === 0,
-          )
-
-          if (missing.length > 0) {
-            return 'Renseignez l’URL Commons, le titre du fichier et l’auteur pour le crédit photo.'
-          }
-
-          return true
-        }),
+      validation: (rule) => rule.custom(validateWikimediaPhotoCredit),
     }),
   ],
   preview: {
     select: {
       title: 'alt',
       media: 'asset',
-      hasCredit: 'photoCredit.commonsFileUrl',
+      creditTitle: 'photoCredit.title',
     },
-    prepare({title, media, hasCredit}) {
+    prepare({title, media, creditTitle}) {
       return {
         title: title || 'Image galerie',
-        subtitle: hasCredit ? 'Crédit Wikimedia' : undefined,
+        subtitle: creditTitle ? 'Crédit Wikimedia' : undefined,
         media,
       }
     },
@@ -204,6 +206,65 @@ export const surroundingsPageContent = defineType({
       title: 'Intro — réassurance',
       type: 'array',
       of: [surroundingsRichTextBlock],
+    }),
+    defineField({
+      name: 'introImage',
+      title: 'Image d’introduction',
+      description:
+        'Photo affichée à droite du bloc intro (colonne desktop, pleine hauteur sur la grille).',
+      type: 'object',
+      icon: ImageIcon,
+      fields: [
+        defineField({
+          name: 'asset',
+          title: 'Image',
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: 'alt',
+          title: 'Texte alternatif',
+          type: 'string',
+          validation: (rule) => rule.required().max(300),
+        }),
+        defineField({
+          name: 'caption',
+          title: 'Légende',
+          description:
+            'Texte simple sous l’image si aucun crédit Wikimedia n’est renseigné (optionnel).',
+          type: 'string',
+          validation: (rule) => rule.max(300),
+        }),
+        defineField({
+          name: 'photoCredit',
+          title: 'Crédit photo (Wikimedia Commons)',
+          type: 'object',
+          options: {
+            collapsible: true,
+            collapsed: true,
+          },
+          fields: wikimediaPhotoCreditFields,
+          validation: (rule) => rule.custom(validateWikimediaPhotoCredit),
+        }),
+      ],
+      preview: {
+        select: {
+          title: 'alt',
+          subtitle: 'caption',
+          media: 'asset',
+          creditTitle: 'photoCredit.title',
+        },
+        prepare({title, subtitle, media, creditTitle}) {
+          return {
+            title: title || 'Image d’introduction',
+            subtitle: creditTitle ? 'Crédit Wikimedia' : subtitle || undefined,
+            media,
+          }
+        },
+      },
     }),
     defineField({
       name: 'galleryImages',

@@ -134,7 +134,10 @@ registerCmsCacheResetter(() => {
   pricingCache = null;
 });
 
-function reportPricingFallback(reason: "missing-document" | "fetch-error", details?: unknown): void {
+function reportPricingFallback(
+  reason: "missing-document" | "fetch-error",
+  details?: unknown
+): void {
   incrementFallbackCounter("pricing");
   console.warn("[fallback:pricing]", {
     criticality: "high",

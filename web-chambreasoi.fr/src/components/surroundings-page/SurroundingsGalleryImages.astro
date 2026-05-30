@@ -1,4 +1,5 @@
 ---
+import SurroundingsPhotoCreditCaption from "@components/surroundings-page/SurroundingsPhotoCreditCaption.astro";
 import type { SurroundingsGalleryImage } from "./types";
 
 interface Props {
@@ -10,77 +11,37 @@ const { images, variant = "accordion" } = Astro.props;
 
 const imageWidth = 1400;
 const imageHeight = 1225;
-const commonsHomeUrl = "https://commons.wikimedia.org/";
 
 const gridClass =
   variant === "page"
     ? "hidden grid-cols-1 gap-grid lg:col-span-5 lg:col-start-2 lg:grid lg:grid-cols-4 lg:row-start-5"
-    : "mt-[1.6rem] grid grid-cols-2 gap-[0.8rem]";
+    : "mt-[1.6rem] grid grid-cols-1 gap-[0.8rem] md:grid-cols-2 lg:gap-[0.8rem]";
 ---
 
 {
   images.length > 0 ? (
     <div class={gridClass}>
-      {
-        images.map((image, index) => (
-          <figure
-            data-reveal
-            data-reveal-delay={String(480 + index * 80)}
-            class="group/image relative aspect-[4/3.5] overflow-hidden bg-accentStone/25"
-          >
-            <div class="surroundings-gallery-image-container">
-              <img
-                src={image.src}
-                srcset={image.srcSet ?? undefined}
-                width={image.width ?? imageWidth}
-                height={image.height ?? imageHeight}
-                alt={image.alt}
-                loading="lazy"
-                decoding="async"
-                class="surroundings-gallery-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
-              />
-            </div>
-            {
-              image.photoCredit ? (
-                <figcaption class="surroundings-gallery-photo-credit absolute inset-x-0 bottom-0 bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
-                  Photo :
-                  {" "}
-                  <a
-                    href={image.photoCredit.commonsFileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="surroundings-gallery-photo-credit__link"
-                  >
-                    « {image.photoCredit.title} »
-                  </a>
-                  {" "}
-                  par {image.photoCredit.author},
-                  {" "}
-                  <a
-                    href={image.photoCredit.licenseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="surroundings-gallery-photo-credit__link"
-                  >
-                    {image.photoCredit.licenseLabel}
-                  </a>
-                  , via
-                  {" "}
-                  <a
-                    href={commonsHomeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="surroundings-gallery-photo-credit__link"
-                  >
-                    Wikimedia Commons
-                  </a>
-                  .
-                </figcaption>
-              ) : null
-            }
-          </figure>
-        ))
-      }
+      {images.map((image, index) => (
+        <figure
+          data-reveal
+          data-reveal-delay={String(480 + index * 80)}
+          class="group/image relative aspect-[4/3.5] overflow-hidden bg-accentStone/25"
+        >
+          <div class="surroundings-gallery-image-container">
+            <img
+              src={image.src}
+              srcset={image.srcSet ?? undefined}
+              width={image.width ?? imageWidth}
+              height={image.height ?? imageHeight}
+              alt={image.alt}
+              loading="lazy"
+              decoding="async"
+              class="surroundings-gallery-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </div>
+          {image.photoCredit ? <SurroundingsPhotoCreditCaption credit={image.photoCredit} /> : null}
+        </figure>
+      ))}
     </div>
   ) : null
 }
@@ -100,15 +61,5 @@ const gridClass =
     height: 100%;
     object-fit: cover;
     object-position: center;
-  }
-
-  .surroundings-gallery-photo-credit__link {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .surroundings-gallery-photo-credit__link:hover {
-    color: rgb(255 255 255 / 85%);
   }
 </style>

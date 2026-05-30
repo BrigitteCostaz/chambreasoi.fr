@@ -4,6 +4,7 @@ import {defineField, defineType} from 'sanity'
 const postalCodeRegex = /^\d{5}$/
 const countryIsoRegex = /^[A-Z]{2}$/
 const telLinkRegex = /^tel:/
+const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/
 
 export const organizationSettings = defineType({
   name: 'organizationSettings',
@@ -27,6 +28,10 @@ export const organizationSettings = defineType({
     {
       name: 'google',
       title: 'Google Business',
+    },
+    {
+      name: 'mentions',
+      title: 'Mentions légales',
     },
   ],
   fields: [
@@ -235,6 +240,139 @@ export const organizationSettings = defineType({
       type: 'string',
       group: 'google',
       description: 'Exemple : €, €€, etc.',
+    }),
+
+    defineField({
+      name: 'websiteDeveloper',
+      title: 'Développeur du site',
+      type: 'object',
+      group: 'mentions',
+      fields: [
+        defineField({
+          name: 'name',
+          title: 'Nom',
+          type: 'string',
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: 'url',
+          title: 'Site web',
+          type: 'url',
+          validation: (rule) => rule.uri({allowRelative: false, scheme: ['https']}),
+        }),
+        defineField({
+          name: 'email',
+          title: 'Email',
+          type: 'string',
+          validation: (rule) => rule.required().email(),
+        }),
+        defineField({
+          name: 'siret',
+          title: 'SIRET',
+          type: 'string',
+          validation: (rule) => rule.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'websiteHosting',
+      title: 'Hébergeur',
+      type: 'object',
+      group: 'mentions',
+      fields: [
+        defineField({
+          name: 'name',
+          title: 'Nom',
+          type: 'string',
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: 'address',
+          title: 'Adresse',
+          type: 'text',
+          rows: 2,
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: 'url',
+          title: 'Site web',
+          type: 'url',
+          validation: (rule) => rule.uri({allowRelative: false, scheme: ['https']}),
+        }),
+        defineField({
+          name: 'privacyPolicyUrl',
+          title: 'Politique de confidentialité',
+          type: 'url',
+          validation: (rule) => rule.uri({allowRelative: false, scheme: ['https']}),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'mentionsLastUpdated',
+      title: 'Dernière mise à jour (affichage)',
+      type: 'string',
+      group: 'mentions',
+      description: 'Exemple : 4 mars 2026',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'mentionsLastUpdatedIso',
+      title: 'Dernière mise à jour (ISO)',
+      type: 'string',
+      group: 'mentions',
+      description: 'Format AAAA-MM-JJ (ex. 2026-03-04)',
+      validation: (rule) =>
+        rule
+          .required()
+          .regex(isoDateRegex, {name: 'ISO date'})
+          .error('La date doit être au format AAAA-MM-JJ.'),
+    }),
+    defineField({
+      name: 'photoCredits',
+      title: 'Crédits photographiques',
+      type: 'array',
+      group: 'mentions',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'name',
+              title: 'Auteur',
+              type: 'string',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'description',
+              title: 'Description',
+              type: 'string',
+              description: 'Périmètre des photographies (ex. photos du site, de la chambre…)',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'url',
+              title: 'Site web (optionnel)',
+              type: 'url',
+            }),
+            defineField({
+              name: 'licenseUrl',
+              title: 'URL de la licence (optionnel)',
+              type: 'url',
+            }),
+            defineField({
+              name: 'licenseLabel',
+              title: 'Libellé de la licence (optionnel)',
+              type: 'string',
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'name',
+              subtitle: 'description',
+            },
+          },
+        },
+      ],
     }),
   ],
   preview: {

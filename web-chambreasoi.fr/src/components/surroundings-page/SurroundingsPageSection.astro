@@ -26,7 +26,11 @@ const content = resolveSurroundingsPageContent({
 const accordions = content.accordions;
 ---
 
-<SurroundingsPageIntro content={content} />
+<SurroundingsPageIntro
+  content={content}
+  sanityIntroImage={sanityContent?.introImage}
+  fallbackIntro={fallbackContent.images[0]}
+/>
 
 <section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
   <GridOverlay />
@@ -114,7 +118,7 @@ const accordions = content.accordions;
               finishClose();
             }
           },
-          { once: true },
+          { once: true }
         );
 
         window.setTimeout(finishClose, ACCORDION_CLOSE_MS);

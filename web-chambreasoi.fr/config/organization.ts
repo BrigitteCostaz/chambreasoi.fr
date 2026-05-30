@@ -5,7 +5,7 @@ import {
   type OrganizationSettingsResult,
 } from "@chambreasoi/sanity/queries";
 import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
-import type { OrganizationConfig } from "@config/types";
+import type { OrganizationConfig, PhotoCreditEntry } from "@config/types";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { resolveNumber, resolveString, resolveStringArray } from "@utils/config-resolvers";
 
@@ -61,6 +61,19 @@ const ORG_DEFAULTS: OrganizationConfig = {
     },
   },
 
+  dates: {
+    lastUpdated: "30 mai 2026",
+    lastUpdatedIso: "2026-05-30",
+  },
+
+  photoCredits: [
+    {
+      name: "Baptiste Chénin",
+      description: "Photographies du site",
+      url: "https://baptistechenin.com",
+    },
+  ],
+
   googleBusiness: {
     cid: "",
     location: {
@@ -73,6 +86,36 @@ const ORG_DEFAULTS: OrganizationConfig = {
     priceRange: "€",
   },
 };
+
+function mapPhotoCredits(
+  cmsCredits: OrganizationSettingsResult["photoCredits"],
+  fallback: PhotoCreditEntry[]
+): PhotoCreditEntry[] {
+  if (!Array.isArray(cmsCredits) || cmsCredits.length === 0) {
+    return fallback;
+  }
+
+  const mapped = cmsCredits
+    .map((entry) => {
+      const name = entry?.name?.trim();
+      const description = entry?.description?.trim();
+      if (!name || !description) return null;
+
+      const credit: PhotoCreditEntry = { name, description };
+      const url = entry.url?.trim();
+      const licenseUrl = entry.licenseUrl?.trim();
+      const licenseLabel = entry.licenseLabel?.trim();
+
+      if (url) credit.url = url;
+      if (licenseUrl) credit.licenseUrl = licenseUrl;
+      if (licenseLabel) credit.licenseLabel = licenseLabel;
+
+      return credit;
+    })
+    .filter((entry): entry is PhotoCreditEntry => entry !== null);
+
+  return mapped.length > 0 ? mapped : fallback;
+}
 
 function mapSanityToOrgData(
   cms: OrganizationSettingsResult | null,
@@ -112,7 +155,29 @@ function mapSanityToOrgData(
       activityCode: resolveString(fallback.legal.activityCode, cms.legalActivityCode),
       activityLabel: resolveString(fallback.legal.activityLabel, cms.legalActivityLabel),
     },
-    website: fallback.website,
+    website: {
+      url: fallback.website.url,
+      developer: {
+        name: resolveString(fallback.website.developer.name, cms.websiteDeveloper?.name),
+        url: resolveString(fallback.website.developer.url, cms.websiteDeveloper?.url),
+        email: resolveString(fallback.website.developer.email, cms.websiteDeveloper?.email),
+        siret: resolveString(fallback.website.developer.siret, cms.websiteDeveloper?.siret),
+      },
+      hosting: {
+        name: resolveString(fallback.website.hosting.name, cms.websiteHosting?.name),
+        address: resolveString(fallback.website.hosting.address, cms.websiteHosting?.address),
+        url: resolveString(fallback.website.hosting.url, cms.websiteHosting?.url),
+        privacyPolicyUrl: resolveString(
+          fallback.website.hosting.privacyPolicyUrl,
+          cms.websiteHosting?.privacyPolicyUrl
+        ),
+      },
+    },
+    dates: {
+      lastUpdated: resolveString(fallback.dates.lastUpdated, cms.mentionsLastUpdated),
+      lastUpdatedIso: resolveString(fallback.dates.lastUpdatedIso, cms.mentionsLastUpdatedIso),
+    },
+    photoCredits: mapPhotoCredits(cms.photoCredits, fallback.photoCredits),
     googleBusiness: {
       cid: resolveString(fallback.googleBusiness.cid ?? "", cms.googleCid),
       location: {

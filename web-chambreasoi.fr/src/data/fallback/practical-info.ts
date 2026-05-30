@@ -4,13 +4,6 @@ import type {
   PracticalInfoTextBlockResult,
 } from "@lib/sanity";
 
-export const tariffColClasses = [
-  "lg:row-start-3 lg:col-start-2",
-  "lg:row-start-4 lg:col-start-2",
-  "lg:row-start-5 lg:col-start-2",
-  "lg:row-start-6 lg:col-start-2",
-] as const;
-
 export const tariffAccentClasses = [
   "bg-accentStone/25",
   "bg-accentForest/20",

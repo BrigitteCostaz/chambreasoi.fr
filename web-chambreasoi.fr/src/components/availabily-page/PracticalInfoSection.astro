@@ -3,12 +3,14 @@ import { Image } from "astro:assets";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import SanityPicture from "@components/media/SanityPicture.astro";
 import { getPricing, getPublicRates } from "@config/pricing";
-import { getPracticalInfoContent } from "@lib/sanity";
 import { formatEuroFR } from "@utils/currency";
-import { getPracticalInfoRenderModel } from "../../data/adapters/practical-info";
+import type { PracticalInfoRenderModel } from "../../data/adapters/practical-info";
 
-const practicalInfo = await getPracticalInfoContent();
-const renderModel = await getPracticalInfoRenderModel(practicalInfo);
+type Props = {
+  renderModel: PracticalInfoRenderModel;
+};
+
+const { renderModel } = Astro.props;
 const {
   p,
   accentClasses,
@@ -17,7 +19,6 @@ const {
   bookingSanitySrcSet,
   fallbackBookingImage,
   fallbackKitchenImage,
-  tariffColClasses,
   tariffAccentClasses,
   resolvedServiceImages,
   displayedServiceCards,
@@ -49,7 +50,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
 
   <div class="relative z-10 flex flex-col gap-[3.6rem] lg:gap-[4.8rem]">
     <!-- Tarifs: own 5-col grid -->
-    <div class="grid grid-cols-2 gap-grid lg:grid-flow-dense lg:items-stretch lg:grid-cols-5">
+    <div class="grid grid-cols-2 gap-grid lg:items-stretch lg:grid-cols-5">
       <div
         data-reveal
         data-reveal-delay="0"
@@ -59,13 +60,40 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
       </div>
 
       <div
-        data-reveal
-        data-reveal-delay="80"
-        class="col-span-full max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+        class="col-span-full flex flex-col gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:row-span-5 lg:gap-[0.4rem] lg:pb-0 lg:px-0"
       >
-        <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
-          <h2 class="heading-2 text-balance">{p.tariffsHeading}</h2>
+        <div
+          data-reveal
+          data-reveal-delay="80"
+          class="max-w-[72ch] lg:pb-0"
+        >
+          <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+            <h2 class="heading-2 text-balance">{p.tariffsHeading}</h2>
+          </div>
         </div>
+
+        {
+          publicRates.map((rate, index) => (
+            <article
+              data-reveal
+              data-reveal-delay={String(120 + index * 40)}
+              class:list={[
+                "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:pb-[1.6rem]",
+                tariffAccentClasses[index],
+              ]}
+            >
+              <div class="flex flex-col gap-[0.2rem]">
+                <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
+              </div>
+              <p class="text-balance text-ui-sm leading-relaxed">
+                <span class="text-ui-sm font-medium tabular-nums">
+                  {formatEuroFR(rate.priceCents)}
+                </span>
+                <span class="text-muted"> TTC</span>
+              </p>
+            </article>
+          ))
+        }
       </div>
 
       <figure
@@ -89,28 +117,6 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
           class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
         />
       </figure>
-
-      {
-        publicRates.map((rate, index) => (
-          <article
-            data-reveal
-            data-reveal-delay={String(120 + index * 40)}
-            class:list={[
-              "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:col-span-1 lg:pb-[1.6rem]",
-              tariffColClasses[index],
-              tariffAccentClasses[index],
-            ]}
-          >
-            <div class="flex flex-col gap-[0.2rem]">
-              <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
-            </div>
-            <p class="text-balance text-ui-sm leading-relaxed">
-              <span class="text-ui-sm font-medium tabular-nums">{formatEuroFR(rate.priceCents)}</span>
-              <span class="text-muted"> TTC</span>
-            </p>
-          </article>
-        ))
-      }
     </div>
 
     <!-- Infos pratiques / modalités: separate 5-col grid -->
@@ -431,6 +437,20 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
 </section>
 
 <style>
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .service-image-container {
     position: absolute;
     inset: 0;

@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  getCmsCacheEpoch,
-  invalidateCmsCache,
-  registerCmsCacheResetter,
-} from "./cache";
+import { getCmsCacheEpoch, invalidateCmsCache, registerCmsCacheResetter } from "./cache";
 
 describe("cms cache invalidation", () => {
   it("increments epoch on each invalidation", () => {

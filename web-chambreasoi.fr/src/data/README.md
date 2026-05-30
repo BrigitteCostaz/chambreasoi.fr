@@ -1,4 +1,4 @@
-## Data Modules
+# Data Modules
 
 Centralized data modules are split by responsibility:
 
@@ -9,8 +9,8 @@ Each file is named by domain (`surroundings`, `practical-info`, `la-chambre`, `f
 
 ## Sanity singletons (local dev)
 
-- **surroundingsPageContent** — Studio → *Page - Bons plans* (`_id: surroundingsPageContent`). Requires 3 accordéons and **Publish**; drafts are not returned by the public API.
+- **surroundingsPageContent** — Studio → *Page - Bons plans* (`_id: surroundingsPageContent`). Includes **Image d’introduction** (intro hero column), galerie page, 3 accordéons; requires **Publish** (drafts are not returned by the public API).
 - **pricingSettings** — Studio → *Tarifs*; used via `getPricing()` (home fold, price section, tarifs practical-info cards).
-- **practicalInfoContent** — Studio → *Page - Infos pratiques*; tarifs heading and kitchen image on `/tarifs-et-reservation`.
+- **practicalInfoContent** — Studio → *Page - Infos pratiques* (`_id: practicalInfoContent`); disponibilités, tarifs, modalités et services on `/tarifs-et-reservation`. Requires **Publish** (drafts are not returned by the public API).
 
 Align `PUBLIC_SANITY_PROJECT_ID` / dataset with `studio-chambreasoi.fr/.env` (see `.env.example` files).

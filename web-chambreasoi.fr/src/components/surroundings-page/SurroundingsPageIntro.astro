@@ -1,56 +1,108 @@
 ---
 import GridOverlay from "@components/layout/GridOverlay.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
+import SurroundingsPhotoCreditCaption from "@components/surroundings-page/SurroundingsPhotoCreditCaption.astro";
 import PortableText from "@components/rich-text/PortableText.astro";
 import RichTextBlockRenderer from "@components/rich-text/RichTextBlock.astro";
-import type { ResolvedSurroundingsPageContent } from "./types";
+import type { SurroundingsIntroImageResult } from "@lib/sanity";
+import { resolveImage } from "@utils/imageUtils";
+import { resolveSurroundingsPhotoCredit } from "../../data/adapters/surroundings";
+import type { ResolvedSurroundingsPageContent, SurroundingsImage } from "./types";
 
 interface Props {
   content: ResolvedSurroundingsPageContent;
+  sanityIntroImage?: SurroundingsIntroImageResult | null;
+  fallbackIntro?: SurroundingsImage;
 }
 
-const { content } = Astro.props;
-const [introImage] = content.images;
+const INTRO_WIDTH = 900;
+const INTRO_HEIGHT = 1200;
+const FALLBACK_IMAGE_PATH = "@images/chambreasoi-garden-01.png";
+
+const { content, sanityIntroImage = null, fallbackIntro } = Astro.props;
+
+const fallbackImage = await resolveImage(FALLBACK_IMAGE_PATH);
+const imageAlt =
+  sanityIntroImage?.alt?.trim() ??
+  fallbackIntro?.alt ??
+  "Vue du jardin et des environs de Challes-les-Eaux";
+const photoCredit = resolveSurroundingsPhotoCredit(
+  sanityIntroImage?.photoCredit,
+  fallbackIntro?.photoCredit
+);
+const caption = photoCredit
+  ? undefined
+  : (sanityIntroImage?.caption?.trim() ?? fallbackIntro?.caption);
+const showIntroImage = Boolean(sanityIntroImage?.asset) || Boolean(fallbackImage);
 ---
 
-<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+<section class="relative max-lg:overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
   <GridOverlay />
-  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
-    <div class="flex items-center px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]">
+  <div class="relative z-10 grid min-w-0 grid-cols-1 gap-grid lg:grid-cols-5 lg:items-stretch">
+    <div
+      class="flex min-w-0 items-center px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+    >
       <span class="heading-3">{content.heroEyebrow}</span>
     </div>
 
-    <div class="max-w-[76ch] flex flex-col gap-[2.4rem] pb-[2.4rem] lg:col-span-2 lg:col-start-2 lg:row-start-2 lg:pb-0">
+    <div
+      class="flex min-w-0 max-w-[76ch] flex-col gap-[2.4rem] pb-[2.4rem] lg:col-span-2 lg:col-start-2 lg:row-start-2 lg:pb-0"
+    >
       <div class="flex flex-col gap-[1.25rem]">
         <h1 class="heading-2 text-balance">{content.heroTitle}</h1>
         {
           content.editorialLead.sanityBlocks ? (
-            <PortableText blocks={content.editorialLead.sanityBlocks} class="text-pretty text-ui-md leading-relaxed" />
+            <PortableText
+              blocks={content.editorialLead.sanityBlocks}
+              class="text-pretty text-ui-md leading-relaxed"
+            />
           ) : (
-            <RichTextBlockRenderer block={content.editorialLead.fallback} class="text-pretty text-ui-md leading-relaxed" />
+            <RichTextBlockRenderer
+              block={content.editorialLead.fallback}
+              class="text-pretty text-ui-md leading-relaxed"
+            />
           )
         }
         <div class="flex flex-col mt-[2.4rem] gap-[.8rem] bg-accentStone/25 p-[0.8rem]">
           {
             content.proximityStatement.sanityBlocks ? (
-              <PortableText blocks={content.proximityStatement.sanityBlocks} class="text-balance text-ui-lg font-medium leading-snug" />
+              <PortableText
+                blocks={content.proximityStatement.sanityBlocks}
+                class="text-balance text-ui-lg font-medium leading-snug"
+              />
             ) : (
-              <RichTextBlockRenderer block={content.proximityStatement.fallback} class="text-balance text-ui-lg font-medium leading-snug" />
+              <RichTextBlockRenderer
+                block={content.proximityStatement.fallback}
+                class="text-balance text-ui-lg font-medium leading-snug"
+              />
             )
           }
           {
             content.proximityIntro.sanityBlocks ? (
-              <PortableText blocks={content.proximityIntro.sanityBlocks} class="text-balance text-ui-sm leading-relaxed" />
+              <PortableText
+                blocks={content.proximityIntro.sanityBlocks}
+                class="text-balance text-ui-sm leading-relaxed"
+              />
             ) : (
               content.proximityIntro.fallback.map((block) => (
-                <RichTextBlockRenderer block={block} class="text-balance text-ui-sm leading-relaxed" />
+                <RichTextBlockRenderer
+                  block={block}
+                  class="text-balance text-ui-sm leading-relaxed"
+                />
               ))
             )
           }
           {
             content.proximityReassurance.sanityBlocks ? (
-              <PortableText blocks={content.proximityReassurance.sanityBlocks} class="text-balance text-ui-sm font-medium leading-relaxed" />
+              <PortableText
+                blocks={content.proximityReassurance.sanityBlocks}
+                class="text-balance text-ui-sm font-medium leading-relaxed"
+              />
             ) : (
-              <RichTextBlockRenderer block={content.proximityReassurance.fallback} class="text-balance text-ui-sm font-medium leading-relaxed" />
+              <RichTextBlockRenderer
+                block={content.proximityReassurance.fallback}
+                class="text-balance text-ui-sm font-medium leading-relaxed"
+              />
             )
           }
         </div>
@@ -58,24 +110,28 @@ const [introImage] = content.images;
     </div>
 
     {
-      introImage ? (
-        <figure class="group/image relative aspect-[4/3] overflow-hidden bg-accentForest/20 lg:col-span-1 lg:col-start-5 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[30rem]">
-          <img
-            src={introImage.src}
-            alt={introImage.alt}
-            width="900"
-            height="1200"
-            loading="lazy"
-            decoding="async"
-            class="size-full object-cover object-center"
-          />
-          {
-            introImage.caption ? (
-              <figcaption class="absolute inset-x-0 bottom-0 bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
-                {introImage.caption}
-              </figcaption>
-            ) : null
-          }
+      showIntroImage ? (
+        <figure class="group/image relative min-w-0 aspect-[3/4] overflow-hidden bg-accentForest/20 lg:col-span-1 lg:col-start-5 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[30rem]">
+          <div class="absolute inset-0">
+            <SanityPicture
+              source={sanityIntroImage}
+              alt={imageAlt}
+              width={INTRO_WIDTH}
+              height={INTRO_HEIGHT}
+              sizes="(max-width: 1024px) 100vw, 20vw"
+              loading="lazy"
+              decoding="async"
+              fallback={fallbackImage}
+              class="size-full object-cover object-center"
+            />
+          </div>
+          {photoCredit ? (
+            <SurroundingsPhotoCreditCaption credit={photoCredit} />
+          ) : caption ? (
+            <figcaption class="absolute inset-x-0 bottom-0 z-[1] bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white">
+              {caption}
+            </figcaption>
+          ) : null}
         </figure>
       ) : null
     }

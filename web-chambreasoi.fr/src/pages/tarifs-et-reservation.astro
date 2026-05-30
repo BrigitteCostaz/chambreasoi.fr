@@ -2,14 +2,36 @@
 import CalendarDisplay from "@components/availabily-page/CalendarDisplay.astro";
 import PracticalInfoSection from "@components/availabily-page/PracticalInfoSection.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
+import { devLog, getPracticalInfoContent, sanityConfig } from "@lib/sanity";
+import { getPracticalInfoRenderModel } from "../data/adapters/practical-info";
+
+const practicalInfo = await getPracticalInfoContent();
+const { projectId, dataset } = sanityConfig();
+
+if (!practicalInfo) {
+  incrementFallbackCounter("practical-info");
+}
+
+devLog("practicalInfoContent", practicalInfo ? "cms" : "fallback", { projectId, dataset });
+
+const renderModel = await getPracticalInfoRenderModel(practicalInfo);
+const { availability } = renderModel;
 ---
 
 <BaseLayout>
-  <CalendarDisplay>
-    <Fragment slot="intro">
-      <p>Consultez les disponibilités de la chambre pour préparer votre séjour.</p>
-    </Fragment>
-  </CalendarDisplay>
+  <CalendarDisplay
+    availabilityEyebrow={availability.eyebrow}
+    availabilityHeading={availability.heading}
+    availabilityIntro={availability.intro}
+    reservationIntro={availability.reservationIntro}
+  />
 
-  <PracticalInfoSection />
+  <PracticalInfoSection renderModel={renderModel} />
 </BaseLayout>
+
+<script>
+  import { initRevealOnIntersect } from "@utils/reveal";
+
+  initRevealOnIntersect({ threshold: 0.1 });
+</script>

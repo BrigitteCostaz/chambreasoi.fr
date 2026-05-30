@@ -13,7 +13,6 @@ import {
   fallbackServiceImages,
   serviceDesktopPositionClassesByCount,
   tariffAccentClasses,
-  tariffColClasses,
 } from "../fallback/practical-info";
 
 const serviceImageWidth = 1400;
@@ -28,6 +27,8 @@ const hasSanityAsset = (
     | undefined
 ) => Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
 
+export type PracticalInfoRenderModel = Awaited<ReturnType<typeof getPracticalInfoRenderModel>>;
+
 export const getPracticalInfoRenderModel = async (
   practicalInfo: PracticalInfoContentResult | null
 ) => {
@@ -35,6 +36,17 @@ export const getPracticalInfoRenderModel = async (
     resolveImage("@images/chambreasoi-home-01.png"),
     resolveImage("@images/chambreasoi-trinkets.png"),
   ]);
+
+  const availability = {
+    eyebrow: practicalInfo?.availabilityEyebrow ?? "Disponibilités",
+    heading: practicalInfo?.availabilityHeading ?? "Agenda",
+    intro:
+      practicalInfo?.availabilityIntro ??
+      "Consultez les disponibilités de la chambre pour préparer votre séjour.",
+    reservationIntro:
+      practicalInfo?.reservationIntro ??
+      "Pour réserver une date ou poser une question sur votre venue, contactez-nous au",
+  };
 
   const p = {
     eyebrow: practicalInfo?.eyebrow ?? "Infos pratiques",
@@ -149,9 +161,9 @@ export const getPracticalInfoRenderModel = async (
     resolvedServiceImages[index] ?? resolvedServiceImages[index % resolvedServiceImages.length];
 
   return {
+    availability,
     p,
     accentClasses: accentClasses as Record<PracticalInfoAccent, string>,
-    tariffColClasses,
     tariffAccentClasses,
     bookingCardPositionClasses,
     kitchenSanitySrc,

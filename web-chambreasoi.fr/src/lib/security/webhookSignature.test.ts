@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  isTimestampFresh,
-  parseSignatureHeader,
-  timingSafeStringEqual,
-} from "./webhookSignature";
+import { isTimestampFresh, parseSignatureHeader, timingSafeStringEqual } from "./webhookSignature";
 
 describe("parseSignatureHeader", () => {
   it("parses valid signature header", () => {

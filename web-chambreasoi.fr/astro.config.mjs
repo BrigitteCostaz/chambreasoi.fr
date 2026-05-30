@@ -174,8 +174,7 @@ export default defineConfig({
         ...Object.fromEntries(
           Object.entries(appAliases).flatMap(([alias, relativePath]) => [
             [alias, new URL(relativePath, import.meta.url).pathname],
-            [`${alias}/`, new URL(`${relativePath}/`, import.meta.url).pathname,
-            ],
+            [`${alias}/`, new URL(`${relativePath}/`, import.meta.url).pathname],
           ])
         ),
 

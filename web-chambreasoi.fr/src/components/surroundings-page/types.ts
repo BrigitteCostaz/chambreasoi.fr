@@ -25,12 +25,16 @@ export type RichTextBlock = RichTextParagraphBlock | RichTextListBlock;
 
 export interface SurroundingsImage {
   src: string;
+  srcSet?: string | null;
   alt: string;
   caption?: string;
+  photoCredit?: WikimediaPhotoCredit;
+  width?: number;
+  height?: number;
 }
 
 export interface WikimediaPhotoCredit {
-  commonsFileUrl: string;
+  commonsFileUrl?: string;
   title: string;
   author: string;
   licenseUrl: string;
@@ -107,7 +111,6 @@ export type ResolvedSurroundingsPageContent = {
   proximityIntro: RichTextListSlot;
   proximityReassurance: RichTextSlot;
   editorialLead: RichTextSlot;
-  images: SurroundingsImage[];
   galleryImages: SurroundingsGalleryImage[];
   accordions: [
     ResolvedSurroundingsAccordion,

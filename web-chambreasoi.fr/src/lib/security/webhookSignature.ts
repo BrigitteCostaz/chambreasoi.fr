@@ -14,7 +14,11 @@ export function parseSignatureHeader(signatureHeader: string | null): {
   return { timestamp, signature };
 }
 
-export function isTimestampFresh(timestamp: number, ttlSeconds: number, nowSeconds: number): boolean {
+export function isTimestampFresh(
+  timestamp: number,
+  ttlSeconds: number,
+  nowSeconds: number
+): boolean {
   return Math.abs(nowSeconds - timestamp) <= ttlSeconds;
 }
 

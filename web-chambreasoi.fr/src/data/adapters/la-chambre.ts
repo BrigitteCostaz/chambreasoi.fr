@@ -6,6 +6,7 @@ import {
   type RoomPageImageResult,
   type RoomPageSectionResult,
 } from "@lib/sanity";
+import { getGalleryImageDimensions } from "@lib/la-chambre/gallery-layout";
 import { resolveImage } from "@utils/imageUtils";
 import {
   type ContentCard,
@@ -98,7 +99,10 @@ const resolveGalleryImages = (
         return { ...fallback, alt: sanityImage.alt ?? fallback.alt, sanityImage };
       })
     : fallbackImages;
-  return images.map((image) => withSanityImageSources(image, 1100, 825));
+  return images.map((image) => {
+    const { width, height } = getGalleryImageDimensions(image);
+    return withSanityImageSources(image, width, height);
+  });
 };
 
 export const getSection = (

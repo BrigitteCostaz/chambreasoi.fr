@@ -31,14 +31,7 @@ const visibleLines = Array.from({ length: visibleLineCount });
 const fillerCells = Array.from({ length: fillerCount });
 ---
 
-<div
-  class:list={[
-    "pointer-events-none absolute inset-0",
-    zIndexClass,
-    offsetClass,
-    className,
-  ]}
->
+<div class:list={["pointer-events-none absolute inset-0", zIndexClass, offsetClass, className]}>
   {
     !desktopOnly && (
       <div

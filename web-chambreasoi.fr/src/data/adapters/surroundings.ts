@@ -16,27 +16,26 @@ import type {
   SurroundingsGalleryImageResult,
   SurroundingsTextBlockResult,
 } from "@chambreasoi/sanity/queries";
-
 const GALLERY_WIDTH = 1400;
 const GALLERY_HEIGHT = 1225;
 const DEFAULT_LICENSE_URL = "https://creativecommons.org/licenses/by-sa/4.0/";
 const DEFAULT_LICENSE_LABEL = "CC BY-SA 4.0";
 
-const resolvePhotoCredit = (
-  sanityCredit: SurroundingsGalleryImageResult["photoCredit"],
+export const resolveSurroundingsPhotoCredit = (
+  sanityCredit: SurroundingsGalleryImageResult["photoCredit"] | undefined,
   fallbackCredit?: WikimediaPhotoCredit
 ): WikimediaPhotoCredit | undefined => {
-  const commonsFileUrl = sanityCredit?.commonsFileUrl?.trim();
   const title = sanityCredit?.title?.trim();
   const author = sanityCredit?.author?.trim();
 
-  if (commonsFileUrl && title && author) {
+  if (title && author) {
+    const commonsFileUrl = sanityCredit?.commonsFileUrl?.trim();
     return {
-      commonsFileUrl,
       title,
       author,
       licenseUrl: sanityCredit?.licenseUrl?.trim() || DEFAULT_LICENSE_URL,
       licenseLabel: sanityCredit?.licenseLabel?.trim() || DEFAULT_LICENSE_LABEL,
+      ...(commonsFileUrl ? { commonsFileUrl } : {}),
     };
   }
 
@@ -45,6 +44,27 @@ const resolvePhotoCredit = (
 
 const hasSanityGalleryAsset = (image: SurroundingsGalleryImageResult | null | undefined) =>
   Boolean(image?.asset && (image.asset._ref || image.asset._id || image.asset.url));
+
+const buildCmsImageSrc = (
+  image: { asset: SurroundingsGalleryImageResult["asset"]; alt?: string | null } | null | undefined,
+  width: number,
+  height: number
+): string | null => {
+  if (!image?.asset) return null;
+
+  return (
+    buildSanityImageUrl({
+      source: image,
+      width,
+      height,
+      quality: 80,
+      format: "webp",
+      fit: "crop",
+    }) ??
+    image.asset.url ??
+    null
+  );
+};
 
 const resolveSanityGalleryImages = (
   sanityImages: SurroundingsGalleryImageResult[] | null | undefined,
@@ -60,27 +80,22 @@ const resolveSanityGalleryImages = (
       fallback[index] ??
       (fallback.length > 0 ? fallback[index % fallback.length] : undefined) ??
       fallback[0];
-    const source = { asset: image.asset, alt: image.alt };
-    const src = buildSanityImageUrl({
-      source,
-      width: GALLERY_WIDTH,
-      height: GALLERY_HEIGHT,
-      quality: 80,
-      format: "webp",
-      fit: "crop",
-    });
+    const src = buildCmsImageSrc(image, GALLERY_WIDTH, GALLERY_HEIGHT);
 
     if (!src) {
       return fallbackItem ? [fallbackItem] : [];
     }
 
-    const photoCredit = resolvePhotoCredit(image.photoCredit, fallbackItem?.photoCredit);
+    const photoCredit = resolveSurroundingsPhotoCredit(
+      image.photoCredit,
+      fallbackItem?.photoCredit
+    );
 
     return [
       {
         src,
         srcSet: buildSanityDprSrcSet({
-          source,
+          source: image,
           width: GALLERY_WIDTH,
           height: GALLERY_HEIGHT,
           dprs: [1, 1.5, 2],
@@ -141,7 +156,9 @@ const resolveItem = (
   if (reservationRequired) item.reservationRequired = reservationRequired;
 
   const fallbackNote =
-    typeof fallbackItem.note === "object" && fallbackItem.note && "sanityBlocks" in fallbackItem.note
+    typeof fallbackItem.note === "object" &&
+    fallbackItem.note &&
+    "sanityBlocks" in fallbackItem.note
       ? fallbackItem.note.fallback
       : fallbackItem.note;
 
@@ -178,10 +195,7 @@ const resolveAccordion = (
       fallbackAccordion.description && "sanityBlocks" in fallbackAccordion.description
         ? fallbackAccordion.description.fallback
         : fallbackAccordion.description;
-    accordion.description = richTextSlot(
-      sanityAccordion?.description,
-      fallbackDescription ?? ""
-    );
+    accordion.description = richTextSlot(sanityAccordion?.description, fallbackDescription ?? "");
   }
 
   return accordion;
@@ -238,7 +252,6 @@ export const resolveSurroundingsPageContent = ({
       sanityContent?.proximityReassurance,
       fallbackContent.proximityReassurance
     ),
-    images: fallbackContent.images,
     galleryImages: resolveSanityGalleryImages(
       sanityContent?.galleryImages,
       fallbackContent.galleryImages
