@@ -1,6 +1,6 @@
 /* config/types/pricing.d.ts
  *
- * Centralized pricing model for "UNE CHAMBRE A SOI".
+ * Centralized pricing model for "UNE CHAMBRE À SOI".
  *
  * Goals:
  * - Single source of truth for tariffs used by UI components and JSON-LD schema generation.

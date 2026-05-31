@@ -1,4 +1,12 @@
-/* config/types/site.d.ts */
+/* config/types/head.d.ts */
+export interface OgImageAsset {
+  /** Path relative to site root, e.g. /og/og-chambreasoi-01.png */
+  path: string;
+  width: number;
+  height: number;
+  alt: string;
+}
+
 export interface HeadConfig {
   meta: {
     url: string;
@@ -10,6 +18,10 @@ export interface HeadConfig {
     geoPlaceName: string;
     geoPosition: string;
     defaultOgImage: string;
+  };
+  ogImages: {
+    primary: OgImageAsset;
+    secondary: OgImageAsset;
   };
   favicons: {
     faviconPng: string;

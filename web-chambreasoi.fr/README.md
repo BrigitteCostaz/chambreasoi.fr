@@ -27,6 +27,45 @@ pnpm --filter web-chambreasoi-fr lint
 - Fallback observability counters: `src/lib/observability/fallbackMetrics.ts`
 - Fallback health endpoint: `src/pages/api/health/fallbacks.ts`
 
+## SEO / discovery
+
+- **`/robots.txt`** — dynamic (`config/robots.ts`)
+- **`/sitemap-index.xml`** — `@astrojs/sitemap`
+- **`/llms.txt`** — LLM-friendly site index (`config/llms.ts`, prerendered)
+- **IndexNow** — targeted URL notification after Sanity publish (see below)
+
+## Sanity webhook (revalidate + IndexNow)
+
+Configure in [manage.sanity.io](https://manage.sanity.io) → Project → API → Webhooks.
+
+**URL:** `https://chambreasoi.fr/api/revalidate` (POST, signed)
+
+**Projection:**
+
+```json
+{ "_type": "{{_type}}", "_id": "{{_id}}" }
+```
+
+**Filter:**
+
+```
+_type in ["foldContent","headlineContent","locationSectionContent","organizationSettings","pricingSettings","accommodationSettings","availability","locationPageContent","practicalInfoContent","roomPageContent","surroundingsPageContent"]
+```
+
+On publish, the webhook:
+
+1. Maps `_type` → public path(s) (`config/cms-route-map.ts`)
+2. Purges only those paths at Cloudflare
+3. Invalidates in-memory CMS cache
+4. Warms URLs (no-cache fetch with retry)
+5. Submits affected URLs to IndexNow (if `INDEXNOW_KEY` is set)
+
+### IndexNow setup (one-time)
+
+1. `openssl rand -hex 16` → set `INDEXNOW_KEY` as Cloudflare Worker **secret**
+2. Deploy → verify `curl https://chambreasoi.fr/{KEY}.txt` returns the key
+3. Register the key in [Bing Webmaster Tools](https://www.bing.com/webmasters/) → IndexNow
+
 ## Aliases and config
 - Runtime alias source: `config/aliases.mjs` (consumed by `astro.config.mjs`)
 - Keep TS alias config in sync with `tsconfig.json`.

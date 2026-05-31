@@ -1,5 +1,5 @@
 ---
-import { getHeadData } from "@config/head";
+import { getHeadData, resolveSiteAssetUrl } from "@config/head";
 import { getOrgData } from "@config/organization";
 import { sitemap } from "@config/pages";
 import { getGlobalSchema } from "@config/schema/global-schema";
@@ -30,7 +30,10 @@ const canonicalURL = currentPage?.canonical
   ? currentPage.canonical
   : new URL(pathname, baseUrl).href;
 
-const ogImageURL = currentPage?.ogImage ?? HeadData.meta.defaultOgImage;
+const ogImagePath = currentPage?.ogImage ?? HeadData.meta.defaultOgImage;
+const ogImageURL = resolveSiteAssetUrl(ogImagePath, baseUrl);
+const ogPrimary = HeadData.ogImages.primary;
+const usePrimaryDimensions = ogImagePath === ogPrimary.path;
 
 const pageNodes: JsonLdNode[] = currentPage?.jsonLd
   ? Array.isArray(currentPage.jsonLd)
@@ -72,6 +75,7 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
   {pageDescription ? <meta name="description" content={pageDescription} /> : null}
 
   <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site index" />
   <link rel="canonical" href={canonicalURL} />
 
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -83,12 +87,22 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
   <meta property="og:title" content={pageTitle} />
   {pageDescription ? <meta property="og:description" content={pageDescription} /> : null}
   <meta property="og:image" content={ogImageURL} />
+  {
+    usePrimaryDimensions ? (
+      <>
+        <meta property="og:image:width" content={String(ogPrimary.width)} />
+        <meta property="og:image:height" content={String(ogPrimary.height)} />
+        <meta property="og:image:alt" content={ogPrimary.alt} />
+      </>
+    ) : null
+  }
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content={orgData.legal.brandName} />
   <meta property="og:locale" content="fr_FR" />
 
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={ogImageURL} />
 
   {HeadData.favicons?.faviconIco ? <link rel="icon" href={HeadData.favicons.faviconIco} /> : null}
   {

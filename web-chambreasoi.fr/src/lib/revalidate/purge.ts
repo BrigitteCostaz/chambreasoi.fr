@@ -1,16 +1,10 @@
-export const ALL_PUBLIC_ROUTES = [
-  "/",
-  "/la-chambre",
-  "/tarifs-et-reservation",
-  "/acces-et-localisation",
-  "/decouvrir-les-environs",
-  "/legales/mentions-legales",
-  "/legales/politique-confidentialite",
-] as const;
+import { ALL_PUBLIC_ROUTES } from "@config/public-routes";
 
-export function buildCloudflarePurgePayload() {
+export { ALL_PUBLIC_ROUTES };
+
+export function buildCloudflarePurgePayload(paths: readonly string[] = ALL_PUBLIC_ROUTES) {
   return {
     purge_everything: false,
-    files: [...ALL_PUBLIC_ROUTES],
+    files: [...paths],
   };
 }

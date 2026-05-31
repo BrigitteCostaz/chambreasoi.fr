@@ -1,6 +1,10 @@
 import type { APIRoute } from "astro";
 import { invalidateCmsCache } from "@config/cache";
+import { resolvePathsFromWebhook } from "@config/cms-route-map";
+import { submitIndexNow, toAbsoluteUrls } from "@config/indexnow";
+import { ALL_PUBLIC_ROUTES, normalizeBaseUrl } from "@config/public-routes";
 import { buildCloudflarePurgePayload } from "@lib/revalidate/purge";
+import { warmPublicUrls } from "@lib/revalidate/warm-urls";
 import {
   isTimestampFresh,
   parseSignatureHeader,
@@ -12,10 +16,13 @@ export const prerender = false;
 
 const SIGNATURE_HEADER_NAME = "sanity-webhook-signature";
 const SIGNATURE_TTL_SECONDS = 300;
+const SITE_BASE_URL = "https://chambreasoi.fr";
+
 type RevalidateBindings = Partial<{
   SANITY_WEBHOOK_SECRET: string;
   CF_ZONE_ID: string;
   CF_API_TOKEN: string;
+  INDEXNOW_KEY: string;
 }>;
 
 function toBase64Url(bytes: ArrayBuffer) {
@@ -48,7 +55,12 @@ function getValidatedBindings(runtimeEnv: RevalidateBindings) {
     return null;
   }
 
-  return { secret, zoneId, apiToken };
+  return {
+    secret,
+    zoneId,
+    apiToken,
+    indexNowKey: runtimeEnv.INDEXNOW_KEY,
+  };
 }
 
 async function isValidSanitySignature(
@@ -72,6 +84,32 @@ async function isValidSanitySignature(
   return timingSafeStringEqual(parsedSignature.signature, expected);
 }
 
+function resolveRevalidationPaths(body: string): {
+  paths: string[];
+  usedFallback: boolean;
+  skipped: boolean;
+} {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    const mapped = resolvePathsFromWebhook(parsed);
+
+    if (mapped) {
+      return { paths: mapped, usedFallback: false, skipped: false };
+    }
+
+    if (typeof parsed === "object" && parsed !== null && "_type" in parsed) {
+      console.warn("[revalidate] Unmapped Sanity _type; skipping purge and IndexNow", {
+        type: (parsed as { _type?: unknown })._type,
+      });
+      return { paths: [], usedFallback: false, skipped: true };
+    }
+  } catch {
+    console.warn("[revalidate] Invalid webhook JSON; falling back to all public routes");
+  }
+
+  return { paths: [...ALL_PUBLIC_ROUTES], usedFallback: true, skipped: false };
+}
+
 export const ALL: APIRoute = async ({ request }) => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -91,6 +129,12 @@ export const ALL: APIRoute = async ({ request }) => {
     return new Response("Invalid signature", { status: 401 });
   }
 
+  const { paths, usedFallback, skipped } = resolveRevalidationPaths(body);
+
+  if (skipped) {
+    return new Response("OK", { status: 200 });
+  }
+
   const purgeResponse = await fetch(
     `https://api.cloudflare.com/client/v4/zones/${bindings.zoneId}/purge_cache`,
     {
@@ -99,7 +143,7 @@ export const ALL: APIRoute = async ({ request }) => {
         Authorization: `Bearer ${bindings.apiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildCloudflarePurgePayload()),
+      body: JSON.stringify(buildCloudflarePurgePayload(paths)),
     }
   );
 
@@ -109,11 +153,27 @@ export const ALL: APIRoute = async ({ request }) => {
       status: purgeResponse.status,
       statusText: purgeResponse.statusText,
       body: errorBody,
+      paths,
+      usedFallback,
     });
     return new Response("Cloudflare cache purge failed", { status: 502 });
   }
 
   invalidateCmsCache();
+
+  const baseUrl = normalizeBaseUrl(SITE_BASE_URL);
+  const absoluteUrls = toAbsoluteUrls(baseUrl, paths);
+  const live = await warmPublicUrls({ baseUrl, paths });
+
+  if (bindings.indexNowKey && live && absoluteUrls.length > 0) {
+    await submitIndexNow({
+      key: bindings.indexNowKey,
+      baseUrl,
+      urlList: absoluteUrls,
+    });
+  } else if (bindings.indexNowKey && !live) {
+    console.error("[revalidate] Skipping IndexNow because URL warm failed", { paths });
+  }
 
   return new Response("OK", { status: 200 });
 };

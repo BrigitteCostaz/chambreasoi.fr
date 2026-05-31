@@ -4,7 +4,7 @@ export const sitemap: Record<string, PageMeta> = {
   home: {
     key: "home",
     path: "/",
-    title: "UNE CHAMBRE A SOI - Chambre d'hôtes Challes-les-Eaux",
+    title: "UNE CHAMBRE À SOI - Chambre d'hôtes Challes-les-Eaux",
     description:
       "Chambre d'hôtes calme à Challes-les-Eaux (Savoie). A43 sortie 20 (3km), WiFi, terrasse, parking gratuit.",
     jsonLd: {

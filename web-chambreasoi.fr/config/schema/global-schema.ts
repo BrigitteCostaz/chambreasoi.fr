@@ -1,6 +1,7 @@
 // ./config/schema/global-schema.ts
 
 import { getAccommodation } from "@config/accomodation";
+import { getHeadData, resolveSiteAssetUrl } from "@config/head";
 import { getOrgData } from "@config/organization";
 import { sitemap } from "@config/pages";
 import { getPricing } from "@config/pricing";
@@ -11,10 +12,12 @@ const normalizeBaseUrl = (url: string): string => (url.endsWith("/") ? url : `${
 
 export async function getGlobalSchema(): Promise<JsonLdNode[]> {
   const orgData = await getOrgData();
+  const headData = await getHeadData();
   const pricing = await getPricing();
   const accommodation = await getAccommodation();
 
   const baseUrl = normalizeBaseUrl(orgData.website.url);
+  const baseUrlWithoutTrailingSlash = baseUrl.replace(/\/$/, "");
   const resolveUrl = (path: string): string => new URL(path, baseUrl).href;
 
   const amenityFeature = accommodation.amenities.map((name) => ({
@@ -30,14 +33,6 @@ export async function getGlobalSchema(): Promise<JsonLdNode[]> {
       url: baseUrl,
       name: orgData.legal.brandName,
       publisher: { "@id": `${baseUrl}#organization` },
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: resolveUrl("/?s={search_term_string}"),
-        },
-        "query-input": "required name=search_term_string",
-      },
     },
     {
       "@type": "Organization",
@@ -56,8 +51,8 @@ export async function getGlobalSchema(): Promise<JsonLdNode[]> {
       priceRange: orgData.googleBusiness.priceRange,
       description: "Chambre d'hôtes avec lit double, salle de bain privative et accès terrasse.",
       image: [
-        resolveUrl("/og/og-chambreasoi-placeholder-01.png"),
-        resolveUrl("/og/og-chambreasoi-placeholder-02.png"),
+        resolveSiteAssetUrl(headData.ogImages.primary.path, baseUrlWithoutTrailingSlash),
+        resolveSiteAssetUrl(headData.ogImages.secondary.path, baseUrlWithoutTrailingSlash),
       ],
       address: {
         "@type": "PostalAddress",
