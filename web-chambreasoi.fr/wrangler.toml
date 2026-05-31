@@ -1,4 +1,4 @@
-name = "chambreasoi"
+name = "chambreasoi-web"
 # main = "@astrojs/cloudflare/entrypoints/server"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
@@ -17,7 +17,8 @@ not_found_handling = "404-page"
 # NOTE: ENABLE_SANITY_STUDIO is intentionally absent here.
 # It is a BUILD-TIME flag read from process.env during `astro build`.
 # Putting it in [vars] has no effect on whether the /studio route is compiled in.
-# Set it via the deploy script instead: see package.json "deploy" / "build:ci".
+# Production Studio is hosted at studio.chambreasoi.fr — not embedded on this site.
+# To test embedded /studio locally: ENABLE_SANITY_STUDIO=true pnpm dev
 [vars]
 PUBLIC_SANITY_PROJECT_ID = "vq8mnl17"
 PUBLIC_SANITY_DATASET = "production"

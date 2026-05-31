@@ -103,20 +103,13 @@ if (isDev) {
   process.env.PUBLIC_SANITY_DATASET = dataset;
 }
 /**
- * Studio is ENABLED by default (opt-out, not opt-in).
+ * Embedded Studio is opt-in only. Production Studio lives at studio.chambreasoi.fr
+ * (see studio-chambreasoi.fr/, deployed via Cloudflare Pages).
  *
- * Why opt-out:
- * - wrangler.toml [vars] are RUNTIME bindings only — they are NOT present in
- *   process.env during `astro build`. An opt-in check (`=== "true"`) therefore
- *   always evaluates to false at build time, so the /studio route is never
- *   registered in the built artifact, causing a 404 in production.
- * - Defaulting to enabled means the route is always compiled in; you can still
- *   remove it from a specific build by explicitly passing the flag.
- *
- * To disable (e.g. in CI or lightweight preview builds):
- *   ENABLE_SANITY_STUDIO=false pnpm build
+ * To test the embedded /studio route locally:
+ *   ENABLE_SANITY_STUDIO=true pnpm dev
  */
-const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO !== "false";
+const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO === "true";
 
 export default defineConfig({
   site: "https://chambreasoi.fr",
@@ -146,10 +139,7 @@ export default defineConfig({
   }), icon({
     iconDir: "src/icons",
   }), sitemap({
-    filter: (page) => {
-      const pathname = new URL(page).pathname;
-      return !pathname.startsWith("/api/") && !pathname.startsWith("/studio/");
-    },
+    filter: (page) => !new URL(page).pathname.startsWith("/api/"),
   })],
 
   devToolbar: {

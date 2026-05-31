@@ -1,4 +1,4 @@
-export const DISALLOW_FOR_ALL = ["/api/", "/studio/"] as const;
+export const DISALLOW_FOR_ALL = ["/api/"] as const;
 
 export const AI_TRAINING_BOTS = [
   "Google-Extended",

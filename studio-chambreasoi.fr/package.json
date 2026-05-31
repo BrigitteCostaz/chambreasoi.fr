@@ -7,8 +7,10 @@
   "scripts": {
     "dev": "sanity dev",
     "start": "sanity start",
-    "build": "sanity build",
-    "deploy": "sanity deploy",
+    "build": "sanity build && cp static/robots.txt static/_redirects dist/",
+    "deploy": "pnpm run build && wrangler pages deploy dist --project-name=chambreasoi-studio --branch=main --commit-dirty=true",
+    "deploy:preview": "pnpm run build && wrangler pages deploy dist --project-name=chambreasoi-studio --branch=develop --commit-dirty=true",
+    "deploy:sanity-hosted": "sanity deploy",
     "deploy-graphql": "sanity graphql deploy",
     "typecheck": "tsc --noEmit"
   },
@@ -28,7 +30,8 @@
     "@types/react": "^19.2.15",
     "eslint": "^10.4.1",
     "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "4.95.0"
   },
   "prettier": {
     "semi": false,

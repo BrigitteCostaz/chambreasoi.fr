@@ -9,7 +9,7 @@ describe("buildRobotsTxt", () => {
     expect(robots).toContain("Sitemap: https://chambreasoi.fr/sitemap-index.xml");
   });
 
-  it("disallows API and studio paths for all crawlers", () => {
+  it("disallows API paths for all crawlers", () => {
     const robots = buildRobotsTxt(SITE);
     for (const path of DISALLOW_FOR_ALL) {
       expect(robots).toContain(`Disallow: ${path}`);

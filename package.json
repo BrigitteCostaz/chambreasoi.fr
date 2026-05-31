@@ -21,13 +21,14 @@
   },
   "scripts": {
     "dev:web": "pnpm --filter web-chambreasoi-fr dev",
-    "dev:studio": "pnpm --filter chambreasoifr dev",
+    "dev:studio": "pnpm --filter studio-chambreasoi-fr dev",
     "build:web": "pnpm --filter web-chambreasoi-fr build",
-    "build:studio": "pnpm --filter chambreasoifr build",
-    "deploy:web": "pnpm --filter web-chambreasoi-fr deploy",
+    "build:studio": "pnpm --filter studio-chambreasoi-fr build",
+    "deploy:web": "pnpm --filter web-chambreasoi-fr run deploy",
+    "deploy:studio": "pnpm --filter studio-chambreasoi-fr run deploy",
     "install:all": "pnpm install",
     "typecheck": "pnpm -r exec tsc --noEmit",
-    "test": "pnpm --filter web-chambreasoi-fr test && pnpm --filter @chambreasoi/sanity test && pnpm --filter chambreasoifr typecheck",
+    "test": "pnpm --filter web-chambreasoi-fr test && pnpm --filter @chambreasoi/sanity test && pnpm --filter studio-chambreasoi-fr typecheck",
     "ci:verify": "pnpm test && pnpm typecheck"
   }
 }
