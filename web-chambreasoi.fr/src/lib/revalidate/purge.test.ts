@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { ALL_PUBLIC_ROUTES, buildCloudflarePurgePayload } from "./purge";
+import { describe, expect, it, vi } from "vitest";
+import {
+  ALL_PUBLIC_ROUTES,
+  buildCloudflarePurgePayload,
+  purgeCloudflareCache,
+} from "./purge";
 
 describe("revalidate purge payload", () => {
   it("targets all public routes by default", () => {
@@ -14,9 +18,8 @@ describe("revalidate purge payload", () => {
     ]);
   });
 
-  it("builds cloudflare file purge payload with absolute URLs", () => {
+  it("builds cloudflare file purge payload with absolute URLs only", () => {
     expect(buildCloudflarePurgePayload()).toEqual({
-      purge_everything: false,
       files: [
         "https://chambreasoi.fr/",
         "https://chambreasoi.fr/la-chambre",
@@ -31,8 +34,58 @@ describe("revalidate purge payload", () => {
 
   it("builds targeted purge payload with absolute URLs", () => {
     expect(buildCloudflarePurgePayload(["/la-chambre"])).toEqual({
-      purge_everything: false,
       files: ["https://chambreasoi.fr/la-chambre"],
+    });
+  });
+});
+
+describe("purgeCloudflareCache", () => {
+  it("returns ok when Cloudflare API succeeds", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ success: true, result: { id: "purge-id" } }),
+    });
+
+    await expect(
+      purgeCloudflareCache({
+        zoneId: "zone123",
+        apiToken: "token123",
+        paths: ["/la-chambre"],
+        fetchImpl,
+      })
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.cloudflare.com/client/v4/zones/zone123/purge_cache",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ files: ["https://chambreasoi.fr/la-chambre"] }),
+      })
+    );
+  });
+
+  it("returns Cloudflare error message on failure", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: async () =>
+        JSON.stringify({
+          success: false,
+          errors: [{ code: 9109, message: "Invalid purge URL" }],
+        }),
+    });
+
+    await expect(
+      purgeCloudflareCache({
+        zoneId: "zone123",
+        apiToken: "token123",
+        paths: ["/la-chambre"],
+        fetchImpl,
+      })
+    ).resolves.toEqual({
+      ok: false,
+      status: 403,
+      error: "Invalid purge URL",
     });
   });
 });

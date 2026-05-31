@@ -3,7 +3,7 @@ import { invalidateCmsCache } from "@config/cache";
 import { resolvePathsFromWebhook } from "@config/cms-route-map";
 import { submitIndexNow, toAbsoluteUrls } from "@config/indexnow";
 import { ALL_PUBLIC_ROUTES, normalizeBaseUrl } from "@config/public-routes";
-import { buildCloudflarePurgePayload } from "@lib/revalidate/purge";
+import { purgeCloudflareCache } from "@lib/revalidate/purge";
 import { warmPublicUrls } from "@lib/revalidate/warm-urls";
 import {
   isTimestampFresh,
@@ -46,10 +46,14 @@ async function createSignature(payload: string, timestamp: number, secret: strin
   );
 }
 
+function trimSecret(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function getValidatedBindings(runtimeEnv: RevalidateBindings) {
-  const secret = runtimeEnv.SANITY_WEBHOOK_SECRET;
-  const zoneId = runtimeEnv.CF_ZONE_ID;
-  const apiToken = runtimeEnv.CF_API_TOKEN;
+  const secret = trimSecret(runtimeEnv.SANITY_WEBHOOK_SECRET);
+  const zoneId = trimSecret(runtimeEnv.CF_ZONE_ID);
+  const apiToken = trimSecret(runtimeEnv.CF_API_TOKEN);
 
   if (!secret || !zoneId || !apiToken) {
     return null;
@@ -59,7 +63,7 @@ function getValidatedBindings(runtimeEnv: RevalidateBindings) {
     secret,
     zoneId,
     apiToken,
-    indexNowKey: runtimeEnv.INDEXNOW_KEY,
+    indexNowKey: trimSecret(runtimeEnv.INDEXNOW_KEY) || undefined,
   };
 }
 
@@ -136,28 +140,22 @@ export const ALL: APIRoute = async ({ request }) => {
 
   const baseUrl = normalizeBaseUrl(SITE_BASE_URL);
 
-  const purgeResponse = await fetch(
-    `https://api.cloudflare.com/client/v4/zones/${bindings.zoneId}/purge_cache`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${bindings.apiToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(buildCloudflarePurgePayload(paths, baseUrl)),
-    }
-  );
+  const purgeResult = await purgeCloudflareCache({
+    zoneId: bindings.zoneId,
+    apiToken: bindings.apiToken,
+    paths,
+    baseUrl,
+  });
 
-  if (!purgeResponse.ok) {
-    const errorBody = (await purgeResponse.text()).slice(0, 300);
+  if (!purgeResult.ok) {
     console.error("Cloudflare cache purge failed", {
-      status: purgeResponse.status,
-      statusText: purgeResponse.statusText,
-      body: errorBody,
+      status: purgeResult.status,
+      error: purgeResult.error,
       paths,
       usedFallback,
+      zoneId: bindings.zoneId,
     });
-    return new Response("Cloudflare cache purge failed", { status: 502 });
+    return new Response(`Cloudflare cache purge failed: ${purgeResult.error}`, { status: 502 });
   }
 
   invalidateCmsCache();
