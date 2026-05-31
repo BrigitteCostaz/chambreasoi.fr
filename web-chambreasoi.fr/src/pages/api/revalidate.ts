@@ -134,15 +134,17 @@ export const ALL: APIRoute = async ({ request }) => {
     return new Response("OK", { status: 200 });
   }
 
+  const baseUrl = normalizeBaseUrl(SITE_BASE_URL);
+
   const purgeResponse = await fetch(
     `https://api.cloudflare.com/client/v4/zones/${bindings.zoneId}/purge_cache`,
     {
-      method: "DELETE",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${bindings.apiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildCloudflarePurgePayload(paths)),
+      body: JSON.stringify(buildCloudflarePurgePayload(paths, baseUrl)),
     }
   );
 
@@ -160,7 +162,6 @@ export const ALL: APIRoute = async ({ request }) => {
 
   invalidateCmsCache();
 
-  const baseUrl = normalizeBaseUrl(SITE_BASE_URL);
   const absoluteUrls = toAbsoluteUrls(baseUrl, paths);
   const live = await warmPublicUrls({ baseUrl, paths });
 

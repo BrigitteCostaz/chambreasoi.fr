@@ -17,5 +17,12 @@
     "PUBLIC_SANITY_DATASET": "production",
     "SANITY_PROJECT_ID": "vq8mnl17",
     "SANITY_DATASET": "production"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "01c4610c325f41059e0d0e32b6b48d15",
+      "preview_id": "01c4610c325f41059e0d0e32b6b48d15"
+    }
+  ]
 }
