@@ -1,5 +1,8 @@
 const SIGNATURE_HEADER_REGEX = /^t=(\d+)[, ]+v1=([^, ]+)$/;
 
+/** Sanity sends millisecond Unix timestamps in `sanity-webhook-signature` (@sanity/webhook v4). */
+const SANITY_MIN_TIMESTAMP_MS = 1609459200000;
+
 export function parseSignatureHeader(signatureHeader: string | null): {
   timestamp: number;
   signature: string;
@@ -15,11 +18,15 @@ export function parseSignatureHeader(signatureHeader: string | null): {
 }
 
 export function isTimestampFresh(
-  timestamp: number,
+  timestampMs: number,
   ttlSeconds: number,
-  nowSeconds: number
+  nowMs: number = Date.now()
 ): boolean {
-  return Math.abs(nowSeconds - timestamp) <= ttlSeconds;
+  if (timestampMs < SANITY_MIN_TIMESTAMP_MS) {
+    return false;
+  }
+
+  return Math.abs(nowMs - timestampMs) <= ttlSeconds * 1000;
 }
 
 export function timingSafeStringEqual(left: string, right: string): boolean {

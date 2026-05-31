@@ -69,13 +69,12 @@ async function isValidSanitySignature(
   secret: string
 ) {
   const parsedSignature = parseSignatureHeader(signatureHeader);
-  const now = Math.floor(Date.now() / 1000);
 
   if (!parsedSignature) {
     return false;
   }
 
-  if (!isTimestampFresh(parsedSignature.timestamp, SIGNATURE_TTL_SECONDS, now)) {
+  if (!isTimestampFresh(parsedSignature.timestamp, SIGNATURE_TTL_SECONDS)) {
     return false;
   }
 

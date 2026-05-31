@@ -40,16 +40,20 @@ Configure in [manage.sanity.io](https://manage.sanity.io) → Project → API �
 
 **URL:** `https://chambreasoi.fr/api/revalidate` (POST, signed)
 
-**Projection:**
+**Projection** (GROQ, not JSON templates):
 
-```json
-{ "_type": "{{_type}}", "_id": "{{_id}}" }
+```groq
+{
+  _type,
+  _id
+}
 ```
 
 **Filter:**
 
 ```
 _type in ["foldContent","headlineContent","locationSectionContent","organizationSettings","pricingSettings","accommodationSettings","availability","locationPageContent","practicalInfoContent","roomPageContent","surroundingsPageContent"]
+&& !(_id in path("drafts.**"))
 ```
 
 On publish, the webhook:
