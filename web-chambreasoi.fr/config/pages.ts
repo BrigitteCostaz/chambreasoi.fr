@@ -101,7 +101,8 @@ const pages = {
   mentionsLegales: {
     key: "mentionsLegales",
     path: "/legales/mentions-legales",
-    title: "Mentions légales",
+    title: "Mentions légales — Chambre d'hôtes Challes-les-Eaux",
+    titleNav: "mentions légales",
     description:
       "Consultez les informations légales de la chambre d'hôtes Une chambre à soi à Challes-les-Eaux.",
     jsonLd: [
@@ -119,7 +120,8 @@ const pages = {
   politiqueConfidentialite: {
     key: "politiqueConfidentialite",
     path: "/legales/politique-confidentialite",
-    title: "Politique de confidentialité",
+    title: "Politique de confidentialité — Chambre d'hôtes Challes-les-Eaux",
+    titleNav: "confidentialité",
     description:
       "Consultez la politique de confidentialité de la chambre d'hôtes Une chambre à soi à Challes-les-Eaux.",
     jsonLd: [

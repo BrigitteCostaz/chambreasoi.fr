@@ -52,12 +52,12 @@ export const footerNavigation: NavLinkItem[] = [
 export const legalNavigation: LegalLinkItem[] = [
   {
     pageKey: "mentionsLegales",
-    text: sitemap.mentionsLegales.title,
+    text: sitemap.mentionsLegales.titleNav ?? sitemap.mentionsLegales.title,
     link: sitemap.mentionsLegales.path,
   },
   {
     pageKey: "politiqueConfidentialite",
-    text: sitemap.politiqueConfidentialite.title,
+    text: sitemap.politiqueConfidentialite.titleNav ?? sitemap.politiqueConfidentialite.title,
     link: sitemap.politiqueConfidentialite.path,
   },
 ];
