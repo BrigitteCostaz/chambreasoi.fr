@@ -1,3 +1,10 @@
+import { buildSanityDprSrcSet, buildSanityImageUrl } from "@chambreasoi/sanity/image";
+import type {
+  SurroundingsAccordionItemResult,
+  SurroundingsAccordionResult,
+  SurroundingsGalleryImageResult,
+  SurroundingsTextBlockResult,
+} from "@chambreasoi/sanity/queries";
 import type {
   ResolvedSurroundingsAccordion,
   ResolvedSurroundingsItem,
@@ -9,13 +16,7 @@ import type {
   SurroundingsItem,
   WikimediaPhotoCredit,
 } from "@components/surroundings-page/types";
-import { buildSanityDprSrcSet, buildSanityImageUrl } from "@chambreasoi/sanity/image";
-import type {
-  SurroundingsAccordionItemResult,
-  SurroundingsAccordionResult,
-  SurroundingsGalleryImageResult,
-  SurroundingsTextBlockResult,
-} from "@chambreasoi/sanity/queries";
+
 const GALLERY_WIDTH = 1400;
 const GALLERY_HEIGHT = 1225;
 const DEFAULT_LICENSE_URL = "https://creativecommons.org/licenses/by-sa/4.0/";

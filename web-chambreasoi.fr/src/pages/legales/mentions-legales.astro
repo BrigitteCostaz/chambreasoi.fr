@@ -1,8 +1,10 @@
 ---
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import MentionsLegalesContent from "@components/legals/MentionsLegalesContent.astro";
-import BaseLayout from "@layouts/BaseLayout.astro";
 import { getOrgData } from "@config/organization";
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+export const prerender = true;
 
 const org = await getOrgData();
 ---

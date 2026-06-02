@@ -1,8 +1,9 @@
 ---
-import { ColorData, paletteToCSSVars } from "@config/colors";
+import { ColorData, darkOpaqueBgUtilitiesCSS, paletteToCSSVars } from "@config/colors";
 
 const lightVars = paletteToCSSVars(ColorData.colors.light);
 const darkVars = paletteToCSSVars(ColorData.colors.dark);
+const darkOpaqueBg = darkOpaqueBgUtilitiesCSS();
 
 const css = `
 :root {
@@ -18,6 +19,8 @@ ${darkVars}
 ${darkVars}
   }
 }
+
+${darkOpaqueBg}
 `;
 ---
 

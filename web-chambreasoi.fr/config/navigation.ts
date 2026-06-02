@@ -12,7 +12,7 @@ export const headerNavigation: NavLinkItem[] = [
   },
   {
     pageKey: "room",
-    text: sitemap.room.title,
+    text: sitemap.room.titleNav ?? sitemap.room.title,
     link: sitemap.room.path,
     icon: "ion/bed-sharp",
     showInDesktopNav: true,
@@ -20,7 +20,7 @@ export const headerNavigation: NavLinkItem[] = [
   },
   {
     pageKey: "reservations",
-    text: sitemap.reservations.title,
+    text: sitemap.reservations.titleNav ?? sitemap.reservations.title,
     link: sitemap.reservations.path,
     icon: "ion/calendar-sharp",
     showInDesktopNav: true,
@@ -28,7 +28,7 @@ export const headerNavigation: NavLinkItem[] = [
   },
   {
     pageKey: "location",
-    text: sitemap.location.title,
+    text: sitemap.location.titleNav ?? sitemap.location.title,
     link: sitemap.location.path,
     icon: "ion/navigate-sharp",
     showInDesktopNav: true,
@@ -36,7 +36,7 @@ export const headerNavigation: NavLinkItem[] = [
   },
   {
     pageKey: "surroundings",
-    text: sitemap.surroundings.title,
+    text: sitemap.surroundings.titleNav ?? sitemap.surroundings.title,
     link: sitemap.surroundings.path,
     icon: "ion/binocular-sharp",
     showInDesktopNav: true,

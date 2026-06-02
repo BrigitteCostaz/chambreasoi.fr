@@ -3,7 +3,7 @@ import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalend
 import Button from "@components/button/Button.astro";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getOrgData } from "@config/organization";
-import { AVAILABILITY_MONTHS_QUERY, fetchSanity, type AvailabilityMonthResult } from "@lib/sanity";
+import { AVAILABILITY_MONTHS_QUERY, type AvailabilityMonthResult, fetchSanity } from "@lib/sanity";
 
 type Props = {
   availabilityEyebrow: string;
@@ -12,12 +12,8 @@ type Props = {
   reservationIntro: string;
 };
 
-const {
-  availabilityEyebrow,
-  availabilityHeading,
-  availabilityIntro,
-  reservationIntro,
-} = Astro.props;
+const { availabilityEyebrow, availabilityHeading, availabilityIntro, reservationIntro } =
+  Astro.props;
 
 function getMonthDays(month: string) {
   const year = Number(month.slice(0, 4));
@@ -87,7 +83,8 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
         <div class="space-y-[0.8rem] text-balance text-ui-lg font-medium lg:max-w-[48ch]">
           <p class="sm:hidden">{reservationIntro}</p>
           <p class="hidden sm:block">
-            {reservationIntro} {phone.display}
+            {reservationIntro}
+            {phone.display}
           </p>
         </div>
 

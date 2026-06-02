@@ -9,14 +9,14 @@ export function resolveSiteAssetUrl(path: string, baseUrl: string): string {
 
 function buildOgImages(brandName: string, city: string): HeadConfig["ogImages"] {
   const primary: OgImageAsset = {
-    path: "/og/og-chambreasoi-01.png",
+    path: "/og/og-chambreasoi-01.jpg",
     width: 1200,
     height: 630,
     alt: `${brandName} — chambre d'hôtes à ${city}`,
   };
 
   const secondary: OgImageAsset = {
-    path: "/og/og-chambreasoi-02.png",
+    path: "/og/og-chambreasoi-02.jpg",
     width: 1200,
     height: 1200,
     alt: `${brandName} — vue de la chambre d'hôtes`,

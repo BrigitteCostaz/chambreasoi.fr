@@ -79,23 +79,46 @@ export const leftCardPositions = [
   "lg:col-start-2 lg:row-start-3",
   "lg:col-start-3 lg:row-start-3",
 ] as const;
-export const mobileInterleavedCardOrdersWithHero = [
+
+export const privateMobileCardOrdersWithHero = [
   "max-lg:order-4 lg:order-none",
+  "max-lg:order-7 lg:order-none",
+  "max-lg:order-8 lg:order-none",
+] as const;
+export const privateMobileGalleryOrdersWithHero = [
+  "max-lg:order-5 lg:order-none",
+  "max-lg:order-6 lg:order-none",
+  "max-lg:order-9 lg:order-none",
+] as const;
+
+export const sharedMobileCardOrdersWithHero = [
+  "max-lg:order-4 lg:order-none",
+  "max-lg:order-5 lg:order-none",
+  "max-lg:order-7 lg:order-none",
+] as const;
+export const sharedMobileGalleryOrdersWithHero = [
+  "max-lg:order-6 lg:order-none",
+  "max-lg:order-8 lg:order-none",
+  "max-lg:order-9 lg:order-none",
+] as const;
+
+export const serviceMobileCardOrdersWithHero = [
+  "max-lg:order-5 lg:order-none",
   "max-lg:order-6 lg:order-none",
   "max-lg:order-8 lg:order-none",
 ] as const;
-export const mobileInterleavedGalleryOrdersWithHero = [
-  "max-lg:order-5 lg:order-none",
+export const serviceMobileGalleryOrdersWithHero = [
+  "max-lg:order-4 lg:order-none",
   "max-lg:order-7 lg:order-none",
   "max-lg:order-9 lg:order-none",
 ] as const;
-export const mobileInterleavedCardOrdersNoHero = [
+export const serviceMobileCardOrdersNoHero = [
   "max-lg:order-3 lg:order-none",
-  "max-lg:order-5 lg:order-none",
+  "max-lg:order-6 lg:order-none",
   "max-lg:order-7 lg:order-none",
 ] as const;
-export const mobileInterleavedGalleryOrdersNoHero = [
+export const serviceMobileGalleryOrdersNoHero = [
   "max-lg:order-4 lg:order-none",
-  "max-lg:order-6 lg:order-none",
+  "max-lg:order-5 lg:order-none",
   "max-lg:order-8 lg:order-none",
 ] as const;

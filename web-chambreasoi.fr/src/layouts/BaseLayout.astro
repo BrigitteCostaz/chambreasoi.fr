@@ -3,7 +3,16 @@ import Footer from "@components/footer/Footer.astro";
 import Header from "@components/header/Header.astro";
 import MobileNav from "@components/navigation/MobileNav.astro";
 import { headerNavigation } from "@config/navigation";
+import { sitemap } from "@config/pages";
 import Head from "@layouts/Head.astro";
+
+interface Props {
+  /** Omit canonical and set noindex (404 and similar). */
+  noindex?: boolean;
+  pageKey?: keyof typeof sitemap;
+}
+
+const { noindex = false, pageKey } = Astro.props;
 
 // Transform headerNavigation to MobileNav's expected format
 const mobileNavLinks = headerNavigation
@@ -16,7 +25,7 @@ const mobileNavLinks = headerNavigation
 ---
 
 <html lang="fr">
-  <Head />
+  <Head noindex={noindex} pageKey={pageKey} />
   <body id="body" class="flex flex-col" style="min-height: 100dvh">
     <Header />
     <MobileNav links={mobileNavLinks} />

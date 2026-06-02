@@ -32,6 +32,8 @@ type ButtonProps = BaseProps & {
   disabled?: boolean;
   target?: never;
   rel?: never;
+  /** Inline handler, e.g. `history.back()` — only valid when rendering a `<button>`. */
+  onclick?: string;
 };
 
 type LinkProps = BaseProps & {
@@ -40,6 +42,7 @@ type LinkProps = BaseProps & {
   disabled?: boolean; // Visual only for links
   target?: string;
   rel?: string;
+  onclick?: never;
 };
 
 type Props = ButtonProps | LinkProps;
@@ -55,6 +58,7 @@ const {
   disabled = false,
   target,
   rel,
+  onclick,
   ...rest
 } = Astro.props;
 
@@ -94,7 +98,7 @@ const classList = ["button", `button--${variant}`, `button--${size}`, className]
       {icon && iconSide === "right" && <Icon name={icon} class="button__icon" />}
     </a>
   ) : (
-    <button type={type} disabled={disabled} class:list={classList} {...rest}>
+    <button type={type} disabled={disabled} onclick={onclick} class:list={classList} {...rest}>
       {icon && iconSide === "left" && <Icon name={icon} class="button__icon" />}
       <slot />
       {icon && iconSide === "right" && <Icon name={icon} class="button__icon" />}

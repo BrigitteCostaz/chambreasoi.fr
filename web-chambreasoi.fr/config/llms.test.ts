@@ -13,7 +13,7 @@ describe("buildLlmsTxt", () => {
     expect(content).toContain("> Chambre d'hôtes à Challes-les-Eaux.");
     expect(content).toContain("## Pages");
     expect(content).toContain("## Optional");
-    expect(content).toContain("[La chambre](https://chambreasoi.fr/la-chambre)");
+    expect(content).toContain("[la chambre](https://chambreasoi.fr/la-chambre)");
     expect(content).toContain("https://chambreasoi.fr/sitemap-index.xml");
   });
 });

@@ -10,7 +10,12 @@ export function getIndexNowHost(baseUrl: string): string {
   return new URL(normalizeBaseUrl(baseUrl)).hostname;
 }
 
-export function buildIndexNowPayload(host: string, key: string, keyLocation: string, urlList: string[]) {
+export function buildIndexNowPayload(
+  host: string,
+  key: string,
+  keyLocation: string,
+  urlList: string[]
+) {
   return {
     host,
     key,

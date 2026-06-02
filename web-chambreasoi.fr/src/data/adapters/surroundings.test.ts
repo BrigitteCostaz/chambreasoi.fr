@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { resolveSurroundingsPageContent } from "./surroundings";
 import { fallbackContent, reservationLabels } from "../../data/fallback/surroundings";
+import { resolveSurroundingsPageContent } from "./surroundings";
 
 describe("resolveSurroundingsPageContent", () => {
   it("keeps exactly three accordions from fallback model", () => {

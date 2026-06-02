@@ -1,10 +1,10 @@
 ---
-import { Icon } from "astro-icon/components";
 import PortableText from "@components/rich-text/PortableText.astro";
 import RichTextBlockRenderer from "@components/rich-text/RichTextBlock.astro";
+import { Icon } from "astro-icon/components";
 import SurroundingsCard from "./SurroundingsCard.astro";
 import SurroundingsGalleryImages from "./SurroundingsGalleryImages.astro";
-import type { ResolvedSurroundingsPageContent, ReservationStatus } from "./types";
+import type { ReservationStatus, ResolvedSurroundingsPageContent } from "./types";
 
 interface Props {
   accordions: ResolvedSurroundingsPageContent["accordions"];

@@ -13,11 +13,15 @@ import { getLaChambrePageModel } from "../data/adapters/la-chambre";
 import {
   accentClasses,
   leftCardPositions,
-  mobileInterleavedCardOrdersNoHero,
-  mobileInterleavedCardOrdersWithHero,
-  mobileInterleavedGalleryOrdersNoHero,
-  mobileInterleavedGalleryOrdersWithHero,
+  privateMobileCardOrdersWithHero,
+  privateMobileGalleryOrdersWithHero,
   rightCardPositions,
+  serviceMobileCardOrdersNoHero,
+  serviceMobileCardOrdersWithHero,
+  serviceMobileGalleryOrdersNoHero,
+  serviceMobileGalleryOrdersWithHero,
+  sharedMobileCardOrdersWithHero,
+  sharedMobileGalleryOrdersWithHero,
 } from "../data/fallback/la-chambre";
 
 const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomPageContent());
@@ -25,12 +29,12 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
 
 <BaseLayout>
   <section>
-    <div class="relative overflow-x-clip py-[.8rem] lg:pb-[4.8rem] lg:bg-accentStone/25">
+    <div
+      class="relative overflow-x-clip mt-[.8rem] lg:mt-[0] lg:mt-0 py-[.8rem] lg:pb-[4.8rem] bg-accentStone/25"
+    >
       <GridOverlay />
 
-      <div
-        class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem] bg-accentStone/25 lg:bg-transparent"
-      >
+      <div class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem]">
         <div
           class="col-span-full flex flex-col gap-[3.2rem] px-[0.4rem] lg:col-span-4 lg:col-start-2"
         >
@@ -51,20 +55,20 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
 
   <section
     id="sejour-confort"
-    class="relative overflow-x-clip py-[3.2rem] scroll-mt-[var(--header-height,0px)] lg:py-[4.8rem]"
+    class="relative overflow-x-clip pt-[4.8rem] pb-[1.6rem] scroll-mt-[var(--header-height,0px)] lg:py-[4.8rem]"
   >
     <GridOverlay />
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
         <span class="heading-3">{p.privateSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-lg:order-2 max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:pb-0 lg:mb-[1.6rem]"
+        class="max-lg:order-[-1] max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:pb-0 lg:mb-[1.6rem]"
       >
         <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
           <h2 class="heading-2 text-balance">{p.privateSection.heading}</h2>
@@ -124,7 +128,7 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
             class:list={[
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
-              mobileInterleavedCardOrdersWithHero[index] ?? mobileInterleavedCardOrdersWithHero[2],
+              privateMobileCardOrdersWithHero[index] ?? privateMobileCardOrdersWithHero[2],
               rightCardPositions[index] ?? rightCardPositions[0],
             ]}
           >
@@ -144,8 +148,7 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
               data-reveal-delay={String(380 + index * 50)}
               class:list={[
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
-                mobileInterleavedGalleryOrdersWithHero[index] ??
-                  mobileInterleavedGalleryOrdersWithHero[2],
+                privateMobileGalleryOrdersWithHero[index] ?? privateMobileGalleryOrdersWithHero[2],
                 ...getGalleryLayoutClasses(p.privateSection.galleryImages, index),
               ]}
             >
@@ -181,20 +184,20 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
     </div>
   </section>
 
-  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+  <section class="relative overflow-x-clip py-[1.6rem] lg:py-[4.8rem]">
     <GridOverlay />
 
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
         <span class="heading-3">{p.sharedSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-lg:order-2 flex flex-col pb-[1.6rem] lg:order-none lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:pb-0"
+        class="max-lg:order-[-1] max-w-[72ch] flex flex-col px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:pb-0"
       >
         <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem] pb-[1.6rem]">
           <h2 class="heading-2 text-balance leading-[1.2] min-h-[2.4em]">
@@ -216,7 +219,7 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
             class:list={[
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[13rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
-              mobileInterleavedCardOrdersWithHero[index] ?? mobileInterleavedCardOrdersWithHero[2],
+              sharedMobileCardOrdersWithHero[index] ?? sharedMobileCardOrdersWithHero[2],
               leftCardPositions[index] ?? leftCardPositions[0],
             ]}
           >
@@ -233,7 +236,7 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
           <figure
             data-reveal
             data-reveal-delay="360"
-            class="max-lg:order-3 group/image relative aspect-[3/4] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+            class="max-lg:order-3 group/image relative aspect-[4/3] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
           >
             <img
               src={p.sharedSection.featureImage.sanitySrc}
@@ -276,8 +279,7 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
               data-reveal-delay={String(420 + index * 50)}
               class:list={[
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
-                mobileInterleavedGalleryOrdersWithHero[index] ??
-                  mobileInterleavedGalleryOrdersWithHero[2],
+                sharedMobileGalleryOrdersWithHero[index] ?? sharedMobileGalleryOrdersWithHero[2],
                 ...getGalleryLayoutClasses(p.sharedSection.galleryImages, index),
               ]}
             >
@@ -313,20 +315,20 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
     </div>
   </section>
 
-  <section class="relative overflow-x-clip py-[3.2rem] lg:py-[4.8rem]">
+  <section class="relative overflow-x-clip py-[1.6rem] lg:py-[4.8rem]">
     <GridOverlay />
 
     <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
       <div
         data-reveal
         data-reveal-delay="0"
-        class="max-lg:order-1 px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
       >
         <span class="heading-3">{p.serviceSection.eyebrow}</span>
       </div>
 
       <div
-        class="max-lg:order-2 max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-3 lg:pb-0"
+        class="max-lg:order-[-1] max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-3 lg:pb-0"
       >
         <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
           <h2 class="heading-2 text-balance">{p.serviceSection.heading}</h2>
@@ -387,14 +389,8 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
               "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
               accentClasses[card.accent],
               ...(hasServiceFeatureImage
-                ? [
-                    mobileInterleavedCardOrdersWithHero[index] ??
-                      mobileInterleavedCardOrdersWithHero[2],
-                  ]
-                : [
-                    mobileInterleavedCardOrdersNoHero[index] ??
-                      mobileInterleavedCardOrdersNoHero[2],
-                  ]),
+                ? [serviceMobileCardOrdersWithHero[index] ?? serviceMobileCardOrdersWithHero[2]]
+                : [serviceMobileCardOrdersNoHero[index] ?? serviceMobileCardOrdersNoHero[2]]),
               rightCardPositions[index] ?? rightCardPositions[0],
             ]}
           >
@@ -416,12 +412,12 @@ const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomP
                 "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
                 ...(hasServiceFeatureImage
                   ? [
-                      mobileInterleavedGalleryOrdersWithHero[index] ??
-                        mobileInterleavedGalleryOrdersWithHero[2],
+                      serviceMobileGalleryOrdersWithHero[index] ??
+                        serviceMobileGalleryOrdersWithHero[2],
                     ]
                   : [
-                      mobileInterleavedGalleryOrdersNoHero[index] ??
-                        mobileInterleavedGalleryOrdersNoHero[2],
+                      serviceMobileGalleryOrdersNoHero[index] ??
+                        serviceMobileGalleryOrdersNoHero[2],
                     ]),
                 ...getGalleryLayoutClasses(p.serviceSection.galleryImages, index, 1),
               ]}

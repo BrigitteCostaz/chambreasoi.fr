@@ -168,8 +168,21 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
 
   /* Icone des fleches de navigation. */
   :global([data-vc-theme] .vc-header .vc-arrow::before) {
-    background-image: var(--chevronBackgroundImage);
-    color: var(--color-accentForest);
+    /* Use the SVG as a mask to cut out the shape */
+    -webkit-mask-image: var(--chevronBackgroundImage);
+    mask-image: var(--chevronBackgroundImage);
+
+    -webkit-mask-size: contain;
+    mask-size: contain;
+
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+
+    -webkit-mask-position: center;
+    mask-position: center;
+
+    /* The background-color now becomes the icon's color */
+    background-color: var(--color-accentForest);
   }
 
   /* Etat des labels de jours de semaine. */

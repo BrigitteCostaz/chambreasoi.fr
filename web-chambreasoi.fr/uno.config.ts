@@ -2,24 +2,11 @@
 import { defineConfig, presetMini } from "unocss";
 import { presetWebFonts } from "unocss/preset-web-fonts";
 
-import { ColorData } from "./config/colors";
-
-type ThemeColors = typeof ColorData.colors;
-
-const flattenColors = (colors: ThemeColors) => {
-  const darkPrefixed = Object.fromEntries(
-    Object.entries(colors.dark).map(([key, value]) => [`dark-${key}`, value])
-  );
-
-  return {
-    ...colors.light,
-    ...darkPrefixed,
-  };
-};
+import { semanticColorsForUno } from "./config/colors";
 
 export default defineConfig({
   theme: {
-    colors: flattenColors(ColorData.colors),
+    colors: semanticColorsForUno(),
     fontFamily: {
       sans: '"Karla", sans-serif',
       mono: '"Victor Mono", monospace',
@@ -37,7 +24,7 @@ export default defineConfig({
     "heading-1":
       "text-[clamp(24px,calc(24px+32*(100vw-375px)/1225),32px)] font-[var(--font-display)] font-medium tracking-[var(--font-display-tracking)] leading-[1.1]",
     "heading-2":
-      "text-[clamp(20px,calc(20px+16*(100vw-375px)/1225),28px)] font-[var(--font-display)] font-medium leading-[1.1]",
+      "text-[clamp(20px,calc(20px+16*(100vw-375px)/1225),28px)] font-[var(--font-display)] font-medium leading-[1.1] color-txtMuted",
     "heading-3":
       "text-[clamp(14px,calc(14*1px+(6)*(100vw-375*1px)/(1225)),18px)] font-[var(--font-sans)] leading-[1.2] [text-transform:uppercase]",
     // Body / UI

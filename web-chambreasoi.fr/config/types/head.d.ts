@@ -1,6 +1,6 @@
 /* config/types/head.d.ts */
 export interface OgImageAsset {
-  /** Path relative to site root, e.g. /og/og-chambreasoi-01.png */
+  /** Path relative to site root, e.g. /og/og-chambreasoi-01.jpg */
   path: string;
   width: number;
   height: number;

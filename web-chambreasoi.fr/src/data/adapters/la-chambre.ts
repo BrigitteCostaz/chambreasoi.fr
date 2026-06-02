@@ -1,3 +1,4 @@
+import { getGalleryImageDimensions } from "@lib/la-chambre/gallery-layout";
 import {
   buildSanityDprSrcSet,
   buildSanityImageUrl,
@@ -6,7 +7,6 @@ import {
   type RoomPageImageResult,
   type RoomPageSectionResult,
 } from "@lib/sanity";
-import { getGalleryImageDimensions } from "@lib/la-chambre/gallery-layout";
 import { resolveImage } from "@utils/imageUtils";
 import {
   type ContentCard,

@@ -10,6 +10,11 @@ export interface PageMeta {
   description: string;
 
   /**
+   * Short label for navigation menus. Falls back to title when omitted.
+   */
+  titleNav?: string;
+
+  /**
    * Structured data.
    *
    * Must be compatible with `schema-dts` `Thing` because `astro-seo-schema`
@@ -22,6 +27,7 @@ export interface PageMeta {
    */
   ogImage?: string;
   canonical?: string;
+  noindex?: boolean;
 
   /**
    * Override the mainEntity @id for this page's WebPage node.

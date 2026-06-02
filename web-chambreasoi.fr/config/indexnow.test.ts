@@ -15,12 +15,9 @@ describe("indexnow", () => {
 
   it("builds payload with host and url list", () => {
     expect(
-      buildIndexNowPayload(
-        "chambreasoi.fr",
-        "abc123",
-        "https://chambreasoi.fr/abc123.txt",
-        ["https://chambreasoi.fr/la-chambre"]
-      )
+      buildIndexNowPayload("chambreasoi.fr", "abc123", "https://chambreasoi.fr/abc123.txt", [
+        "https://chambreasoi.fr/la-chambre",
+      ])
     ).toEqual({
       host: "chambreasoi.fr",
       key: "abc123",

@@ -1,4 +1,3 @@
-import type { APIRoute } from "astro";
 import { invalidateCmsCache } from "@config/cache";
 import { resolvePathsFromWebhook } from "@config/cms-route-map";
 import { submitIndexNow, toAbsoluteUrls } from "@config/indexnow";
@@ -11,6 +10,7 @@ import {
   timingSafeStringEqual,
 } from "@lib/security/webhookSignature";
 import { getCloudflareBindings, getRuntimeEnv } from "@utils/runtime-env";
+import type { APIRoute } from "astro";
 
 export const prerender = false;
 

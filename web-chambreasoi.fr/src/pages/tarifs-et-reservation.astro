@@ -6,6 +6,9 @@ import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { devLog, getPracticalInfoContent, sanityConfig } from "@lib/sanity";
 import { getPracticalInfoRenderModel } from "../data/adapters/practical-info";
 
+// Keep this route SSR: availability can change independently of deploys.
+export const prerender = false;
+
 const practicalInfo = await getPracticalInfoContent();
 const { projectId, dataset } = sanityConfig();
 

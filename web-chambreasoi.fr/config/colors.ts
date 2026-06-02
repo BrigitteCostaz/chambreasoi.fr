@@ -1,5 +1,5 @@
 /* config/theme.ts */
-import type { ColorConfig, ColorPalette } from "@config/types";
+import type { ColorConfig, ColorPalette, ColorToken } from "@config/types";
 
 export const ColorData: ColorConfig = {
   colors: {
@@ -29,7 +29,7 @@ export const ColorData: ColorConfig = {
       bgCard: "oklch(20% 0.010 116deg)", // ~ #1e231a
 
       txtPri: "oklch(92% 0.008 122deg)", // ~ #e4ebe0
-      txtMuted: "oklch(65% 0.016 118deg)", // ~ #97a08f
+      txtMuted: "oklch(79% 0.006 128deg)", // ~ #b9bbb7
 
       accentForest: "oklch(64% 0.094 145deg)", // ~ #5a9c5e
       accentStone: "oklch(63% 0.036 193deg)", // ~ #7a9e9b
@@ -49,4 +49,40 @@ export function paletteToCSSVars(palette: ColorPalette): string {
   return Object.entries(palette)
     .map(([k, v]) => `--color-${k}: ${v};`)
     .join("\n    ");
+}
+
+/** OkLCH values in light/dark palettes are injected as --color-* by ColorStyles.astro only. */
+export function semanticColorsForUno(): Record<ColorToken, string> {
+  const tokens = Object.keys(ColorData.colors.light) as ColorToken[];
+  return Object.fromEntries(
+    tokens.map((key) => [
+      key,
+      // <alpha-value> enables /25, /90, etc. against the active theme’s CSS variable.
+      `color-mix(in oklch, var(--color-${key}) calc(<alpha-value> * 100%), transparent)`,
+    ])
+  ) as Record<ColorToken, string>;
+}
+
+/** bg-* opacity utilities: transparent mix in light; opaque mix on dark tiles. */
+export const LIGHT_ONLY_TRANSPARENT_BG_UTILITIES: ReadonlyArray<{
+  token: ColorToken;
+  opacity: number;
+  darkMixPercent: number;
+}> = [
+  { token: "accentStone", opacity: 25, darkMixPercent: 80 },
+  { token: "accentForest", opacity: 20, darkMixPercent: 80 },
+  { token: "accentBistre", opacity: 20, darkMixPercent: 75 },
+  { token: "accentBistre", opacity: 25, darkMixPercent: 75 },
+  { token: "accentTerra", opacity: 20, darkMixPercent: 75 },
+  { token: "accentTerra", opacity: 25, darkMixPercent: 75 },
+];
+
+export function darkOpaqueBgUtilitiesCSS(): string {
+  return LIGHT_ONLY_TRANSPARENT_BG_UTILITIES.map(({ token, opacity, darkMixPercent }) => {
+    const className = `bg-${token}\\/${opacity}`;
+    const value = `color-mix(in oklch,var(--color-${token}) ${darkMixPercent}%,var(--color-bgBase))`;
+    const rule = `.${className}{background-color:${value};}`;
+    return `html.dark ${rule}
+@media (prefers-color-scheme:dark){:root:not(.light):not(.dark) ${rule}}`;
+  }).join("\n");
 }

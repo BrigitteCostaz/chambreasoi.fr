@@ -32,7 +32,12 @@ pnpm --filter web-chambreasoi-fr lint
 - **`/robots.txt`** — dynamic (`config/robots.ts`)
 - **`/sitemap-index.xml`** — `@astrojs/sitemap`
 - **`/llms.txt`** — LLM-friendly site index (`config/llms.ts`, prerendered)
+- **`/404` metadata** — `config/pages.ts` declares `notFound` with `noindex`
+- **`public/_headers`** — Cloudflare cache and discovery headers for assets, SSR pages, and `llms.txt`
 - **IndexNow** — targeted URL notification after Sanity publish (see below)
+
+Public CMS pages stay SSR so Sanity updates can be purged and warmed without a rebuild.
+Legal pages are prerendered; `/tarifs-et-reservation` stays SSR because availability changes frequently.
 
 ## Sanity webhook (revalidate + IndexNow)
 

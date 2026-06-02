@@ -15,7 +15,7 @@ function formatLinkList(keys: readonly (keyof typeof sitemap)[], baseUrl: string
     .map((key) => {
       const page = sitemap[key];
       const url = toAbsoluteUrls(baseUrl, [page.path])[0];
-      return `- [${page.title}](${url}): ${page.description}`;
+      return `- [${page.titleNav ?? page.title}](${url}): ${page.description}`;
     })
     .join("\n");
 }

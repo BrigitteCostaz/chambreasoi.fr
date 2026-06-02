@@ -16,9 +16,7 @@ export function buildRobotsTxt(site: URL): string {
     ...DISALLOW_FOR_ALL.map((path) => `Disallow: ${path}`),
   ].join("\n");
 
-  const aiBlocks = AI_TRAINING_BOTS.map(
-    (bot) => `User-agent: ${bot}\nDisallow: /`,
-  ).join("\n\n");
+  const aiBlocks = AI_TRAINING_BOTS.map((bot) => `User-agent: ${bot}\nDisallow: /`).join("\n\n");
 
   return `${globalBlock}\n\n${aiBlocks}\n\nSitemap: ${sitemapURL.href}\n`;
 }

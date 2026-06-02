@@ -62,12 +62,8 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
       <div
         class="col-span-full flex flex-col gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:row-span-5 lg:gap-[0.4rem] lg:pb-0 lg:px-0"
       >
-        <div
-          data-reveal
-          data-reveal-delay="80"
-          class="max-w-[72ch] lg:pb-0"
-        >
-          <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+        <div data-reveal data-reveal-delay="80" class="max-w-[72ch] lg:pb-0">
+          <div class="flex flex-col gap-[0.4rem] lg:min-h-0 lg:mb-[1.6rem]">
             <h2 class="heading-2 text-balance">{p.tariffsHeading}</h2>
           </div>
         </div>
@@ -134,7 +130,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
       <div
         data-reveal
         data-reveal-delay="80"
-        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0 lg:mb-[2.4rem]"
       >
         <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
           <h2 class="heading-2 text-balance">{p.bookingHeading}</h2>
@@ -146,7 +142,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
           <figure
             data-reveal
             data-reveal-delay="100"
-            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
+            class="group/image relative aspect-[3/4] max-h-full overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
           >
             <img
               src={bookingSanitySrc}
@@ -235,7 +231,7 @@ const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: n
     <div
       data-reveal
       data-reveal-delay="80"
-      class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+      class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0 lg:mb-[2.4rem]"
     >
       <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
         <h2 class="heading-2 text-balance">{p.servicesHeading}</h2>

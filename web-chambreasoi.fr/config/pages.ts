@@ -1,6 +1,12 @@
 import type { PageMeta } from "@config/types/page-meta";
+import { parsePagesSitemap } from "./pages.schema";
+import { buildBreadcrumbList } from "./schema/breadcrumbs";
 
-export const sitemap: Record<string, PageMeta> = {
+const SITE_URL = "https://chambreasoi.fr";
+
+const breadcrumbHome = { name: "Accueil", path: "/" };
+
+const pages = {
   home: {
     key: "home",
     path: "/",
@@ -16,8 +22,10 @@ export const sitemap: Record<string, PageMeta> = {
   room: {
     key: "room",
     path: "/la-chambre",
-    title: "La chambre",
-    description: "Découvrez la chambre et ses équipements.",
+    title: "Chambre d'hôtes à Challes-les-Eaux — Une chambre à soi",
+    titleNav: "la chambre",
+    description:
+      "Chambre double avec salle de bain privative, terrasse et WiFi à Challes-les-Eaux (Savoie). Parking gratuit, accès A43 sortie 20",
     mainEntityId: "https://chambreasoi.fr/#room-1",
     jsonLd: [
       {
@@ -28,62 +36,112 @@ export const sitemap: Record<string, PageMeta> = {
         "@type": "HotelRoom",
         "@id": "https://chambreasoi.fr/#room-1",
       },
+      buildBreadcrumbList(SITE_URL, "/la-chambre", [breadcrumbHome, { name: "La chambre" }]),
     ],
   },
 
   reservations: {
     key: "reservations",
     path: "/tarifs-et-reservation",
-    title: "Infos pratiques",
-    description: "Consultez les tarifs, la disponibilité et les modalités de votre séjour.",
-    jsonLd: {
-      "@type": "WebPage",
-      name: "Tarifs et disponibilité",
-    },
+    title: "Tarifs et réservation — Chambre d'hôtes Challes-les-Eaux",
+    titleNav: "infos pratiques",
+    description:
+      "Consultez les tarifs, les disponibilités à jour et les modalités de réservation de votre séjour à Challes-les-Eaux.",
+    jsonLd: [
+      {
+        "@type": "WebPage",
+        name: "Tarifs et disponibilité",
+      },
+      buildBreadcrumbList(SITE_URL, "/tarifs-et-reservation", [
+        breadcrumbHome,
+        { name: "Tarifs et réservation" },
+      ]),
+    ],
   },
 
   location: {
     key: "location",
     path: "/acces-et-localisation",
-    title: "Localisation",
-    description: "Comment accéder à la chambre d'hôtes à Challes-les-Eaux.",
-    jsonLd: {
-      "@type": "Place",
-      name: "Une chambre à soi",
-      "@id": "https://chambreasoi.fr/#place",
-    },
+    title: "Accès et localisation — Chambre d'hôtes Challes-les-Eaux",
+    titleNav: "localisation",
+    description:
+      "Accès facile depuis l'A43 (sortie 20), la gare de Chambéry et le Médipôle de Savoie. Plan, adresse et transports à Challes-les-Eaux.",
+    jsonLd: [
+      {
+        "@type": "Place",
+        name: "Une chambre à soi",
+        "@id": "https://chambreasoi.fr/#place",
+      },
+      buildBreadcrumbList(SITE_URL, "/acces-et-localisation", [
+        breadcrumbHome,
+        { name: "Accès et localisation" },
+      ]),
+    ],
   },
 
   surroundings: {
     key: "surroundings",
     path: "/decouvrir-les-environs",
-    title: "Bons Plans",
-    description: "Activités et lieux à découvrir autour de Challes-les-Eaux.",
-    jsonLd: {
-      "@type": "WebPage",
-      name: "Découvrir les environs",
-    },
+    title: "Découvrir les environs — Chambre d'hôtes Challes-les-Eaux",
+    titleNav: "bons plans",
+    description:
+      "Activités et lieux à découvrir autour de Challes-les-Eaux (Savoie). commerces, restaurants, sentiers de randonnée, etc.",
+    jsonLd: [
+      {
+        "@type": "WebPage",
+        name: "Découvrir les environs",
+      },
+      buildBreadcrumbList(SITE_URL, "/decouvrir-les-environs", [
+        breadcrumbHome,
+        { name: "Découvrir les environs" },
+      ]),
+    ],
   },
 
   mentionsLegales: {
     key: "mentionsLegales",
     path: "/legales/mentions-legales",
-    title: "mentions légales",
-    description: "Consultez les mentions légales de Une chambre à soi.",
-    jsonLd: {
-      "@type": "WebPage",
-      name: "Mentions légales",
-    },
+    title: "Mentions légales — Chambre d'hôtes Challes-les-Eaux",
+    description:
+      "Consultez les informations légales de la chambre d'hôtes Une chambre à soi à Challes-les-Eaux.",
+    jsonLd: [
+      {
+        "@type": "WebPage",
+        name: "Mentions légales",
+      },
+      buildBreadcrumbList(SITE_URL, "/legales/mentions-legales", [
+        breadcrumbHome,
+        { name: "Mentions légales" },
+      ]),
+    ],
   },
 
   politiqueConfidentialite: {
     key: "politiqueConfidentialite",
     path: "/legales/politique-confidentialite",
-    title: "politique de confidentialité",
-    description: "Consultez la politique de confidentialité de Une chambre à soi.",
-    jsonLd: {
-      "@type": "WebPage",
-      name: "Politique de confidentialité",
-    },
+    title: "Politique de confidentialité — Chambre d'hôtes Challes-les-Eaux",
+    description:
+      "Consultez la politique de confidentialité de la chambre d'hôtes Une chambre à soi à Challes-les-Eaux.",
+    jsonLd: [
+      {
+        "@type": "WebPage",
+        name: "Politique de confidentialité",
+      },
+      buildBreadcrumbList(SITE_URL, "/legales/politique-confidentialite", [
+        breadcrumbHome,
+        { name: "Politique de confidentialité" },
+      ]),
+    ],
   },
-};
+
+  notFound: {
+    key: "notFound",
+    path: "/404",
+    title: "Page introuvable — Une chambre à soi",
+    description:
+      "Cette page n'existe pas ou a été déplacée. Retournez à l'accueil de la chambre d'hôtes Une chambre à soi à Challes-les-Eaux.",
+    noindex: true,
+  },
+} satisfies Record<string, PageMeta>;
+
+export const sitemap = parsePagesSitemap(pages);

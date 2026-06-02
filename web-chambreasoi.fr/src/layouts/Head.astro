@@ -10,6 +10,13 @@ import "@unocss/reset/tailwind.css";
 import "@styles/global.css";
 import ColorStyles from "@components/ColorStyles.astro";
 
+interface Props {
+  noindex?: boolean;
+  pageKey?: keyof typeof sitemap;
+}
+
+const { noindex: noindexProp = false, pageKey } = Astro.props;
+
 const globalSchema = await getGlobalSchema();
 const HeadData = await getHeadData();
 const orgData = await getOrgData();
@@ -23,29 +30,34 @@ const currentPage = Object.values(sitemap).find((p) => {
   return cleanPath === cleanCurrent;
 });
 
-const pageTitle = currentPage?.title ?? HeadData.meta.metaTitle;
-const pageDescription = currentPage?.description ?? HeadData.meta.metaDescription;
+const pageMeta = pageKey ? sitemap[pageKey] : currentPage;
+const noindex = noindexProp || pageMeta?.noindex === true;
 
-const canonicalURL = currentPage?.canonical
-  ? currentPage.canonical
-  : new URL(pathname, baseUrl).href;
+const pageTitle = pageMeta?.title ?? HeadData.meta.metaTitle;
+const pageDescription = pageMeta?.description ?? HeadData.meta.metaDescription;
 
-const ogImagePath = currentPage?.ogImage ?? HeadData.meta.defaultOgImage;
+const canonicalURL = pageMeta?.canonical ? pageMeta.canonical : new URL(pathname, baseUrl).href;
+const ogURL = noindex ? new URL("/", baseUrl).href : canonicalURL;
+
+const ogImagePath = pageMeta?.ogImage ?? HeadData.meta.defaultOgImage;
 const ogImageURL = resolveSiteAssetUrl(ogImagePath, baseUrl);
 const ogPrimary = HeadData.ogImages.primary;
 const usePrimaryDimensions = ogImagePath === ogPrimary.path;
 
-const pageNodes: JsonLdNode[] = currentPage?.jsonLd
-  ? Array.isArray(currentPage.jsonLd)
-    ? currentPage.jsonLd
-    : [currentPage.jsonLd]
-  : [];
+const pageNodes: JsonLdNode[] = noindex
+  ? []
+  : pageMeta?.jsonLd
+    ? Array.isArray(pageMeta.jsonLd)
+      ? pageMeta.jsonLd
+      : [pageMeta.jsonLd]
+    : [];
 
 const pageUrl = new URL(pathname, baseUrl).href;
 
 const hasHotelRoom = pageNodes.some((node) => node["@type"] === "HotelRoom");
+const hasBreadcrumbList = pageNodes.some((node) => node["@type"] === "BreadcrumbList");
 const mainEntityId =
-  currentPage?.mainEntityId ?? (hasHotelRoom ? `${baseUrl}#room-1` : `${baseUrl}#bedandbreakfast`);
+  pageMeta?.mainEntityId ?? (hasHotelRoom ? `${baseUrl}#room-1` : `${baseUrl}#bedandbreakfast`);
 
 const withDynamicWebPageFields: JsonLdNode[] = pageNodes.map((node) => {
   if (node["@type"] !== "WebPage") return node;
@@ -59,6 +71,7 @@ const withDynamicWebPageFields: JsonLdNode[] = pageNodes.map((node) => {
     url: pageUrl,
     isPartOf: { "@id": `${baseUrl}#website` },
     mainEntity: { "@id": mainEntityId },
+    ...(hasBreadcrumbList ? { breadcrumb: { "@id": `${pageUrl}#breadcrumb` } } : {}),
   } as JsonLdNode;
 });
 
@@ -76,9 +89,14 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
 
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site index" />
-  <link rel="canonical" href={canonicalURL} />
+  {noindex ? null : <link rel="canonical" href={canonicalURL} />}
 
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta
+    name="robots"
+    content={noindex
+      ? "noindex, follow"
+      : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"}
+  />
 
   <meta name="geo.region" content={HeadData.meta.geoRegion} />
   <meta name="geo.placename" content={HeadData.meta.geoPlaceName} />
@@ -96,7 +114,7 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
       </>
     ) : null
   }
-  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:url" content={ogURL} />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content={orgData.legal.brandName} />
   <meta property="og:locale" content="fr_FR" />

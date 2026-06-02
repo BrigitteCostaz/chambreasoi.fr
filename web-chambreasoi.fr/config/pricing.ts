@@ -1,7 +1,6 @@
 import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 import { PRICING_SETTINGS_QUERY, type PricingSettingsResult } from "@chambreasoi/sanity/queries";
 import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
-import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import type {
   MoneyCents,
   MoneyFormatter,
@@ -11,6 +10,7 @@ import type {
   PublicRateOfferId,
   RoomId,
 } from "@config/types/pricing";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 
 /**
  * Format integer cents (EUR) to schema-friendly "80.00" string.

@@ -1,4 +1,4 @@
-import { sitemap } from "@config/pages";
+import { sitemap } from "./pages";
 
 /** Stable order for purge / fallback revalidation. */
 export const PUBLIC_PAGE_KEYS = [

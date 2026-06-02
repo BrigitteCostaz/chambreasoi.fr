@@ -1,7 +1,7 @@
-import type { APIRoute } from "astro";
-import { buildLlmsTxt } from "@config/llms";
 import { getHeadData } from "@config/head";
+import { buildLlmsTxt } from "@config/llms";
 import { getOrgData } from "@config/organization";
+import type { APIRoute } from "astro";
 
 export const prerender = true;
 

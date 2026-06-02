@@ -1,11 +1,11 @@
 ---
+import { sanityConfig } from "@chambreasoi/sanity/config";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import SurroundingsCardGrid from "@components/surroundings-page/SurroundingsCardGrid.astro";
 import SurroundingsGalleryImages from "@components/surroundings-page/SurroundingsGalleryImages.astro";
 import SurroundingsPageIntro from "@components/surroundings-page/SurroundingsPageIntro.astro";
-import { sanityConfig } from "@chambreasoi/sanity/config";
-import { devLog, getSurroundingsPageContent } from "@lib/sanity";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
+import { devLog, getSurroundingsPageContent } from "@lib/sanity";
 import { resolveSurroundingsPageContent } from "../../data/adapters/surroundings";
 import { fallbackContent, reservationLabels } from "../../data/fallback/surroundings";
 

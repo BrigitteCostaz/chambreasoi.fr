@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  ALL_PUBLIC_ROUTES,
-  buildCloudflarePurgePayload,
-  purgeCloudflareCache,
-} from "./purge";
+import { ALL_PUBLIC_ROUTES, buildCloudflarePurgePayload, purgeCloudflareCache } from "./purge";
 
 describe("revalidate purge payload", () => {
   it("targets all public routes by default", () => {

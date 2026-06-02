@@ -48,7 +48,7 @@
     "@astrojs/check": "^0.9.9",
     "@astrojs/node": "^10.1.2",
     "@biomejs/biome": "^2.4.16",
-    "@cloudflare/workers-types": "^4.20260530.1",
+    "@cloudflare/workers-types": "^4.20260601.1",
     "@types/react": "^19.2.15",
     "@unocss/astro": "^66.7.0",
     "@unocss/preset-web-fonts": "^66.7.0",
@@ -56,7 +56,8 @@
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3",
     "unocss": "^66.7.0",
-    "vitest": "^4.1.7",
-    "wrangler": "4.95.0"
+    "vitest": "^4.1.8",
+    "wrangler": "4.95.0",
+    "zod": "^4.4.3"
   }
 }

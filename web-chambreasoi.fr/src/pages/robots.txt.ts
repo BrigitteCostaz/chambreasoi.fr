@@ -1,5 +1,5 @@
-import type { APIRoute } from "astro";
 import { buildRobotsTxt } from "@config/robots";
+import type { APIRoute } from "astro";
 
 export const prerender = true;
 
