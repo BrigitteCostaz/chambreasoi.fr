@@ -1,11 +1,11 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
-import { ComposeIcon } from '@sanity/icons'
+import { BlockElementIcon } from '@sanity/icons'
 
 export const locationSectionContent = defineType({
   name: 'locationSectionContent',
-  title: 'Section Localisation',
+  title: 'Accueil Localisation',
   type: 'document',
-  icon: ComposeIcon,
+  icon: BlockElementIcon,
   fields: [
     // -------------------------------------------------------------------------
     // INTRO MAP

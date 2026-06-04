@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
-import { ComposeIcon } from '@sanity/icons'
+import { BlockElementIcon} from '@sanity/icons'
 
 /*
  * headlineContent — document type
@@ -16,7 +16,7 @@ export const headlineContent = defineType({
   name: 'headlineContent',
   title: 'Headline - Contenu',
   type: 'document',
-  icon: ComposeIcon,
+  icon: BlockElementIcon,
   fields: [
     // -------------------------------------------------------------------------
     // HEADLINE

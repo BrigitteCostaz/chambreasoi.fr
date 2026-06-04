@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity'
-import { ComposeIcon, ImageIcon } from '@sanity/icons'
+import { BlockElementIcon, ImageIcon } from '@sanity/icons'
 
 const imageWithAlt = [
   defineField({
@@ -41,7 +41,7 @@ export const foldContent = defineType({
   name: 'foldContent',
   title: 'Fold — Contenu',
   type: 'document',
-  icon: ComposeIcon,
+  icon: BlockElementIcon,
   fields: [
     // -------------------------------------------------------------------------
     // SEO

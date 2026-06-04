@@ -25,6 +25,14 @@ type RevalidateBindings = Partial<{
   INDEXNOW_KEY: string;
 }>;
 
+type CloudflareRuntimeLocals = {
+  runtime?: {
+    ctx?: {
+      waitUntil?: (promise: Promise<unknown>) => void;
+    };
+  };
+};
+
 function toBase64Url(bytes: ArrayBuffer) {
   const binary = String.fromCharCode(...new Uint8Array(bytes));
 
@@ -113,7 +121,7 @@ function resolveRevalidationPaths(body: string): {
   return { paths: [...ALL_PUBLIC_ROUTES], usedFallback: true, skipped: false };
 }
 
-export const ALL: APIRoute = async ({ request }) => {
+export const ALL: APIRoute = async ({ request, locals }) => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
@@ -161,16 +169,27 @@ export const ALL: APIRoute = async ({ request }) => {
   invalidateCmsCache();
 
   const absoluteUrls = toAbsoluteUrls(baseUrl, paths);
-  const live = await warmPublicUrls({ baseUrl, paths });
+  const warmAndMaybeIndex = warmPublicUrls({ baseUrl, paths }).then(async (live) => {
+    if (bindings.indexNowKey && live && absoluteUrls.length > 0) {
+      await submitIndexNow({
+        key: bindings.indexNowKey,
+        baseUrl,
+        urlList: absoluteUrls,
+      });
+      return;
+    }
 
-  if (bindings.indexNowKey && live && absoluteUrls.length > 0) {
-    await submitIndexNow({
-      key: bindings.indexNowKey,
-      baseUrl,
-      urlList: absoluteUrls,
-    });
-  } else if (bindings.indexNowKey && !live) {
-    console.error("[revalidate] Skipping IndexNow because URL warm failed", { paths });
+    if (bindings.indexNowKey && !live) {
+      console.error("[revalidate] Skipping IndexNow because URL warm failed", { paths });
+    }
+  });
+
+  const waitUntil = (locals as CloudflareRuntimeLocals).runtime?.ctx?.waitUntil;
+
+  if (waitUntil) {
+    waitUntil(warmAndMaybeIndex);
+  } else {
+    await warmAndMaybeIndex;
   }
 
   return new Response("OK", { status: 200 });

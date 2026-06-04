@@ -1,4 +1,4 @@
-import {ComposeIcon, ImageIcon} from '@sanity/icons'
+import {BulbOutlineIcon, ImageIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 const surroundingsRichTextBlock = defineArrayMember({
@@ -166,7 +166,7 @@ export const surroundingsPageContent = defineType({
   name: 'surroundingsPageContent',
   title: 'Page Environs',
   type: 'document',
-  icon: ComposeIcon,
+  icon: BulbOutlineIcon,
   fields: [
     defineField({
       name: 'heroEyebrow',

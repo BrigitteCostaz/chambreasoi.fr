@@ -1,4 +1,4 @@
-import {PinIcon} from '@sanity/icons'
+import {ClockIcon} from '@sanity/icons'
 import {defineField, defineType} from 'sanity'
 
 const timeRegex = /^\d{2}:\d{2}$/
@@ -7,7 +7,7 @@ export const accommodationSettings = defineType({
   name: 'accommodationSettings',
   title: 'Hébergement',
   type: 'document',
-  icon: PinIcon,
+  icon: ClockIcon,
   fields: [
     defineField({
       name: 'checkinTime',

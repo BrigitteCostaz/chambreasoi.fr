@@ -11,9 +11,11 @@ type AvailabilityDate = {
 interface Props {
   month: string;
   dates: AvailabilityDate[];
+  minDate: string;
+  maxDate: string;
 }
 
-const { month, dates } = Astro.props;
+const { month, dates, minDate, maxDate } = Astro.props;
 const availableDates = dates.filter(({ available }) => available === true).map(({ date }) => date);
 const unavailableDates = dates
   .filter(({ available }) => available === false)
@@ -21,13 +23,6 @@ const unavailableDates = dates
 const defaultUnavailableDates = dates
   .filter(({ available }) => available === undefined)
   .map(({ date }) => date);
-const sortedDates = dates.map(({ date }) => date).sort();
-const fallbackMonthStart = `${month.slice(0, 7)}-01`;
-const fallbackMonthEnd = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0))
-  .toISOString()
-  .slice(0, 10);
-const minDate = sortedDates[0] ?? fallbackMonthStart;
-const maxDate = sortedDates.at(-1) ?? fallbackMonthEnd;
 const calendarData = JSON.stringify({
   availableDates,
   unavailableDates,
@@ -87,6 +82,14 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
 
     const { availableDates, unavailableDates, defaultUnavailableDates, minDate, maxDate } =
       JSON.parse(rawData) as CalendarData;
+
+    if (!minDate || !maxDate || minDate > maxDate) {
+      console.warn("[availability-calendar] Invalid date range; skipping calendar init", {
+        minDate,
+        maxDate,
+      });
+      return;
+    }
     const availableIcon =
       document.querySelector<HTMLTemplateElement>("#availability-icon-available")?.innerHTML ??
       "✅ Disponible";

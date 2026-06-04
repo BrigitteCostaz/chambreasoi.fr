@@ -1,4 +1,4 @@
-import { ComposeIcon } from '@sanity/icons'
+import { CalendarIcon } from '@sanity/icons'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 import { AvailabilityMonthInput } from '../components/availabilityMonthInput'
 
@@ -15,13 +15,13 @@ export const availability = defineType({
   name: 'availability',
   title: 'Disponibilités',
   type: 'document',
-  icon: ComposeIcon,
+  icon: CalendarIcon,
   fields: [
     defineField({
       name: 'month',
       title: 'Mois',
       type: 'date',
-      description: 'Sélectionner un jour du mois à gérer. Le mois est identifié par son premier jour.',
+      description: 'Sélectionner n\'importe quel jour du mois à gérer pour faire apparaître l\'interface de gestion.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -47,6 +47,7 @@ export const availability = defineType({
               name: 'available',
               title: 'Disponible',
               type: 'boolean',
+              initialValue: true,
             }),
           ],
           preview: {

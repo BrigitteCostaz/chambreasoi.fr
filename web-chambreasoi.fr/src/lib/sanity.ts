@@ -53,7 +53,10 @@ export * from "@chambreasoi/sanity/queries";
 // ---------------------------------------------------------------------------
 
 import { fetchSanity } from "@chambreasoi/sanity/fetch";
+import { getAvailabilityQueryRange } from "@lib/availability-calendar";
 import {
+  AVAILABILITY_MONTHS_QUERY,
+  type AvailabilityMonthResult,
   FOLD_CONTENT_QUERY,
   type FoldContentResult,
   HEADLINE_CONTENT_QUERY,
@@ -103,6 +106,35 @@ export async function getLocationPageContent(): Promise<LocationPageContentResul
  */
 export async function getPracticalInfoContent(): Promise<PracticalInfoContentResult | null> {
   return fetchSanity<PracticalInfoContentResult>(PRACTICAL_INFO_CONTENT_QUERY);
+}
+
+const AVAILABILITY_FETCH_TIMEOUT_MS = 12_000;
+
+/**
+ * Availability months for the public calendar (bounded window to keep SSR fast).
+ */
+export async function getAvailabilityMonths(): Promise<AvailabilityMonthResult[]> {
+  const { minMonth, maxMonth } = getAvailabilityQueryRange();
+
+  try {
+    const result = await Promise.race([
+      fetchSanity<AvailabilityMonthResult[]>(AVAILABILITY_MONTHS_QUERY, {
+        minMonth,
+        maxMonth,
+      }),
+      new Promise<null>((_, reject) => {
+        setTimeout(
+          () => reject(new Error(`availability fetch timed out after ${AVAILABILITY_FETCH_TIMEOUT_MS}ms`)),
+          AVAILABILITY_FETCH_TIMEOUT_MS
+        );
+      }),
+    ]);
+
+    return result ?? [];
+  } catch (error) {
+    console.error("[availability] Sanity fetch failed; rendering calendar without CMS dates", error);
+    return [];
+  }
 }
 
 /**

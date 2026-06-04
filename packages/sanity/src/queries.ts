@@ -155,7 +155,12 @@ export const ACCOMMODATION_SETTINGS_QUERY = /* groq */ `
 `
 
 export const AVAILABILITY_MONTHS_QUERY = /* groq */ `
-  *[_type == "availability" && !(_id in path("drafts.**"))] | order(month asc){
+  *[
+    _type == "availability"
+    && !(_id in path("drafts.**"))
+    && month >= $minMonth
+    && month <= $maxMonth
+  ] | order(month asc){
     month,
     dates[]{ date, available }
   }

@@ -3,13 +3,16 @@ import CalendarDisplay from "@components/availabily-page/CalendarDisplay.astro";
 import PracticalInfoSection from "@components/availabily-page/PracticalInfoSection.astro";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
-import { devLog, getPracticalInfoContent, sanityConfig } from "@lib/sanity";
+import { devLog, getAvailabilityMonths, getPracticalInfoContent, sanityConfig } from "@lib/sanity";
 import { getPracticalInfoRenderModel } from "../data/adapters/practical-info";
 
 // Keep this route SSR: availability can change independently of deploys.
 export const prerender = false;
 
-const practicalInfo = await getPracticalInfoContent();
+const [practicalInfo, availabilityMonths] = await Promise.all([
+  getPracticalInfoContent(),
+  getAvailabilityMonths(),
+]);
 const { projectId, dataset } = sanityConfig();
 
 if (!practicalInfo) {
@@ -28,6 +31,7 @@ const { availability } = renderModel;
     availabilityHeading={availability.heading}
     availabilityIntro={availability.intro}
     reservationIntro={availability.reservationIntro}
+    availabilityMonths={availabilityMonths}
   />
 
   <PracticalInfoSection renderModel={renderModel} />

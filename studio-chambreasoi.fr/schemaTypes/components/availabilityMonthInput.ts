@@ -1,4 +1,4 @@
-import {createElement, useMemo} from 'react'
+import {createElement, useEffect, useMemo} from 'react'
 import {PatchEvent, set, useFormValue} from 'sanity'
 
 type AvailabilityDate = {
@@ -32,31 +32,45 @@ function createKey(date: string) {
 }
 
 function normalizeDates(month: string | undefined, value: AvailabilityDate[] | undefined) {
-  const statesByDate = new Map(
+  const storedByDate = new Map(
     (value ?? [])
-      .filter((item) => typeof item.date === 'string' && typeof item.available === 'boolean')
-      .map((item) => [item.date, item.available]),
+      .filter((item) => typeof item.date === 'string')
+      .map((item) => [item.date, item]),
   )
 
   return getMonthDays(month).map((date) => {
-    const available = statesByDate.get(date)
+    const stored = storedByDate.get(date)
     const item: AvailabilityDate = {
-      _key: createKey(date),
+      _key: stored?._key ?? createKey(date),
       _type: 'availabilityDate',
       date,
     }
 
-    if (typeof available === 'boolean') item.available = available
+    if (!stored) {
+      item.available = true
+    } else if (typeof stored.available === 'boolean') {
+      item.available = stored.available
+    }
 
     return item
   })
 }
 
-function getNextAvailability(value: boolean | undefined) {
-  if (value === undefined) return true
-  if (value === true) return false
+function datesNeedSync(month: string | undefined, value: AvailabilityDate[] | undefined) {
+  if (!month) return false
 
-  return undefined
+  const monthDays = getMonthDays(month)
+
+  if (!Array.isArray(value) || value.length !== monthDays.length) return true
+
+  return monthDays.some((date) => !value.some((entry) => entry.date === date))
+}
+
+function getNextAvailability(value: boolean | undefined) {
+  if (value === true) return false
+  if (value === false) return undefined
+
+  return true
 }
 
 function getDayLabel(available: boolean | undefined) {
@@ -70,6 +84,12 @@ export function AvailabilityMonthInput(props: AvailabilityMonthInputProps) {
   const month = useFormValue(['month']) as string | undefined
   const normalizedDates = useMemo(() => normalizeDates(month, value), [month, value])
 
+  useEffect(() => {
+    if (!datesNeedSync(month, value)) return
+
+    onChange(PatchEvent.from(set(normalizeDates(month, value))))
+  }, [month, value, onChange])
+
   if (!month) {
     return createElement('p', null, 'Sélectionnez un mois pour générer automatiquement les jours.')
   }
@@ -80,7 +100,7 @@ export function AvailabilityMonthInput(props: AvailabilityMonthInputProps) {
     createElement(
       'p',
       {style: {margin: 0}},
-      'Cliquez sur une date pour alterner : non disponible, disponible, complet.',
+      'Cliquez sur une date pour alterner : disponible, complet, non disponible.',
     ),
     createElement(
       'div',

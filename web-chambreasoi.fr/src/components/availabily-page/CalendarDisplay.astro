@@ -3,47 +3,33 @@ import AvailabilityCalendar from "@components/availabily-page/AvailabilityCalend
 import Button from "@components/button/Button.astro";
 import GridOverlay from "@components/layout/GridOverlay.astro";
 import { getOrgData } from "@config/organization";
-import { AVAILABILITY_MONTHS_QUERY, type AvailabilityMonthResult, fetchSanity } from "@lib/sanity";
+import {
+  buildCalendarDates,
+  getCalendarDisplayRange,
+  resolveCalendarMinMax,
+} from "@lib/availability-calendar";
+import type { AvailabilityMonthResult } from "@lib/sanity";
 
 type Props = {
   availabilityEyebrow: string;
   availabilityHeading: string;
   availabilityIntro: string;
   reservationIntro: string;
+  availabilityMonths: AvailabilityMonthResult[];
 };
 
-const { availabilityEyebrow, availabilityHeading, availabilityIntro, reservationIntro } =
+const { availabilityEyebrow, availabilityHeading, availabilityIntro, reservationIntro, availabilityMonths } =
   Astro.props;
-
-function getMonthDays(month: string) {
-  const year = Number(month.slice(0, 4));
-  const monthIndex = Number(month.slice(5, 7)) - 1;
-  const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
-
-  return Array.from({ length: daysInMonth }, (_, index) => {
-    const day = String(index + 1).padStart(2, "0");
-
-    return `${month.slice(0, 7)}-${day}`;
-  });
-}
 
 const now = new Date();
 const currentMonthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
-const availabilityMonths =
-  (await fetchSanity<AvailabilityMonthResult[]>(AVAILABILITY_MONTHS_QUERY)) ?? [];
+const { rangeStart, rangeEnd } = getCalendarDisplayRange();
+const dates = buildCalendarDates(availabilityMonths);
+const { minDate, maxDate } = resolveCalendarMinMax(dates, rangeStart, rangeEnd, currentMonthStart);
 const orgData = await getOrgData();
 const {
   contact: { phone },
 } = orgData;
-const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
-  const availabilityByDate = new Map(dates.map(({ date, available }) => [date, available]));
-
-  return getMonthDays(month).map((date) => {
-    const available = availabilityByDate.get(date);
-
-    return typeof available === "boolean" ? { date, available } : { date };
-  });
-});
 ---
 
 <section id="disponibilites" class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
@@ -71,7 +57,7 @@ const dates = availabilityMonths.flatMap(({ month, dates = [] }) => {
         data-reveal-delay="240"
         class="mt-[3.2rem] bg-bgCard p-[0.8rem] lg:mt-[4.8rem] lg:p-[1.6rem]"
       >
-        <AvailabilityCalendar month={currentMonthStart} dates={dates} />
+        <AvailabilityCalendar month={currentMonthStart} dates={dates} minDate={minDate} maxDate={maxDate} />
       </div>
 
       <div
