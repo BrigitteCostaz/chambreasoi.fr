@@ -1,4 +1,5 @@
 import type { JsonLdNode } from "@config/types/page-meta";
+import { toCanonicalPageUrl } from "../canonical-url";
 
 type BreadcrumbItem = {
   name: string;
@@ -11,16 +12,25 @@ export function buildBreadcrumbList(
   items: readonly BreadcrumbItem[]
 ): JsonLdNode {
   const siteUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  const pageUrl = new URL(pagePath, siteUrl).href;
+  const pageUrl = toCanonicalPageUrl(baseUrl, pagePath);
 
   return {
     "@type": "BreadcrumbList",
     "@id": `${pageUrl}#breadcrumb`,
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      ...(item.path ? { item: new URL(item.path, siteUrl).href } : {}),
-    })),
+    itemListElement: items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      const itemUrl = item.path
+        ? new URL(item.path, siteUrl).href
+        : isLast
+          ? pageUrl
+          : undefined;
+
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+        ...(itemUrl ? { item: itemUrl } : {}),
+      };
+    }),
   } as JsonLdNode;
 }
