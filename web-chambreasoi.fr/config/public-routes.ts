@@ -1,3 +1,4 @@
+import { toCanonicalPageUrl } from "./canonical-url";
 import { sitemap } from "./pages";
 
 /** Stable order for purge / fallback revalidation. */
@@ -24,9 +25,14 @@ export function normalizeBaseUrl(baseUrl: string): string {
 }
 
 export function toAbsoluteUrls(baseUrl: string, paths: readonly string[]): string[] {
-  const origin = normalizeBaseUrl(baseUrl);
+  return paths.map((path) => toCanonicalPageUrl(baseUrl, path));
+}
 
-  return paths.map((path) => new URL(path, `${origin}/`).href);
+/** Cloudflare Pages `_redirects` rules for legacy URLs without a trailing slash. */
+export function buildTrailingSlashRedirects(): string {
+  return ALL_PUBLIC_ROUTES.filter((path) => path !== "/")
+    .map((path) => `${path} ${path}/ 301`)
+    .join("\n");
 }
 
 export function getPublicAbsoluteUrls(baseUrl: string): string[] {

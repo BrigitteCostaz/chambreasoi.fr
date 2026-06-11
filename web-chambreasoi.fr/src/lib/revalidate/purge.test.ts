@@ -18,19 +18,19 @@ describe("revalidate purge payload", () => {
     expect(buildCloudflarePurgePayload()).toEqual({
       files: [
         "https://chambreasoi.fr/",
-        "https://chambreasoi.fr/la-chambre",
-        "https://chambreasoi.fr/tarifs-et-reservation",
-        "https://chambreasoi.fr/acces-et-localisation",
-        "https://chambreasoi.fr/decouvrir-les-environs",
-        "https://chambreasoi.fr/legales/mentions-legales",
-        "https://chambreasoi.fr/legales/politique-confidentialite",
+        "https://chambreasoi.fr/la-chambre/",
+        "https://chambreasoi.fr/tarifs-et-reservation/",
+        "https://chambreasoi.fr/acces-et-localisation/",
+        "https://chambreasoi.fr/decouvrir-les-environs/",
+        "https://chambreasoi.fr/legales/mentions-legales/",
+        "https://chambreasoi.fr/legales/politique-confidentialite/",
       ],
     });
   });
 
   it("builds targeted purge payload with absolute URLs", () => {
     expect(buildCloudflarePurgePayload(["/la-chambre"])).toEqual({
-      files: ["https://chambreasoi.fr/la-chambre"],
+      files: ["https://chambreasoi.fr/la-chambre/"],
     });
   });
 });
@@ -55,7 +55,7 @@ describe("purgeCloudflareCache", () => {
       "https://api.cloudflare.com/client/v4/zones/zone123/purge_cache",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ files: ["https://chambreasoi.fr/la-chambre"] }),
+        body: JSON.stringify({ files: ["https://chambreasoi.fr/la-chambre/"] }),
       })
     );
   });

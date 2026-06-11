@@ -10,7 +10,6 @@ import { defineConfig } from "astro/config";
 import icon from "astro-icon";
 import unocss from "unocss/astro";
 import { appAliases } from "./config/aliases.mjs";
-import { getPublicAbsoluteUrls } from "./config/public-routes";
 
 /**
  * Load `web-chambreasoi.fr/.env` into process.env for config-time evaluation.
@@ -113,6 +112,7 @@ const enableSanityStudio = process.env.ENABLE_SANITY_STUDIO === "true";
 
 export default defineConfig({
   site: "https://chambreasoi.fr",
+  trailingSlash: "always",
   output: "server",
   adapter: isDev ? (await import("@astrojs/node")).default({ mode: "standalone" }) : cloudflare(),
 
@@ -143,11 +143,13 @@ export default defineConfig({
       iconDir: "src/icons",
     }),
     sitemap({
-      // SSR pages are not auto-discovered; list public routes explicitly.
-      customPages: getPublicAbsoluteUrls("https://chambreasoi.fr"),
       filter: (page) => {
         const pathname = new URL(page).pathname;
-        return !pathname.startsWith("/api/") && pathname !== "/404/";
+        if (pathname.startsWith("/api/") || pathname === "/404/" || pathname === "/404") {
+          return false;
+        }
+        // Canonical URLs use a trailing slash (see config/canonical-url.ts).
+        return pathname === "/" || pathname.endsWith("/");
       },
     }),
   ],
