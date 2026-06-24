@@ -1,0 +1,44 @@
+---
+import CalendarDisplay from "@components/availabily-page/CalendarDisplay.astro";
+import PracticalInfoSection from "@components/availabily-page/PracticalInfoSection.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
+import { devLog, getAvailabilityMonths, getPracticalInfoContent, sanityConfig } from "@lib/sanity";
+import { getPracticalInfoRenderModel } from "../data/adapters/practical-info";
+
+// Keep this route SSR: availability can change independently of deploys.
+export const prerender = false;
+
+const [practicalInfo, availabilityMonths] = await Promise.all([
+  getPracticalInfoContent(),
+  getAvailabilityMonths(),
+]);
+const { projectId, dataset } = sanityConfig();
+
+if (!practicalInfo) {
+  incrementFallbackCounter("practical-info");
+}
+
+devLog("practicalInfoContent", practicalInfo ? "cms" : "fallback", { projectId, dataset });
+
+const renderModel = await getPracticalInfoRenderModel(practicalInfo);
+const { availability } = renderModel;
+---
+
+<BaseLayout>
+  <CalendarDisplay
+    availabilityEyebrow={availability.eyebrow}
+    availabilityHeading={availability.heading}
+    availabilityIntro={availability.intro}
+    reservationIntro={availability.reservationIntro}
+    availabilityMonths={availabilityMonths}
+  />
+
+  <PracticalInfoSection renderModel={renderModel} />
+</BaseLayout>
+
+<script>
+  import { initRevealOnIntersect } from "@utils/reveal";
+
+  initRevealOnIntersect({ threshold: 0.1 });
+</script>

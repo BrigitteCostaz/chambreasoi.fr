@@ -1,0 +1,165 @@
+---
+import { getHeadData, resolveSiteAssetUrl } from "@config/head";
+import { getOrgData } from "@config/organization";
+import { sitemap } from "@config/pages";
+import { toCanonicalPageUrl } from "@config/canonical-url";
+import { getGlobalSchema } from "@config/schema/global-schema";
+import type { JsonLdNode } from "@config/types/page-meta";
+import { Schema } from "astro-seo-schema";
+
+import "@unocss/reset/tailwind.css";
+import "@styles/global.css";
+import ColorStyles from "@components/ColorStyles.astro";
+
+interface Props {
+  noindex?: boolean;
+  pageKey?: keyof typeof sitemap;
+}
+
+const { noindex: noindexProp = false, pageKey } = Astro.props;
+
+const globalSchema = await getGlobalSchema();
+const HeadData = await getHeadData();
+const orgData = await getOrgData();
+const baseUrl = (Astro.site?.href ?? Astro.url.origin).replace(/\/$/, "");
+
+const pathname = Astro.url.pathname;
+
+const currentPage = Object.values(sitemap).find((p) => {
+  const cleanPath = p.path.endsWith("/") ? p.path : `${p.path}/`;
+  const cleanCurrent = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  return cleanPath === cleanCurrent;
+});
+
+const pageMeta = pageKey ? sitemap[pageKey] : currentPage;
+const noindex = noindexProp || pageMeta?.noindex === true;
+
+const pageTitle = pageMeta?.title ?? HeadData.meta.metaTitle;
+const pageDescription = pageMeta?.description ?? HeadData.meta.metaDescription;
+
+const pageUrl = toCanonicalPageUrl(baseUrl, pathname);
+const canonicalURL = pageMeta?.canonical ? pageMeta.canonical : pageUrl;
+const ogURL = noindex ? new URL("/", baseUrl).href : canonicalURL;
+
+const ogImagePath = pageMeta?.ogImage ?? HeadData.meta.defaultOgImage;
+const ogImageURL = resolveSiteAssetUrl(ogImagePath, baseUrl);
+const ogPrimary = HeadData.ogImages.primary;
+const usePrimaryDimensions = ogImagePath === ogPrimary.path;
+
+const pageNodes: JsonLdNode[] = noindex
+  ? []
+  : pageMeta?.jsonLd
+    ? Array.isArray(pageMeta.jsonLd)
+      ? pageMeta.jsonLd
+      : [pageMeta.jsonLd]
+    : [];
+
+const hasHotelRoom = pageNodes.some((node) => node["@type"] === "HotelRoom");
+const hasBreadcrumbList = pageNodes.some((node) => node["@type"] === "BreadcrumbList");
+const mainEntityId =
+  pageMeta?.mainEntityId ?? (hasHotelRoom ? `${baseUrl}#room-1` : `${baseUrl}#bedandbreakfast`);
+
+const withDynamicWebPageFields: JsonLdNode[] = pageNodes.map((node) => {
+  if (node["@type"] !== "WebPage") return node;
+
+  const base = node as Record<string, unknown>;
+
+  return {
+    ...base,
+    "@type": "WebPage",
+    "@id": `${pageUrl}#webpage`,
+    url: pageUrl,
+    isPartOf: { "@id": `${baseUrl}#website` },
+    mainEntity: { "@id": mainEntityId },
+    ...(hasBreadcrumbList ? { breadcrumb: { "@id": `${pageUrl}#breadcrumb` } } : {}),
+  } as JsonLdNode;
+});
+
+const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
+---
+
+<head>
+  <ColorStyles />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="generator" content={Astro.generator} />
+
+  <title>{pageTitle}</title>
+  {pageDescription ? <meta name="description" content={pageDescription} /> : null}
+
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site index" />
+  {noindex ? null : <link rel="canonical" href={canonicalURL} />}
+
+  <meta
+    name="robots"
+    content={noindex
+      ? "noindex, follow"
+      : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"}
+  />
+
+  <meta name="geo.region" content={HeadData.meta.geoRegion} />
+  <meta name="geo.placename" content={HeadData.meta.geoPlaceName} />
+  <meta name="geo.position" content={HeadData.meta.geoPosition} />
+
+  <meta property="og:title" content={pageTitle} />
+  {pageDescription ? <meta property="og:description" content={pageDescription} /> : null}
+  <meta property="og:image" content={ogImageURL} />
+  {
+    usePrimaryDimensions ? (
+      <>
+        <meta property="og:image:width" content={String(ogPrimary.width)} />
+        <meta property="og:image:height" content={String(ogPrimary.height)} />
+        <meta property="og:image:alt" content={ogPrimary.alt} />
+      </>
+    ) : null
+  }
+  <meta property="og:url" content={ogURL} />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={orgData.legal.brandName} />
+  <meta property="og:locale" content="fr_FR" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={ogImageURL} />
+
+  {HeadData.favicons?.faviconIco ? <link rel="icon" href={HeadData.favicons.faviconIco} /> : null}
+  {
+    HeadData.favicons?.faviconPng ? (
+      <link rel="icon" type="image/png" href={HeadData.favicons.faviconPng} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.faviconPng96 ? (
+      <link rel="icon" type="image/png" sizes="96x96" href={HeadData.favicons.faviconPng96} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.faviconSvg ? (
+      <link rel="icon" type="image/svg+xml" href={HeadData.favicons.faviconSvg} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.appleTouchIcon ? (
+      <link rel="apple-touch-icon" href={HeadData.favicons.appleTouchIcon} />
+    ) : null
+  }
+  {
+    HeadData.favicons?.webManifest ? (
+      <link rel="manifest" href={HeadData.favicons.webManifest} />
+    ) : null
+  }
+
+  <link
+    rel="preload"
+    href="/fonts/GeneralSans-Variable.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
+
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=karla:400,500,600&display=swap" />
+
+  <Schema item={{ "@context": "https://schema.org", "@graph": graph }} />
+</head>

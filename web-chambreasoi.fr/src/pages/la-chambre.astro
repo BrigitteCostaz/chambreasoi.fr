@@ -1,0 +1,483 @@
+---
+import { Image } from "astro:assets";
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import {
+  getGalleryImageDimensions,
+  getGalleryLayoutClasses,
+  getGallerySizes,
+} from "@lib/la-chambre/gallery-layout";
+import { getRoomPageContent } from "@lib/sanity";
+import { Icon } from "astro-icon/components";
+import { getLaChambrePageModel } from "../data/adapters/la-chambre";
+import {
+  accentClasses,
+  leftCardPositions,
+  privateMobileCardOrdersWithHero,
+  privateMobileGalleryOrdersWithHero,
+  rightCardPositions,
+  serviceMobileCardOrdersNoHero,
+  serviceMobileCardOrdersWithHero,
+  serviceMobileGalleryOrdersNoHero,
+  serviceMobileGalleryOrdersWithHero,
+  sharedMobileCardOrdersWithHero,
+  sharedMobileGalleryOrdersWithHero,
+} from "../data/fallback/la-chambre";
+
+const { p, hasServiceFeatureImage } = await getLaChambrePageModel(await getRoomPageContent());
+---
+
+<BaseLayout>
+  <section>
+    <div
+      class="relative overflow-x-clip mt-[.8rem] lg:mt-[0] lg:mt-0 py-[.8rem] lg:pb-[4.8rem] bg-accentStone/25"
+    >
+      <GridOverlay />
+
+      <div class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[15rem]">
+        <div
+          class="col-span-full flex flex-col gap-[3.2rem] px-[0.4rem] lg:col-span-4 lg:col-start-2"
+        >
+          <span class="heading-3 uppercase">{p.heroEyebrow}</span>
+          <h1 class="title-room text-balance">{p.heroTitle}</h1>
+        </div>
+      </div>
+
+      <a
+        href="#sejour-confort"
+        aria-label="Aller à la section suivante"
+        class="absolute bottom-[1.6rem] left-1/2 z-20 -translate-x-1/2 rounded-full p-2 transition-transform hover:translate-y-1 focus-visible:outline focus-visible:outline-offset-4 focus-visible:outline-txtPri lg:bottom-[2.4rem]"
+      >
+        <Icon name="ion/chevron-down-sharp" class="text-txtPri size-[2.4rem]" />
+      </a>
+    </div>
+  </section>
+
+  <section
+    id="sejour-confort"
+    class="relative overflow-x-clip pt-[4.8rem] pb-[1.6rem] scroll-mt-[var(--header-height,0px)] lg:py-[4.8rem]"
+  >
+    <GridOverlay />
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+      >
+        <span class="heading-3">{p.privateSection.eyebrow}</span>
+      </div>
+
+      <div
+        class="max-lg:order-[-1] max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-3 lg:col-span-3 lg:row-start-2 lg:pb-0 lg:mb-[1.6rem]"
+      >
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
+          <h2 class="heading-2 text-balance">{p.privateSection.heading}</h2>
+          {
+            p.privateSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.privateSection.introText}</p>
+            ) : null
+          }
+        </div>
+      </div>
+
+      {
+        p.privateSection.featureImage.sanitySrc ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.privateSection.featureImage.sanitySrc}
+              srcset={p.privateSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.privateSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="eager"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.privateSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={p.privateSection.featureImage.image}
+              alt={p.privateSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="eager"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        p.privateSection.cards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(200 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              privateMobileCardOrdersWithHero[index] ?? privateMobileCardOrdersWithHero[2],
+              rightCardPositions[index] ?? rightCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        p.privateSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(380 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                privateMobileGalleryOrdersWithHero[index] ?? privateMobileGalleryOrdersWithHero[2],
+                ...getGalleryLayoutClasses(p.privateSection.galleryImages, index),
+              ]}
+            >
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip py-[1.6rem] lg:py-[4.8rem]">
+    <GridOverlay />
+
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+      >
+        <span class="heading-3">{p.sharedSection.eyebrow}</span>
+      </div>
+
+      <div
+        class="max-lg:order-[-1] max-w-[72ch] flex flex-col px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-3 lg:col-start-1 lg:row-start-2 lg:pb-0"
+      >
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem] pb-[1.6rem]">
+          <h2 class="heading-2 text-balance leading-[1.2] min-h-[2.4em]">
+            {p.sharedSection.heading}
+          </h2>
+          {
+            p.sharedSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.sharedSection.introText}</p>
+            ) : null
+          }
+        </div>
+      </div>
+
+      {
+        p.sharedSection.cards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(180 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[13rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              sharedMobileCardOrdersWithHero[index] ?? sharedMobileCardOrdersWithHero[2],
+              leftCardPositions[index] ?? leftCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        p.sharedSection.featureImage.sanitySrc ? (
+          <figure
+            data-reveal
+            data-reveal-delay="360"
+            class="max-lg:order-3 group/image relative aspect-[4/3] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.sharedSection.featureImage.sanitySrc}
+              srcset={p.sharedSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.sharedSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.sharedSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="360"
+            class="max-lg:order-3 group/image relative aspect-[3/4] lg:aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={p.sharedSection.featureImage.image}
+              alt={p.sharedSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        p.sharedSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(420 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                sharedMobileGalleryOrdersWithHero[index] ?? sharedMobileGalleryOrdersWithHero[2],
+                ...getGalleryLayoutClasses(p.sharedSection.galleryImages, index),
+              ]}
+            >
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip py-[1.6rem] lg:py-[4.8rem]">
+    <GridOverlay />
+
+    <div class="relative z-10 flex flex-col gap-grid lg:grid lg:grid-cols-5 lg:items-stretch">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="max-lg:order-[-2] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[3.2rem] lg:py-[4.8rem]"
+      >
+        <span class="heading-3">{p.serviceSection.eyebrow}</span>
+      </div>
+
+      <div
+        class="max-lg:order-[-1] max-w-[72ch] px-[0.4rem] pb-[1.6rem] lg:order-none lg:col-start-1 lg:col-span-2 lg:row-start-3 lg:pb-0"
+      >
+        <div data-reveal data-reveal-delay="80" class="flex flex-col gap-[1.2rem]">
+          <h2 class="heading-2 text-balance">{p.serviceSection.heading}</h2>
+          {
+            p.serviceSection.introText ? (
+              <p class="text-balance text-ui-md leading-relaxed">{p.serviceSection.introText}</p>
+            ) : null
+          }
+        </div>
+      </div>
+
+      {
+        p.serviceSection.featureImage.sanitySrc ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <img
+              src={p.serviceSection.featureImage.sanitySrc}
+              srcset={p.serviceSection.featureImage.sanitySrcSet ?? undefined}
+              alt={p.serviceSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : p.serviceSection.featureImage.image ? (
+          <figure
+            data-reveal
+            data-reveal-delay="120"
+            class="max-lg:order-3 group/image relative aspect-[4/3] overflow-hidden bg-accentStone/25 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:aspect-auto lg:min-h-[24rem]"
+          >
+            <Image
+              src={p.serviceSection.featureImage.image}
+              alt={p.serviceSection.featureImage.alt}
+              width={1400}
+              height={1000}
+              densities={[1, 1.5, 2]}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        p.serviceSection.cards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(200 + index * 60)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] lg:min-h-[11rem] lg:pb-[1.4rem]",
+              accentClasses[card.accent],
+              ...(hasServiceFeatureImage
+                ? [serviceMobileCardOrdersWithHero[index] ?? serviceMobileCardOrdersWithHero[2]]
+                : [serviceMobileCardOrdersNoHero[index] ?? serviceMobileCardOrdersNoHero[2]]),
+              rightCardPositions[index] ?? rightCardPositions[0],
+            ]}
+          >
+            <div class="border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            <p class="text-balance text-ui-sm leading-relaxed">{card.body}</p>
+          </article>
+        ))
+      }
+
+      {
+        p.serviceSection.galleryImages.map((galleryImage, index) =>
+          galleryImage.sanitySrc || galleryImage.image ? (
+            <figure
+              data-reveal
+              data-reveal-delay={String(380 + index * 50)}
+              class:list={[
+                "group/image relative overflow-hidden bg-accentStone/25 lg:row-start-4",
+                ...(hasServiceFeatureImage
+                  ? [
+                      serviceMobileGalleryOrdersWithHero[index] ??
+                        serviceMobileGalleryOrdersWithHero[2],
+                    ]
+                  : [
+                      serviceMobileGalleryOrdersNoHero[index] ??
+                        serviceMobileGalleryOrdersNoHero[2],
+                    ]),
+                ...getGalleryLayoutClasses(p.serviceSection.galleryImages, index, 1),
+              ]}
+            >
+              {galleryImage.sanitySrc ? (
+                <img
+                  src={galleryImage.sanitySrc}
+                  srcset={galleryImage.sanitySrcSet ?? undefined}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : galleryImage.image ? (
+                <Image
+                  src={galleryImage.image}
+                  alt={galleryImage.alt}
+                  width={getGalleryImageDimensions(galleryImage).width}
+                  height={getGalleryImageDimensions(galleryImage).height}
+                  densities={[1, 1.5, 2]}
+                  sizes={getGallerySizes(galleryImage)}
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                />
+              ) : null}
+            </figure>
+          ) : null
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .title-room {
+    font-size: clamp(32px, calc(32 * 1px + (52) * (100vw - 375 * 1px) / (1225)), 68px);
+    line-height: 1;
+  }
+</style>
+
+<script>
+  import { initRevealOnIntersect } from "@utils/reveal";
+
+  initRevealOnIntersect({ threshold: 0.1 });
+</script>

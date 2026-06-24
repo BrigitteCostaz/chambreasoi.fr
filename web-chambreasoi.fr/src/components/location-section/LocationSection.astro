@@ -1,0 +1,342 @@
+---
+import Button from "@components/button/Button.astro";
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import SvgMap from "@images/map-chambreasoi.svg";
+import { getLocationSectionContent } from "@lib/sanity";
+/* =========================
+ * Imports
+ * ========================= */
+import { Icon } from "astro-icon/components";
+import { defaultLocationSectionContent } from "../../data/fallback/location-section";
+
+/* =========================
+ * Final computed values
+ * ========================= */
+const location = await getLocationSectionContent();
+
+const l = {
+  introText: location?.introText ?? defaultLocationSectionContent.introText,
+  mapLabel1: location?.mapLabel1 ?? defaultLocationSectionContent.mapLabel1,
+  mapLabel2: location?.mapLabel2 ?? defaultLocationSectionContent.mapLabel2,
+  mapLabel3: location?.mapLabel3 ?? defaultLocationSectionContent.mapLabel3,
+  mapCta: location?.mapCta ?? defaultLocationSectionContent.mapCta,
+};
+---
+
+<section class="hidden xl:block relative overflow-x-clip pt-[.8rem] mb-[3.2rem]">
+  <!-- Grid overlay -->
+  <GridOverlay desktopOnly zIndexClass="" />
+  <div data-reveal data-reveal-delay="0" class="grid grid-cols-1 lg:grid-cols-10">
+    <div
+      class="flex items-center gap-grid px-[0.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 py-[4.8rem]"
+    >
+      <!-- <Icon class="text-txtPri size-[1.1rem]" name="ion/square-sharp" /> -->
+      <span class="heading-3">Localisation</span>
+    </div>
+  </div>
+</section>
+
+<section class="xl:hidden relative mb-[3.2rem] min-h-full overflow-x-clip xl:pt-[.8rem]">
+  <!-- Wrapper qui contient les lignes + le texte -->
+  <div class="relative">
+    <!-- Grid overlay (limité à ce wrapper) -->
+    <GridOverlay zIndexClass="" offsetClass="" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 mb-[1.6rem]">
+      <!-- Eyebrow -->
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="lg:col-start-1 lg:col-span-1 lg:row-start-1 px-[0.4rem] flex items-center gap-grid pt-[3.6rem] pb-[3.6rem] lg:py-[4.8rem]"
+      >
+        <span class="heading-3">Localisation</span>
+      </div>
+
+      <!-- Intro + labels -->
+      <div
+        data-reveal
+        data-reveal-delay="120"
+        class="bg-accentTerra/25 lg:col-start-1 lg:col-span-4 lg:row-start-2 flex flex-col gap-[1.2rem] p-[0.8rem]"
+      >
+        <!-- Intro heading -->
+        <h2 class="max-w-full text-pretty text-ui-map">
+          {l.introText}.
+        </h2>
+
+        <!-- Map labels -->
+        <div>
+          <p class="max-w-full whitespace-pre-line text-pretty text-ui-map">
+            {l.mapLabel1}, {l.mapLabel2}
+            {l.mapLabel3}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte mobile — EN DEHORS du wrapper, donc sans lignes -->
+  <div class="xl:hidden map-mobile overflow-hidden flex justify-center">
+    <SvgMap class="map-mobile-svg shrink-0" aria-label="Carte de la région" role="img" />
+  </div>
+
+  <!-- CTA — EN DEHORS du wrapper, donc sans lignes -->
+  <div class="px-[0.8rem] pt-[1.6rem] pb-[0.8rem]">
+    <Button
+      class="inline-flex w-full items-center justify-center font-sans"
+      variant="primary"
+      size="sm"
+      href="/la-chambre"
+    >
+      {l.mapCta}
+    </Button>
+  </div>
+</section>
+
+<div class="hidden xl:block parallax-map h-[calc(100dvh-var(--header-height,0px))]" data-parallax>
+  <div class="parallax-layer">
+    <SvgMap class="map-svg" aria-label="Carte de la région" role="img" />
+  </div>
+  <div class="map-inner grid grid-cols-1 lg:grid-cols-10">
+    <div class="lg:col-span-4 lg:col-start-4 lg:row-start-1">
+      <h2
+        data-reveal
+        data-reveal-delay="0"
+        class="inline-block p-[0.8rem] w-fit text-ui-map px-[0.4rem] text-balance text-ui-map bg-accentTerra/25"
+      >
+        {l.introText}
+      </h2>
+    </div>
+    <div
+      data-reveal
+      data-reveal-delay="120"
+      class="eyebrow flex h-full flex-col self-stretch p-[0.8rem] lg:col-span-2 lg:col-start-1 justify-end"
+    >
+      <p class="whitespace-pre-line text-ui-map w-fit p-[0.8rem] bg-accentTerra/25">
+        {l.mapLabel1}
+      </p>
+    </div>
+    <div
+      data-reveal
+      data-reveal-delay="240"
+      class="lead flex h-full flex-col p-[0.8rem] lg:col-span-4 lg:col-start-2"
+    >
+      <p class="mt-[25vh] w-fit text-ui-map p-[0.8rem] bg-accentTerra/25">
+        {l.mapLabel2}
+      </p>
+    </div>
+    <div
+      data-reveal
+      data-reveal-delay="240"
+      class="lead flex h-full flex-col p-[0.8rem] lg:col-span-2 lg:col-start-8"
+    >
+      <p class="my-2/4 w-fit text-ui-map p-[0.8rem] bg-accentTerra/20">
+        {l.mapLabel3}
+      </p>
+      <Button
+        class="inline-flex w-full items-center justify-center self-end mt-auto font-sans"
+        variant="primary"
+        size="sm"
+        href="/la-chambre"
+      >
+        {l.mapCta}
+      </Button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .parallax-map {
+    position: relative;
+    overflow: hidden;
+    view-timeline-name: --parallax;
+    view-timeline-axis: block;
+  }
+
+  .parallax-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    will-change: transform;
+    overflow: hidden;
+  }
+
+  .map-svg {
+    width: auto;
+    height: 105%;
+    max-width: none;
+    opacity: 0.9;
+    display: block;
+  }
+
+  .map-mobile-svg {
+    width: 1280px;
+    height: auto;
+    opacity: 0.9;
+    display: block;
+    margin-top: -240px;
+  }
+
+  .map-inner {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    height: 100%;
+    padding-top: 6vh;
+
+    text-align: start;
+    overflow: hidden;
+  }
+
+  @media (max-width: 1279px) {
+    .map-inner {
+      padding-inline: 0.8rem;
+    }
+    .map-mobile {
+      background-color: var(--color-bgCard);
+    }
+  }
+
+  /* ── Reveal base state ──────────────────────────────────────────────────────
+     Delay lives here (not on .is-visible) so it only fires on entry.
+     --reveal-delay is stamped inline by the script from data-reveal-delay.
+  ────────────────────────────────────────────────────────────────────────── */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(40px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  :root {
+    --bg-speed-main: -25vh;
+  }
+
+  /* ── CSS Scroll Animations (Chromium) ───────────────────────────────────────
+     animation-fill-mode: both holds the final `to` state after the range
+     exits, so these are already fire-once in the forward direction.
+  ────────────────────────────────────────────────────────────────────────── */
+  @supports (animation-timeline: view()) {
+    .parallax-layer {
+      animation: parallax-shift linear both;
+      animation-timeline: --parallax;
+      animation-range: entry 0% exit 100%;
+      animation-duration: 1ms;
+    }
+    @keyframes parallax-shift {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(var(--bg-speed-main));
+      }
+    }
+
+    .parallax-map {
+      animation: map-bg-fade linear both;
+      animation-timeline: --parallax;
+      animation-range: entry 0% exit 100%;
+      animation-duration: 1ms;
+    }
+    @keyframes map-bg-fade {
+      from {
+        background-color: var(--color-bgBase);
+      }
+      to {
+        background-color: var(--color-bgCard);
+      }
+    }
+  }
+
+  .parallax-map {
+    background-color: color-mix(
+      in oklch,
+      var(--color-bgCard) calc(var(--map-progress, 0) * 100%),
+      var(--color-bgBase)
+    );
+  }
+</style>
+
+<script>
+  import { initRevealOnIntersect } from "@utils/reveal";
+
+  // ── Parallax layer shift (desktop only) ─────────────────────────────────────
+  // Handles only the background translateY. Reveal logic is no longer here —
+  // it lives in the shared IntersectionObserver below so it never reverses.
+
+  let ticking = false;
+
+  document.querySelectorAll<HTMLElement>("[data-parallax]").forEach((hero) => {
+    const layer = hero.querySelector<HTMLElement>(".parallax-layer");
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+        const progress = Math.min(
+          Math.max((window.innerHeight - rect.top) / (window.innerHeight + rect.height), 0),
+          1
+        );
+
+        if (layer) layer.style.transform = `translateY(${progress * -25}vh)`;
+        hero.style.setProperty("--map-progress", String(progress));
+
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  });
+
+  // ── Fire-once reveal — desktop + mobile ─────────────────────────────────────
+  // Stamps --reveal-delay from data-reveal-delay so the CSS transition-delay
+  // consumes it directly. unobserve() ensures it never reverses on scroll-up.
+
+  initRevealOnIntersect({ threshold: 0.15 });
+</script>
+
+<style is:global>
+  @keyframes breathe {
+    0% {
+      fill: #3d6a3f;
+      fill-opacity: 0.4;
+    }
+    50% {
+      fill: #c7d1c4;
+      fill-opacity: 0.7;
+    }
+    100% {
+      fill: #3d6a3f;
+      fill-opacity: 0.4;
+    }
+  }
+
+  .heartbeat {
+    transform-box: fill-box;
+    transform-origin: center center;
+    animation: breathe 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .title--mobile {
+    display: none;
+  }
+  @media (max-width: 1023px) {
+    .title--mobile {
+      display: inline;
+    }
+    .title--desktop {
+      display: none;
+    }
+  }
+</style>

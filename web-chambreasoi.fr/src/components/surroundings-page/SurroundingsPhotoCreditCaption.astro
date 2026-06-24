@@ -1,0 +1,83 @@
+---
+import type { WikimediaPhotoCredit } from "./types";
+
+interface Props {
+  credit: WikimediaPhotoCredit;
+  class?: string;
+}
+
+const { credit, class: className } = Astro.props;
+const commonsHomeUrl = "https://commons.wikimedia.org/";
+const commonsFileUrl = credit.commonsFileUrl?.trim();
+---
+
+<figcaption
+  class:list={[
+    "surroundings-gallery-photo-credit",
+    "absolute inset-x-0 bottom-0 z-[1] bg-txtPri/60 p-[0.8rem] text-[0.8rem] leading-snug text-white",
+    "max-lg:hidden",
+    "lg:opacity-0 lg:pointer-events-none",
+    "lg:transition-opacity lg:duration-300 lg:ease-out",
+    "lg:group-hover/image:opacity-100 lg:group-hover/image:pointer-events-auto",
+    "lg:group-focus-within/image:opacity-100 lg:group-focus-within/image:pointer-events-auto",
+    className,
+  ]}
+>
+  Photo :
+  {" "}
+  {
+    commonsFileUrl ? (
+      <a
+        href={commonsFileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="surroundings-gallery-photo-credit__link"
+      >
+        « {credit.title} »
+      </a>
+    ) : (
+      <span>« {credit.title} »</span>
+    )
+  }
+  {" "}
+  par {credit.author},
+  {" "}
+  <a
+    href={credit.licenseUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="surroundings-gallery-photo-credit__link"
+  >
+    {credit.licenseLabel}
+  </a>
+  , via
+  {" "}
+  <a
+    href={commonsHomeUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="surroundings-gallery-photo-credit__link"
+  >
+    Wikimedia Commons
+  </a>
+  .
+</figcaption>
+
+<style>
+  @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+    .surroundings-gallery-photo-credit {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  .surroundings-gallery-photo-credit__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .surroundings-gallery-photo-credit__link:hover {
+    color: rgb(255 255 255 / 85%);
+  }
+</style>

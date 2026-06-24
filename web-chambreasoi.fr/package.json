@@ -1,0 +1,63 @@
+{
+  "name": "web-chambreasoi-fr",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "build:ci": "ENABLE_SANITY_STUDIO=false astro build",
+    "deploy": "astro build && wrangler deploy",
+    "deploy:preview": "astro build && wrangler versions upload",
+    "format": "biome format --write . && prettier --write \"**/*.astro\"",
+    "format:astro": "prettier --write \"**/*.astro\"",
+    "format:check": "biome format . && prettier --check \"**/*.astro\"",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.7.0",
+    "@astrojs/react": "^5.0.7",
+    "@astrojs/sitemap": "^3.7.3",
+    "@chambreasoi/sanity": "workspace:*",
+    "@sanity/astro": "^3.4.1",
+    "@sanity/client": "^7.23.0",
+    "@unocss/reset": "^66.7.2",
+    "astro": "^6.4.8",
+    "astro-icon": "^1.1.5",
+    "astro-leaflet": "^1.12.0",
+    "astro-seo-schema": "^6.0.0",
+    "leaflet-extra-markers": "^2.0.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sanity": "^5.31.1",
+    "schema-dts": "^2.0.0",
+    "sharp": "^0.34.5",
+    "styled-components": "^6.4.2",
+    "vanilla-calendar-pro": "^3.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/node": "^10.1.4",
+    "@biomejs/biome": "^2.5.1",
+    "@cloudflare/workers-types": "^4.20260624.1",
+    "@types/react": "^19.2.17",
+    "@unocss/astro": "^66.7.2",
+    "@unocss/preset-web-fonts": "^66.7.2",
+    "prettier": "^3.8.4",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3",
+    "unocss": "^66.7.2",
+    "vitest": "^4.1.9",
+    "wrangler": "4.95.0",
+    "zod": "^4.4.3"
+  }
+}

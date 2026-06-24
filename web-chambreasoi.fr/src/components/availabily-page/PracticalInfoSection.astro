@@ -1,0 +1,465 @@
+---
+import { Image } from "astro:assets";
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
+import { getPricing, getPublicRates } from "@config/pricing";
+import { formatEuroFR } from "@utils/currency";
+import type { PracticalInfoRenderModel } from "../../data/adapters/practical-info";
+
+type Props = {
+  renderModel: PracticalInfoRenderModel;
+};
+
+const { renderModel } = Astro.props;
+const {
+  p,
+  accentClasses,
+  bookingCardPositionClasses,
+  bookingSanitySrc,
+  bookingSanitySrcSet,
+  fallbackBookingImage,
+  fallbackKitchenImage,
+  tariffAccentClasses,
+  resolvedServiceImages,
+  displayedServiceCards,
+  serviceDesktopPositionClasses,
+  mobileServiceItemCount,
+  getServiceImage,
+  serviceImageWidth,
+  serviceImageHeight,
+} = renderModel;
+
+const pricing = await getPricing();
+const publicRates = getPublicRates(pricing);
+const kitchenImageSource = p.kitchenImage;
+
+const slugifyId = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getServiceCardId = (card: (typeof displayedServiceCards)[number], index: number): string =>
+  slugifyId(card.category ?? card.title ?? `service-card-${index + 1}`);
+---
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <GridOverlay />
+
+  <div class="relative z-10 flex flex-col gap-[3.6rem] lg:gap-[4.8rem]">
+    <!-- Tarifs: own 5-col grid -->
+    <div class="grid grid-cols-2 gap-grid lg:items-stretch lg:grid-cols-5">
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="col-span-full flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+      >
+        <span class="heading-3">{p.eyebrow}</span>
+      </div>
+
+      <div
+        class="col-span-full flex flex-col gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:row-span-5 lg:gap-[0.4rem] lg:pb-0 lg:px-0"
+      >
+        <div data-reveal data-reveal-delay="80" class="max-w-[72ch] lg:pb-0">
+          <div class="flex flex-col gap-[0.4rem] lg:min-h-0 lg:mb-[1.6rem]">
+            <h2 class="heading-2 text-balance">{p.tariffsHeading}</h2>
+          </div>
+        </div>
+
+        {
+          publicRates.map((rate, index) => (
+            <article
+              data-reveal
+              data-reveal-delay={String(120 + index * 40)}
+              class:list={[
+                "flex flex-col justify-between gap-[1.2rem] border-b border-txtPri/10 p-[0.8rem] lg:pb-[1.6rem]",
+                tariffAccentClasses[index],
+              ]}
+            >
+              <div class="flex flex-col gap-[0.2rem]">
+                <h3 class="text-ui-sm font-medium leading-snug text-balance">{rate.name}</h3>
+              </div>
+              <p class="text-balance text-ui-sm leading-relaxed">
+                <span class="text-ui-sm font-medium tabular-nums">
+                  {formatEuroFR(rate.priceCents)}
+                </span>
+                <span class="text-muted"> TTC</span>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+
+      <figure
+        data-reveal
+        data-reveal-delay="100"
+        class="group/image relative col-span-full aspect-[4/3] overflow-hidden bg-accentStone/25 lg:col-span-3 lg:col-start-3 lg:row-span-5 lg:row-start-2 lg:aspect-auto lg:min-h-0"
+      >
+        <SanityPicture
+          source={kitchenImageSource}
+          alt={p.kitchenImageAlt}
+          width={1400}
+          height={1050}
+          sizes="(min-width: 1024px) 60vw, 100vw"
+          loading="lazy"
+          decoding="async"
+          quality={80}
+          format="webp"
+          fit="crop"
+          dprs={[1, 1.5, 2]}
+          fallback={fallbackKitchenImage}
+          class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+        />
+      </figure>
+    </div>
+
+    <!-- Infos pratiques / modalités: separate 5-col grid -->
+    <div
+      class="grid grid-cols-1 lg:grid-flow-dense lg:items-stretch lg:gap-grid lg:grid-cols-5 lg:mt-[3.2rem]"
+    >
+      <div
+        data-reveal
+        data-reveal-delay="0"
+        class="flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+      >
+        <span class="heading-3"> {p.bookingEyebrow}</span>
+      </div>
+
+      <div
+        data-reveal
+        data-reveal-delay="80"
+        class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0 lg:mb-[2.4rem]"
+      >
+        <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+          <h2 class="heading-2 text-balance">{p.bookingHeading}</h2>
+        </div>
+      </div>
+
+      {
+        bookingSanitySrc ? (
+          <figure
+            data-reveal
+            data-reveal-delay="100"
+            class="group/image relative aspect-[3/4] max-h-full overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
+          >
+            <img
+              src={bookingSanitySrc}
+              srcset={bookingSanitySrcSet ?? undefined}
+              alt={p.bookingImageAlt}
+              width={900}
+              height={1200}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : fallbackBookingImage ? (
+          <figure
+            data-reveal
+            data-reveal-delay="100"
+            class="group/image relative aspect-[3/4] max-h-[24rem] overflow-hidden bg-accentStone/25 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-4 lg:max-h-[32rem] lg:self-start  mb-[.4rem] lg:mb-0"
+          >
+            <Image
+              src={fallbackBookingImage}
+              alt={p.bookingImageAlt}
+              width={900}
+              height={1200}
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              loading="lazy"
+              decoding="async"
+              class="size-full object-cover object-center transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+            />
+          </figure>
+        ) : null
+      }
+
+      {
+        p.bookingCards.map((card, index) => (
+          <article
+            data-reveal
+            data-reveal-delay={String(120 + index * 20)}
+            class:list={[
+              "flex flex-col gap-[1.2rem] p-[0.8rem] mb-[.4rem] lg:mb-0 lg:col-span-1 lg:pb-[1.6rem]",
+              index < 3 ? "lg:mt-[1.6rem]" : "",
+              accentClasses[card.accent ?? "stone"],
+              bookingCardPositionClasses[index] ?? bookingCardPositionClasses[0],
+            ]}
+          >
+            <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+              <h3 class="text-ui-lg font-medium leading-snug">{card.title}</h3>
+            </div>
+            {card.body?.map((block) =>
+              block._type === "block" ? (
+                <p class="text-balance text-ui-sm leading-relaxed">
+                  {block.children?.map((span) =>
+                    span.marks?.includes("strong") ? (
+                      <strong class="font-semibold">{span.text}</strong>
+                    ) : (
+                      span.text
+                    )
+                  )}
+                </p>
+              ) : null
+            )}
+            {card.secondaryText ? (
+              <p class="text-balance text-[0.85rem] leading-relaxed text-muted">
+                {card.secondaryText}
+              </p>
+            ) : null}
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <GridOverlay />
+
+  <div class="relative z-10 grid grid-cols-1 lg:items-stretch lg:gap-grid lg:grid-cols-5">
+    <div
+      data-reveal
+      data-reveal-delay="0"
+      class="flex items-center gap-grid px-[0.4rem] pb-[3.6rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+    >
+      <span class="heading-3">{p.servicesEyebrow}</span>
+    </div>
+
+    <div
+      data-reveal
+      data-reveal-delay="80"
+      class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0 lg:mb-[2.4rem]"
+    >
+      <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+        <h2 class="heading-2 text-balance">{p.servicesHeading}</h2>
+      </div>
+    </div>
+
+    <div class="contents">
+      {
+        displayedServiceCards.map((service, index) => (
+          <span
+            id={getServiceCardId(service, index)}
+            class:list={[
+              "block scroll-mt-[6rem] lg:scroll-mt-[-24rem]",
+              "lg:col-span-1 lg:h-0 lg:overflow-hidden",
+              serviceDesktopPositionClasses[index] ?? serviceDesktopPositionClasses[0],
+            ]}
+            aria-hidden="true"
+          />
+        ))
+      }
+    </div>
+
+    <div class="mt-[1.6rem] grid grid-cols-1 gap-grid lg:hidden">
+      {
+        Array.from({ length: mobileServiceItemCount }).map((_, index) => {
+          const service = displayedServiceCards[index];
+          const image = getServiceImage(index);
+
+          return (
+            <>
+              {image ? (
+                <figure
+                  data-reveal
+                  data-reveal-delay={String(120 + index * 160)}
+                  class="group/image relative aspect-[4/3.5] overflow-hidden bg-accentStone/25"
+                >
+                  <div class="service-image-container">
+                    {image.sanitySrc ? (
+                      <img
+                        src={image.sanitySrc}
+                        srcset={image.sanitySrcSet ?? undefined}
+                        sizes="100vw"
+                        alt={image.alt}
+                        loading="lazy"
+                        decoding="async"
+                        class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                      />
+                    ) : image.fallbackImage ? (
+                      <Image
+                        src={image.fallbackImage}
+                        alt={image.alt}
+                        width={serviceImageWidth}
+                        height={serviceImageHeight}
+                        densities={[1, 1.5, 2]}
+                        loading="lazy"
+                        decoding="async"
+                        class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                      />
+                    ) : (
+                      <img
+                        src={image.placeholderSrc}
+                        width={serviceImageWidth}
+                        height={serviceImageHeight}
+                        alt={image.alt}
+                        loading="lazy"
+                        decoding="async"
+                        class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1.03]"
+                      />
+                    )}
+                  </div>
+                </figure>
+              ) : null}
+              {service ? (
+                <article
+                  data-reveal
+                  data-reveal-delay={String(200 + index * 160)}
+                  class:list={[
+                    "flex flex-col gap-[1.2rem] p-[0.8rem]",
+                    accentClasses[service.accent ?? "stone"],
+                  ]}
+                >
+                  <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem]">
+                    {/* <span class="text-[0.85rem] text-muted uppercase tracking-widest">
+                      {service.category}
+                    </span> */}
+                    {service.title ? (
+                      <h3 class="text-ui-lg font-medium leading-snug">{service.title}</h3>
+                    ) : null}
+                  </div>
+                  {service.body?.map((block) =>
+                    block._type === "block" ? (
+                      <p class="text-balance text-ui-sm leading-relaxed">
+                        {block.children?.map((span) =>
+                          span.marks?.includes("strong") ? (
+                            <strong class="font-semibold">{span.text}</strong>
+                          ) : (
+                            span.text
+                          )
+                        )}
+                      </p>
+                    ) : null
+                  )}
+                </article>
+              ) : null}
+            </>
+          );
+        })
+      }
+    </div>
+
+    {
+      displayedServiceCards.map((service, index) => (
+        <article
+          data-reveal
+          data-reveal-delay={String(240 + index * 80)}
+          class:list={[
+            "hidden flex-col gap-[1.2rem] p-[0.8rem] lg:flex lg:min-h-[18rem] lg:pb-[1.6rem]",
+            accentClasses[service.accent ?? "stone"],
+            serviceDesktopPositionClasses[index] ?? serviceDesktopPositionClasses[0],
+          ]}
+        >
+          <div class="flex flex-col gap-[0.4rem] border-b border-txtPri/10 pb-[0.8rem] lg:min-h-[3.2rem]">
+            {/* <span class="text-[0.85rem] text-muted uppercase tracking-widest">
+              {service.category}
+            </span> */}
+            {service.title ? (
+              <h3 class="text-ui-lg font-medium leading-snug">{service.title}</h3>
+            ) : null}
+          </div>
+          {service.body?.map((block) =>
+            block._type === "block" ? (
+              <p class="text-balance text-ui-sm leading-relaxed">
+                {block.children?.map((span) =>
+                  span.marks?.includes("strong") ? (
+                    <strong class="font-semibold">{span.text}</strong>
+                  ) : (
+                    span.text
+                  )
+                )}
+              </p>
+            ) : null
+          )}
+        </article>
+      ))
+    }
+
+    <div
+      class:list={[
+        "hidden grid-cols-1 gap-grid lg:col-span-5 lg:col-start-1 lg:grid lg:grid-cols-5",
+        "lg:row-start-4",
+      ]}
+    >
+      {
+        resolvedServiceImages.map((image, index) => (
+          <figure
+            data-reveal
+            data-reveal-delay={String(480 + index * 80)}
+            class="group/image relative aspect-[4/2.8] overflow-hidden bg-accentStone/25"
+          >
+            <div class="service-image-container">
+              {image.sanitySrc ? (
+                <img
+                  src={image.sanitySrc}
+                  srcset={image.sanitySrcSet ?? undefined}
+                  sizes="(max-width: 1024px) 360px, 100vw"
+                  alt={image.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
+                />
+              ) : image.fallbackImage ? (
+                <Image
+                  src={image.fallbackImage}
+                  alt={image.alt}
+                  width={serviceImageWidth}
+                  height={serviceImageHeight}
+                  densities={[1, 1.5, 2]}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
+                />
+              ) : (
+                <img
+                  src={image.placeholderSrc}
+                  width={serviceImageWidth}
+                  height={serviceImageHeight}
+                  alt={image.alt}
+                  loading="lazy"
+                  decoding="async"
+                  class="service-image transition-transform duration-1000 ease-out group-hover/image:scale-[1]"
+                />
+              )}
+            </div>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .service-image-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .service-image-container :global(img),
+  .service-image-container :global(.service-image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+</style>

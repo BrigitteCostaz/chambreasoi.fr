@@ -1,0 +1,42 @@
+{
+  "name": "studio-chambreasoi-fr",
+  "private": true,
+  "version": "1.0.0",
+  "main": "package.json",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build && cp static/robots.txt static/_redirects dist/",
+    "deploy": "pnpm run build && wrangler pages deploy dist --project-name=chambreasoi-studio --branch=main --commit-dirty=true",
+    "deploy:preview": "pnpm run build && wrangler pages deploy dist --project-name=chambreasoi-studio --branch=develop --commit-dirty=true",
+    "deploy:sanity-hosted": "sanity deploy",
+    "deploy-graphql": "sanity graphql deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "sanity"
+  ],
+  "dependencies": {
+    "@sanity/icons": "^3.7.4",
+    "@sanity/vision": "^5.28.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "sanity": "^5.28.0",
+    "styled-components": "^6.4.2"
+  },
+  "devDependencies": {
+    "@sanity/eslint-config-studio": "^6.0.0",
+    "@types/react": "^19.2.15",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "wrangler": "4.95.0"
+  },
+  "prettier": {
+    "semi": false,
+    "printWidth": 100,
+    "bracketSpacing": false,
+    "singleQuote": true
+  }
+}

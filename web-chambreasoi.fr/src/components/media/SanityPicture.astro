@@ -1,0 +1,105 @@
+---
+import { Image } from "astro:assets";
+import {
+  buildSanityDprSrcSet,
+  buildSanityImageUrl,
+  type SanityFitMode,
+  type SanityImageFormat,
+} from "@lib/sanity";
+
+interface SanityImageSource {
+  asset?: { _ref?: string; _id?: string; url?: string } | null;
+  alt?: string | null;
+}
+
+interface Props {
+  source?: SanityImageSource | null;
+  alt: string;
+  width: number;
+  height: number;
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  decoding?: "async" | "auto" | "sync";
+  fetchpriority?: "high" | "low" | "auto";
+  quality?: number;
+  format?: SanityImageFormat;
+  fit?: SanityFitMode;
+  dprs?: number[];
+  densities?: number[];
+  fallback?: ImageMetadata | null;
+  class?: string;
+  style?: string;
+}
+
+const {
+  source = null,
+  alt,
+  width,
+  height,
+  sizes,
+  loading = "lazy",
+  decoding = "async",
+  fetchpriority,
+  quality = 80,
+  format = "webp",
+  fit = "crop",
+  dprs = [1, 1.5, 2],
+  densities = [1, 1.5, 2],
+  fallback = null,
+  class: className,
+  style,
+} = Astro.props;
+
+const sanitySrc = buildSanityImageUrl({
+  source,
+  width,
+  height,
+  quality,
+  format,
+  fit,
+});
+
+const sanitySrcSet = buildSanityDprSrcSet({
+  source,
+  width,
+  height,
+  dprs,
+  quality,
+  format,
+  fit,
+});
+
+const shouldRenderSanityImage = Boolean(sanitySrc);
+const shouldRenderFallback = !shouldRenderSanityImage && Boolean(fallback);
+---
+
+{
+  shouldRenderSanityImage ? (
+    <img
+      src={sanitySrc!}
+      srcset={sanitySrcSet ?? undefined}
+      sizes={sizes}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      class={className}
+      style={style}
+    />
+  ) : shouldRenderFallback ? (
+    <Image
+      src={fallback!}
+      alt={alt}
+      width={width}
+      height={height}
+      densities={densities}
+      sizes={sizes}
+      loading={loading}
+      decoding={decoding}
+      class={className}
+      style={style}
+    />
+  ) : null
+}

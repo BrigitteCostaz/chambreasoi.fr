@@ -1,0 +1,191 @@
+---
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import {
+  getLocationPageContent,
+  type LocationPageItemResult,
+  type LocationPageTextBlockResult,
+} from "@lib/sanity";
+import { Icon } from "astro-icon/components";
+
+const locationPageContent = await getLocationPageContent();
+
+const defaultItems: LocationPageItemResult[] = [
+  {
+    _key: "motorway",
+    text: "À 1.5kms de la sortie 20 de l'autoroute A43, sur la route des Alpes et de l'Italie du nord.",
+    body: null,
+    accent: "stone",
+  },
+  {
+    _key: "medipole",
+    text: "À 5 minutes en voiture du Médipôle de Savoie / 10 minutes à pied (pas de problèmes de parking!) pour vos rendez-vous médicaux, un accompagnement ou une visite à un patient. Transfert chambre-médipôle sur demande (voir page réservations).",
+    body: null,
+    accent: "forest",
+  },
+  {
+    _key: "chambery",
+    text: "À 6 kms de Chambéry-centre avec possibilité d'un bus toutes les 10' - l'arrêt « Eglise Challes » est à 300m de votre chambre - pour vos rendez-vous professionnels ou une visite de l'ancienne capitale du Royaume de Piémont-Sardaigne !",
+    body: null,
+    accent: "bistre",
+  },
+  {
+    _key: "mountains",
+    text: "Entre le massif des Bauges et le massif de Chartreuse pour goûter aux charmes de la moyenne montagne avec de nombreuses possibilités d'activités, de promenades ou randonnées pédestres en toutes saisons.",
+    body: null,
+    accent: "stone",
+  },
+  {
+    _key: "vineyard",
+    text: "Tout près du vignoble de Savoie pour une découverte des vignes et des caves.",
+    body: null,
+    accent: "forest",
+  },
+];
+
+const p = {
+  eyebrow: locationPageContent?.eyebrow ?? "Localisation",
+  introText: locationPageContent?.introText ?? "Une chambre à soi est idéalement située :",
+  items: locationPageContent?.items?.length ? locationPageContent.items : defaultItems,
+};
+
+const hasPortableTextBody = (body: LocationPageTextBlockResult[] | null | undefined) =>
+  Boolean(
+    body?.some((block) =>
+      block.children?.some((span) => typeof span.text === "string" && span.text.trim().length > 0)
+    )
+  );
+
+const isExternalHref = (href: string) => /^(https?:)?\/\//.test(href);
+
+const displayedBlocks = p.items.flatMap((item) => {
+  const blocks = hasPortableTextBody(item.body)
+    ? (item.body ?? [])
+    : item.text
+      ? [
+          {
+            _key: `${item._key}-fallback`,
+            _type: "block",
+            style: "normal",
+            markDefs: null,
+            children: [
+              {
+                _key: `${item._key}-fallback-span`,
+                _type: "span",
+                text: item.text,
+                marks: null,
+              },
+            ],
+          } satisfies LocationPageTextBlockResult,
+        ]
+      : [];
+
+  return blocks
+    .map((block) => {
+      const spans =
+        block.children
+          ?.filter((span) => span.text)
+          .map((span) => {
+            const marks = span.marks ?? [];
+            const link = block.markDefs?.find(
+              (markDef) => markDef._type === "link" && marks.includes(markDef._key)
+            );
+            const href = link?.href ?? null;
+
+            return {
+              _key: span._key,
+              text: span.text ?? "",
+              href,
+              isExternal: href ? isExternalHref(href) : false,
+              isStrong: marks.includes("strong"),
+              isEm: marks.includes("em"),
+            };
+          }) ?? [];
+
+      return {
+        _key: `${item._key}-${block._key}`,
+        spans,
+      };
+    })
+    .filter((block) => block.spans.length > 0);
+});
+---
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <GridOverlay />
+
+  <div class="relative z-10 grid grid-cols-1 lg:items-stretch lg:gap-grid lg:grid-cols-5">
+    <div
+      data-reveal
+      data-reveal-delay="0"
+      class="flex items-center gap-grid px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:items-start lg:py-[4.8rem]"
+    >
+      <span class="heading-3">{p.eyebrow}</span>
+    </div>
+
+    <div
+      data-reveal
+      data-reveal-delay="80"
+      class="max-w-[72ch] px-[0.4rem] pb-[2.4rem] lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:pb-0"
+    >
+      <div class="flex flex-col gap-[0.4rem] lg:min-h-0">
+        <h1 class="heading-2 text-balance">{p.introText}</h1>
+      </div>
+    </div>
+
+    <div
+      data-reveal
+      data-reveal-delay="120"
+      class="col-span-full px-[0.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-3"
+    >
+      <slot name="map" />
+    </div>
+
+    <article
+      data-reveal
+      data-reveal-delay="180"
+      class="col-span-full mt-[2.4rem] flex flex-col gap-[1.2rem] bg-accentStone/25 p-[.8rem] pr-[1.2rem] lg:pr-[.8rem] lg:col-span-3 lg:col-start-2 lg:row-start-4 lg:mt-[3.2rem] lg:py-[1.6rem]"
+    >
+      {
+        displayedBlocks.map((block) => (
+          <div class="flex items-start gap-[0.8rem]">
+            <Icon
+              name="ion/checkmark-sharp"
+              class="mt-[0.30rem] size-[1rem] shrink-0"
+              aria-hidden="true"
+            />
+            <p class="text-balance text-ui-sm leading-relaxed">
+              {block.spans.map((span) =>
+                span.href ? (
+                  <a
+                    href={span.href}
+                    class="underline underline-offset-4"
+                    target={span.isExternal ? "_blank" : undefined}
+                    rel={span.isExternal ? "noopener noreferrer" : undefined}
+                  >
+                    {span.isStrong ? (
+                      <strong class="font-semibold">
+                        {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                      </strong>
+                    ) : span.isEm ? (
+                      <em class="italic">{span.text}</em>
+                    ) : (
+                      span.text
+                    )}
+                  </a>
+                ) : span.isStrong ? (
+                  <strong class="font-semibold">
+                    {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                  </strong>
+                ) : span.isEm ? (
+                  <em class="italic">{span.text}</em>
+                ) : (
+                  span.text
+                )
+              )}
+            </p>
+          </div>
+        ))
+      }
+    </article>
+  </div>
+</section>

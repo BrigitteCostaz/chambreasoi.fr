@@ -1,0 +1,29 @@
+---
+import { getOrgData } from "@config/organization";
+
+const orgData = await getOrgData();
+---
+
+<a class="block no-underline" href="/">
+  <p
+    class="logo-text my-0 transition-colors duration-600 ease-in-out group-hover:text-[var(--color-bgBase)]"
+  >
+    <span>{orgData.legal.brandName}</span>
+  </p>
+</a>
+
+<style>
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: clamp(18px, calc(18 * 1px + (2) * (100vw - 375 * 1px) / (1225)), 20px);
+    font-weight: 600;
+    letter-spacing: var(--font-display-tracking);
+    line-height: 1.2;
+    text-transform: lowercase;
+    color: var(--color-accentForest);
+  }
+
+  .logo-text > span {
+    line-height: 1;
+  }
+</style>

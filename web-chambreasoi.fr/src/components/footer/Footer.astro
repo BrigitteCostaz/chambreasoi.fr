@@ -1,0 +1,381 @@
+---
+import FooterNav from "@components/navigation/FooterNav.astro";
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
+import ThemeToggle from "@components/ThemeToggle.astro";
+import { legalNavigation } from "@config/navigation";
+import { getOrgData } from "@config/organization";
+import { Icon } from "astro-icon/components";
+
+const orgData = await getOrgData();
+
+const startYear = Number(orgData.legal.startYear);
+const currentYear = new Date().getFullYear();
+const year = startYear === currentYear ? currentYear : `${startYear}–${currentYear}`;
+
+const {
+  contact: { phone, email },
+  address,
+} = orgData;
+
+const contact = {
+  phone: {
+    display: phone.display,
+    link: phone.link,
+  },
+  email: {
+    value: email,
+    link: `mailto:${email}`,
+  },
+  address: {
+    street: address.street,
+    city: address.city,
+    postalCode: address.postalCode,
+  },
+};
+---
+
+<div class="px-[.8rem]">
+  <footer id="footer" class="footer-shell relative overflow-x-clip py-[1.6rem] pt-24 lg:pt-60">
+    <!-- Grid system -->
+    <!-- <div
+      class="pointer-events-none absolute inset-x-0 bottom-[1.6rem] top-24 translate-x-[0.15rem] lg:top-60"
+    > -->
+    <!-- <div class="pointer-events-none absolute inset-0 top-1/9 bottom-1/9 translate-x-[0.15rem]">
+      <div class="grid size-full grid-cols-2 lg:hidden">
+        <div class="grid-line"></div>
+        <div></div>
+      </div>
+
+      <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div class="grid-line"></div>
+        <div></div>
+      </div>
+    </div> -->
+
+    <!-- Content -->
+    <div class="relative z-10 grid grid-cols-2 lg:grid-cols-5">
+      <div class="col-span-2 lg:col-span-3 lg:col-start-2 space-y-[1.6rem]">
+        <!-- Mobile + Tablet layout -->
+        <div class="grid grid-cols-2 gap-grid md:gap-grid lg:hidden">
+          <div class="flex flex-col gap-[1.2rem] md:gap-[1.6rem]">
+            <!-- Brand -->
+            <div class="p-[0.8rem] flex flex-col justify-between">
+              <div>
+                <SiteLogo />
+                <span class="text-ui-sm text-txtMuted">(Savoie)</span>
+              </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="flex flex-col">
+              <div class="footer-link-row footer-link--rule">
+                <a href={contact.phone.link} class="footer-link footer-hover text-ui-sm">
+                  {contact.phone.display}
+                </a>
+              </div>
+
+              <div class="footer-link-row footer-link--rule">
+                <a
+                  href="https://www.openstreetmap.org/node/13391574122"
+                  class="footer-link footer-link--address footer-hover"
+                >
+                  {address.street}
+                  {address.postalCode}
+                  {address.city}
+                </a>
+              </div>
+              <div class="footer-link-row">
+                <a
+                  href="https://www.openstreetmap.org/node/13391574122"
+                  class="footer-link footer-hover text-ui-sm">{contact.email.value}</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-[1.2rem] md:gap-[1.6rem]">
+            <!-- Navigation -->
+            <FooterNav />
+
+            <!-- Legals -->
+            <div class="flex flex-col">
+              {
+                legalNavigation.map((item, index) =>
+                  index === 0 ? (
+                    <div class="footer-link--rule relative  px-[0.8rem]">
+                      <a
+                        href={item.link}
+                        class="footer-link footer-link--legal footer-hover text-ui-sm"
+                      >
+                        {item.text}
+                      </a>
+                    </div>
+                  ) : (
+                    <div class="px-[0.8rem]">
+                      <a
+                        href={item.link}
+                        class="footer-link footer-link--legal footer-hover text-ui-sm"
+                      >
+                        {item.text}
+                      </a>
+                    </div>
+                  )
+                )
+              }
+            </div>
+          </div>
+
+          <!-- ThemeToggle -->
+          <div
+            class="col-span-2 flex justify-center lg:justify-end border-t border-txtPri/10 pt-[0.8rem]"
+            aria-hidden="true"
+          >
+            <ThemeToggle class="lg:self-end" />
+          </div>
+
+          <!-- Copyright -->
+          <p
+            class="copyright col-span-2 flex items-center justify-center gap-1.5 border-t border-txtPri/10 pt-[0.8rem] text-center"
+          >
+            <Icon class="text-txtPri" name="ic/copyright-sharp" />
+            {year}
+            {orgData.legal.brandName}
+          </p>
+        </div>
+
+        <!-- Desktop layout -->
+        <div class="hidden lg:block">
+          <!-- Top -->
+          <div class="grid grid-cols-3 gap-grid">
+            <!-- Brand -->
+            <div class="p-[0.8rem] flex flex-col justify-between">
+              <div>
+                <SiteLogo />
+                <span class="text-ui-sm text-txtMuted">(Savoie)</span>
+              </div>
+            </div>
+
+            <!-- ThemeToggle -->
+            <div class="p-[0.8rem] flex flex-col justify-end" aria-hidden="true">
+              <ThemeToggle class="self-end" />
+            </div>
+
+            <!-- Navigation -->
+            <FooterNav />
+          </div>
+
+          <!-- Bottom: 3×3 link grid, then a full-width copyright row -->
+          <div class="border-t border-txtPri/10">
+            <div class="footer-bottom">
+              <div class="footer-bottom-grid">
+                <!-- Contact -->
+                <div class="footer-link-row footer-link--rule">
+                  <Icon class="text-txtPri" name="ion/call-sharp" />
+                  <a href={contact.phone.link} class="footer-link footer-hover text-ui-sm">
+                    {contact.phone.display}
+                  </a>
+                </div>
+                <div class="footer-link-row footer-link--rule">
+                  <Icon class="text-txtPri" name="ion/location-sharp" />
+                  <a
+                    href="https://www.openstreetmap.org/node/13391574122"
+                    class="footer-link footer-link--address footer-hover"
+                  >
+                    {address.street}
+                    {address.postalCode}
+                    {address.city}
+                  </a>
+                </div>
+                <div class="footer-link-row">
+                  <Icon class="text-txtPri" name="ion/mail-sharp" />
+                  <a href={contact.email.link} class="footer-link footer-hover text-ui-sm"
+                    >{contact.email.value}</a
+                  >
+                </div>
+                <div
+                  class="footer-bottom-grid__cell footer-bottom-grid__cell--empty"
+                  aria-hidden="true"
+                >
+                </div>
+                <div
+                  class="footer-bottom-grid__cell footer-bottom-grid__cell--empty"
+                  aria-hidden="true"
+                >
+                </div>
+                <div
+                  class="footer-bottom-grid__cell footer-bottom-grid__cell--empty"
+                  aria-hidden="true"
+                >
+                </div>
+                <div
+                  class="footer-bottom-grid__cell footer-bottom-grid__cell--empty"
+                  aria-hidden="true"
+                >
+                </div>
+                <!-- Legals -->
+                {
+                  legalNavigation.map((item, index) =>
+                    index === 0 ? (
+                      <div class="footer-link--rule relative pl-[.8rem]">
+                        <a
+                          href={item.link}
+                          class="footer-link footer-link--legal footer-hover text-ui-sm"
+                        >
+                          {item.text}
+                        </a>
+                      </div>
+                    ) : (
+                      <div class="pl-[.8rem]">
+                        <a
+                          href={item.link}
+                          class="footer-link footer-link--legal footer-hover text-ui-sm"
+                        >
+                          {item.text}
+                        </a>
+                      </div>
+                    )
+                  )
+                }
+                <div
+                  class="footer-bottom-grid__cell footer-bottom-grid__cell--empty"
+                  aria-hidden="true"
+                >
+                </div>
+              </div>
+              <!-- Copyright -->
+              <p
+                class="copyright footer-bottom__copyright flex items-center justify-center gap-1.5 border-block border-txtPri/10 py-[0.8rem] text-center"
+              >
+                <Icon class="text-txtPri" name="ic/copyright-sharp" />
+                {year}
+                {orgData.legal.brandName}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<style>
+  /* =========================
+ * Typography
+ * ========================= */
+  .copyright {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: var(--font-display-tracking);
+    text-transform: lowercase;
+  }
+
+  /* =========================
+ * Links
+ * ========================= */
+  .footer-link {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+    max-width: 100%;
+    width: fit-content;
+    padding: 0.4rem 0 0.4rem 0;
+    line-height: 1.2;
+  }
+
+  /* Narrower than text-ui-sm so the desktop footer address stays one line in the grid */
+  .footer-link.footer-link--address {
+    font-size: clamp(12px, calc(12px + 3 * (100vw - 360px) / 920), 15px);
+  }
+
+  .footer-hover {
+    text-decoration: none;
+    transition: font-style 200ms ease;
+  }
+
+  .footer-hover:hover,
+  .footer-hover:focus-visible {
+    font-style: italic;
+  }
+
+  /* =========================
+ * Link rows
+ * ========================= */
+  .footer-link-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding-left: 0.8rem;
+  }
+
+  .footer-link--rule {
+    position: relative;
+  }
+
+  .footer-link--legal {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    width: 100%;
+  }
+
+  .footer-link-row.footer-link--rule {
+    border-bottom: 1px solid color-mix(in oklch, currentColor 10%, transparent);
+  }
+
+  /* Bottom rule line */
+  .footer-link--rule::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background: color-mix(in oklch, currentColor 10%, transparent);
+  }
+
+  /* Avoid double rule on rows */
+  .footer-link-row.footer-link--rule::after {
+    content: none;
+  }
+
+  /* =========================
+ * Layout
+ * ========================= */
+  .footer-bottom {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+
+  .footer-shell {
+    padding-bottom: calc(var(--header-height, 48px) + 1.6rem);
+  }
+
+  /* Desktop layout */
+  @media (min-width: 1024px) {
+    .footer-shell {
+      padding-bottom: 0;
+    }
+
+    .footer-bottom-grid {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, auto);
+      grid-auto-flow: column;
+      column-gap: 0.4rem;
+      align-items: start;
+    }
+
+    .footer-bottom-grid__cell--empty {
+      min-width: 0;
+      min-height: 0;
+    }
+  }
+</style>

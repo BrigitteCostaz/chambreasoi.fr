@@ -1,0 +1,235 @@
+---
+import type { SurroundingsTextBlockResult } from "@lib/sanity";
+
+export type PortableTextBlockResult = SurroundingsTextBlockResult;
+
+interface PortableTextSpan {
+  _key: string;
+  text: string;
+  href: string | null;
+  isExternal: boolean;
+  isStrong: boolean;
+  isEm: boolean;
+}
+
+interface PortableTextParagraphNode {
+  type: "paragraph";
+  _key: string;
+  spans: PortableTextSpan[];
+}
+
+interface PortableTextListNode {
+  type: "list";
+  _key: string;
+  ordered: boolean;
+  items: PortableTextSpan[][];
+}
+
+type PortableTextNode = PortableTextParagraphNode | PortableTextListNode;
+
+interface Props {
+  blocks: PortableTextBlockResult[];
+  class?: string;
+  listClass?: string;
+  itemClass?: string;
+}
+
+const {
+  blocks,
+  class: className,
+  listClass = "[list-style-type:disc] space-y-[0.35rem] pl-[1.15rem]",
+  itemClass,
+} = Astro.props;
+
+const isExternalHref = (href: string) => /^(https?:)?\/\//.test(href);
+
+const blockToSpans = (block: PortableTextBlockResult): PortableTextSpan[] =>
+  block.children
+    ?.filter((span) => span.text)
+    .map((span) => {
+      const marks = span.marks ?? [];
+      const link = block.markDefs?.find(
+        (markDef) => markDef._type === "link" && marks.includes(markDef._key)
+      );
+      const href = link?.href ?? null;
+
+      return {
+        _key: span._key,
+        text: span.text ?? "",
+        href,
+        isExternal: href ? isExternalHref(href) : false,
+        isStrong: marks.includes("strong"),
+        isEm: marks.includes("em"),
+      };
+    }) ?? [];
+
+const hasSpanContent = (spans: PortableTextSpan[]) =>
+  spans.some((span) => span.text.trim().length > 0);
+
+const groupBlocks = (sourceBlocks: PortableTextBlockResult[]): PortableTextNode[] => {
+  const nodes: PortableTextNode[] = [];
+
+  for (let index = 0; index < sourceBlocks.length; index++) {
+    const block = sourceBlocks[index];
+    if (!block) continue;
+
+    const listItem = block.listItem;
+
+    if (listItem === "bullet" || listItem === "number") {
+      const ordered = listItem === "number";
+      const items: PortableTextSpan[][] = [];
+      let cursor = index;
+
+      while (cursor < sourceBlocks.length) {
+        const listBlock = sourceBlocks[cursor];
+        if (!listBlock || listBlock.listItem !== listItem) break;
+
+        const spans = blockToSpans(listBlock);
+        if (hasSpanContent(spans)) {
+          items.push(spans);
+        }
+        cursor++;
+      }
+
+      if (items.length > 0) {
+        nodes.push({
+          type: "list",
+          _key: block._key,
+          ordered,
+          items,
+        });
+      }
+
+      index = cursor - 1;
+      continue;
+    }
+
+    const spans = blockToSpans(block);
+    if (!hasSpanContent(spans)) continue;
+
+    nodes.push({
+      type: "paragraph",
+      _key: block._key,
+      spans,
+    });
+  }
+
+  return nodes;
+};
+
+const nodes = groupBlocks(blocks);
+---
+
+{
+  nodes.map((node) =>
+    node.type === "list" ? (
+      node.ordered ? (
+        <ol
+          class:list={[
+            className,
+            listClass.replace("[list-style-type:disc]", "[list-style-type:decimal]"),
+          ]}
+        >
+          {node.items.map((spans) => (
+            <li class={itemClass}>
+              {spans.map((span) =>
+                span.href ? (
+                  <a
+                    href={span.href}
+                    class="underline underline-offset-4"
+                    target={span.isExternal ? "_blank" : undefined}
+                    rel={span.isExternal ? "noopener noreferrer" : undefined}
+                  >
+                    {span.isStrong ? (
+                      <strong class="font-semibold">
+                        {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                      </strong>
+                    ) : span.isEm ? (
+                      <em class="italic">{span.text}</em>
+                    ) : (
+                      span.text
+                    )}
+                  </a>
+                ) : span.isStrong ? (
+                  <strong class="font-semibold">
+                    {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                  </strong>
+                ) : span.isEm ? (
+                  <em class="italic">{span.text}</em>
+                ) : (
+                  span.text
+                )
+              )}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ul class:list={[className, listClass]}>
+          {node.items.map((spans) => (
+            <li class={itemClass}>
+              {spans.map((span) =>
+                span.href ? (
+                  <a
+                    href={span.href}
+                    class="underline underline-offset-4"
+                    target={span.isExternal ? "_blank" : undefined}
+                    rel={span.isExternal ? "noopener noreferrer" : undefined}
+                  >
+                    {span.isStrong ? (
+                      <strong class="font-semibold">
+                        {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                      </strong>
+                    ) : span.isEm ? (
+                      <em class="italic">{span.text}</em>
+                    ) : (
+                      span.text
+                    )}
+                  </a>
+                ) : span.isStrong ? (
+                  <strong class="font-semibold">
+                    {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                  </strong>
+                ) : span.isEm ? (
+                  <em class="italic">{span.text}</em>
+                ) : (
+                  span.text
+                )
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    ) : (
+      <p class={className}>
+        {node.spans.map((span) =>
+          span.href ? (
+            <a
+              href={span.href}
+              class="underline underline-offset-4"
+              target={span.isExternal ? "_blank" : undefined}
+              rel={span.isExternal ? "noopener noreferrer" : undefined}
+            >
+              {span.isStrong ? (
+                <strong class="font-semibold">
+                  {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+                </strong>
+              ) : span.isEm ? (
+                <em class="italic">{span.text}</em>
+              ) : (
+                span.text
+              )}
+            </a>
+          ) : span.isStrong ? (
+            <strong class="font-semibold">
+              {span.isEm ? <em class="italic">{span.text}</em> : span.text}
+            </strong>
+          ) : span.isEm ? (
+            <em class="italic">{span.text}</em>
+          ) : (
+            span.text
+          )
+        )}
+      </p>
+    )
+  )
+}
