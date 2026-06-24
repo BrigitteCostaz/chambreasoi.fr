@@ -13,28 +13,6 @@
 /legales/*
   Cache-Control: public, max-age=86400
 
-# CMS-backed SSR pages: bypass CDN HTML cache so Sanity publishes appear without waiting on purge.
-/
-  Cache-Control: private, no-store
-
-/la-chambre
-  Cache-Control: private, no-store
-
-/la-chambre/
-  Cache-Control: private, no-store
-
-/acces-et-localisation
-  Cache-Control: private, no-store
-
-/acces-et-localisation/
-  Cache-Control: private, no-store
-
-/decouvrir-les-environs
-  Cache-Control: private, no-store
-
-/decouvrir-les-environs/
-  Cache-Control: private, no-store
-
 /tarifs-et-reservation
   Cache-Control: private, no-store
 

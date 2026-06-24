@@ -41,14 +41,6 @@ pnpm --filter web-chambreasoi-fr lint
 Public CMS pages stay SSR so Sanity updates can be purged and warmed without a rebuild.
 Legal pages are prerendered; `/tarifs-et-reservation` stays SSR because availability changes frequently.
 
-### Cache policy and publish freshness
-
-- **CMS-backed SSR pages** (`/`, `/la-chambre`, `/acces-et-localisation`, `/decouvrir-les-environs`, `/tarifs-et-reservation`) get `Cache-Control: private, no-store` from Astro middleware (`src/middleware.ts`). On Cloudflare Workers, `public/_headers` applies to static assets only — not HTML from the Worker — so middleware is required for SSR freshness.
-- **Legal pages** (`/legales/*`) are prerendered at build time and cached for 24h — CMS changes there require a redeploy.
-- **Static assets** (`/_astro/*`, `/fonts/*`, etc.) stay long-lived immutable cache.
-
-For immediate updates on CMS pages, publishing in Sanity is enough. The webhook below still purges any residual cache, invalidates in-memory Worker caches (org/pricing/accommodation), and warms URLs.
-
 ## Sanity webhook (revalidate + IndexNow)
 
 Configure in [manage.sanity.io](https://manage.sanity.io) → Project → API → Webhooks.
