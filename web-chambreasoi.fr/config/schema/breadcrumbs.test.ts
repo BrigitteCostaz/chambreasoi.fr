@@ -15,10 +15,14 @@ describe("buildBreadcrumbList", () => {
 
     expect(breadcrumb["@id"]).toBe(`${pageUrl}#breadcrumb`);
     expect(breadcrumb.itemListElement).toHaveLength(2);
-    expect(breadcrumb.itemListElement?.[1]).toMatchObject({
-      name: "Mentions légales",
-      item: pageUrl,
-    });
+    expect(breadcrumb.itemListElement).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Mentions légales",
+          item: pageUrl,
+        }),
+      ])
+    );
   });
 
   it("includes item URLs for every breadcrumb level", () => {

@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { setWorkerEnv } from "@chambreasoi/sanity/config";
+import { mergeSanityRuntimeEnv } from "@lib/sanity-env";
 import { getCloudflareBindings, getRuntimeEnv } from "@utils/runtime-env";
 
 /**
@@ -11,36 +12,15 @@ import { getCloudflareBindings, getRuntimeEnv } from "@utils/runtime-env";
  *
  * How:
  * - `getCloudflareBindings()` reads `import { env } from "cloudflare:workers"` (Astro v6).
- * - We overlay PUBLIC_* vars from import.meta.env for dev/build reliability.
+ * - Build-time PUBLIC_* vars are only a fallback when runtime bindings are missing.
  */
 export const onRequest = defineMiddleware(async (_context, next) => {
   const runtimeEnv = getRuntimeEnv(await getCloudflareBindings());
 
-  const mergedEnv: Record<string, unknown> = {
-    ...runtimeEnv,
-
-    // Provide the minimal set of PUBLIC_* vars we rely on (Vite replacement; reliable in dev/build).
-    ...(import.meta.env.PUBLIC_SANITY_PROJECT_ID
-      ? { PUBLIC_SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID }
-      : {}),
-    ...(import.meta.env.PUBLIC_SANITY_DATASET
-      ? { PUBLIC_SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET }
-      : {}),
-
-    // Provide common aliases so downstream config resolution is robust.
-    ...(import.meta.env.PUBLIC_SANITY_PROJECT_ID
-      ? {
-          SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-          SANITY_STUDIO_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-        }
-      : {}),
-    ...(import.meta.env.PUBLIC_SANITY_DATASET
-      ? {
-          SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
-          SANITY_STUDIO_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
-        }
-      : {}),
-  };
+  const mergedEnv = mergeSanityRuntimeEnv(runtimeEnv, {
+    PUBLIC_SANITY_PROJECT_ID: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
+    PUBLIC_SANITY_DATASET: import.meta.env.PUBLIC_SANITY_DATASET,
+  });
 
   setWorkerEnv(mergedEnv);
 
