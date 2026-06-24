@@ -39,6 +39,14 @@ pnpm --filter web-chambreasoi-fr lint
 Public CMS pages stay SSR so Sanity updates can be purged and warmed without a rebuild.
 Legal pages are prerendered; `/tarifs-et-reservation` stays SSR because availability changes frequently.
 
+### Cache policy and publish freshness
+
+- **CMS-backed SSR pages** (`/`, `/la-chambre`, `/acces-et-localisation`, `/decouvrir-les-environs`, `/tarifs-et-reservation`) use `Cache-Control: private, no-store` in `public/_headers`, so HTML is not edge-cached and each request fetches fresh Sanity content.
+- **Legal pages** (`/legales/*`) are prerendered at build time and cached for 24h — CMS changes there require a redeploy.
+- **Static assets** (`/_astro/*`, `/fonts/*`, etc.) stay long-lived immutable cache.
+
+For immediate updates on CMS pages, publishing in Sanity is enough. The webhook below still purges any residual cache, invalidates in-memory Worker caches (org/pricing/accommodation), and warms URLs.
+
 ## Sanity webhook (revalidate + IndexNow)
 
 Configure in [manage.sanity.io](https://manage.sanity.io) → Project → API → Webhooks.
@@ -68,6 +76,10 @@ On publish, the webhook:
 3. Invalidates in-memory CMS cache
 4. Warms URLs (no-cache fetch with retry)
 5. Submits affected URLs to IndexNow (if `INDEXNOW_KEY` is set)
+
+Structured logs (`[revalidate]` prefix in Worker observability) record webhook `_type`, `_id`, resolved paths, skip reason (draft / unmapped), purge result, cache epoch, and warm outcome. Check these if a publish does not appear on the site.
+
+**Required Worker secrets:** `SANITY_WEBHOOK_SECRET`, `CF_ZONE_ID`, `CF_API_TOKEN` (see `.env.example`).
 
 ### IndexNow setup (one-time)
 

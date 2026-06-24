@@ -1,8 +1,8 @@
 import { invalidateCmsCache } from "@config/cache";
-import { resolvePathsFromWebhook } from "@config/cms-route-map";
 import { submitIndexNow, toAbsoluteUrls } from "@config/indexnow";
-import { ALL_PUBLIC_ROUTES, normalizeBaseUrl } from "@config/public-routes";
+import { normalizeBaseUrl } from "@config/public-routes";
 import { purgeCloudflareCache } from "@lib/revalidate/purge";
+import { resolveRevalidationPaths } from "@lib/revalidate/resolve-paths";
 import { warmPublicUrls } from "@lib/revalidate/warm-urls";
 import {
   isTimestampFresh,
@@ -95,32 +95,6 @@ async function isValidSanitySignature(
   return timingSafeStringEqual(parsedSignature.signature, expected);
 }
 
-function resolveRevalidationPaths(body: string): {
-  paths: string[];
-  usedFallback: boolean;
-  skipped: boolean;
-} {
-  try {
-    const parsed: unknown = JSON.parse(body);
-    const mapped = resolvePathsFromWebhook(parsed);
-
-    if (mapped) {
-      return { paths: mapped, usedFallback: false, skipped: false };
-    }
-
-    if (typeof parsed === "object" && parsed !== null && "_type" in parsed) {
-      console.warn("[revalidate] Unmapped Sanity _type; skipping purge and IndexNow", {
-        type: (parsed as { _type?: unknown })._type,
-      });
-      return { paths: [], usedFallback: false, skipped: true };
-    }
-  } catch {
-    console.warn("[revalidate] Invalid webhook JSON; falling back to all public routes");
-  }
-
-  return { paths: [...ALL_PUBLIC_ROUTES], usedFallback: true, skipped: false };
-}
-
 export const ALL: APIRoute = async ({ request, locals }) => {
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -129,6 +103,11 @@ export const ALL: APIRoute = async ({ request, locals }) => {
   const runtimeEnv = getRuntimeEnv(await getCloudflareBindings()) as RevalidateBindings;
   const bindings = getValidatedBindings(runtimeEnv);
   if (!bindings) {
+    console.error("[revalidate] Missing webhook bindings", {
+      hasSecret: Boolean(trimSecret(runtimeEnv.SANITY_WEBHOOK_SECRET)),
+      hasZoneId: Boolean(trimSecret(runtimeEnv.CF_ZONE_ID)),
+      hasApiToken: Boolean(trimSecret(runtimeEnv.CF_API_TOKEN)),
+    });
     return new Response("Server misconfiguration", { status: 500 });
   }
 
@@ -137,12 +116,22 @@ export const ALL: APIRoute = async ({ request, locals }) => {
   const isValidSignature = await isValidSanitySignature(body, signature, bindings.secret);
 
   if (!isValidSignature) {
+    console.warn("[revalidate] Rejected webhook with invalid signature");
     return new Response("Invalid signature", { status: 401 });
   }
 
-  const { paths, usedFallback, skipped } = resolveRevalidationPaths(body);
+  const resolution = resolveRevalidationPaths(body);
 
-  if (skipped) {
+  console.info("[revalidate] Webhook received", {
+    type: resolution.webhookType ?? null,
+    id: resolution.webhookId ?? null,
+    paths: resolution.paths,
+    usedFallback: resolution.usedFallback,
+    skipped: resolution.skipped,
+    skipReason: resolution.skipReason ?? null,
+  });
+
+  if (resolution.skipped) {
     return new Response("OK", { status: 200 });
   }
 
@@ -151,38 +140,59 @@ export const ALL: APIRoute = async ({ request, locals }) => {
   const purgeResult = await purgeCloudflareCache({
     zoneId: bindings.zoneId,
     apiToken: bindings.apiToken,
-    paths,
+    paths: resolution.paths,
     baseUrl,
   });
 
   if (!purgeResult.ok) {
-    console.error("Cloudflare cache purge failed", {
+    console.error("[revalidate] Cloudflare cache purge failed", {
       status: purgeResult.status,
       error: purgeResult.error,
-      paths,
-      usedFallback,
-      zoneId: bindings.zoneId,
+      paths: resolution.paths,
+      usedFallback: resolution.usedFallback,
+      type: resolution.webhookType ?? null,
     });
     return new Response(`Cloudflare cache purge failed: ${purgeResult.error}`, { status: 502 });
   }
 
-  invalidateCmsCache();
+  const cacheEpoch = invalidateCmsCache();
 
-  const absoluteUrls = toAbsoluteUrls(baseUrl, paths);
-  const warmAndMaybeIndex = warmPublicUrls({ baseUrl, paths }).then(async (live) => {
-    if (bindings.indexNowKey && live && absoluteUrls.length > 0) {
-      await submitIndexNow({
-        key: bindings.indexNowKey,
-        baseUrl,
-        urlList: absoluteUrls,
-      });
-      return;
-    }
-
-    if (bindings.indexNowKey && !live) {
-      console.error("[revalidate] Skipping IndexNow because URL warm failed", { paths });
-    }
+  console.info("[revalidate] Purge and in-memory cache invalidation complete", {
+    paths: resolution.paths,
+    cacheEpoch,
+    type: resolution.webhookType ?? null,
   });
+
+  const absoluteUrls = toAbsoluteUrls(baseUrl, resolution.paths);
+  const warmAndMaybeIndex = warmPublicUrls({ baseUrl, paths: resolution.paths }).then(
+    async (live) => {
+      console.info("[revalidate] URL warm finished", {
+        paths: resolution.paths,
+        live,
+        type: resolution.webhookType ?? null,
+      });
+
+      if (bindings.indexNowKey && live && absoluteUrls.length > 0) {
+        await submitIndexNow({
+          key: bindings.indexNowKey,
+          baseUrl,
+          urlList: absoluteUrls,
+        });
+        console.info("[revalidate] IndexNow submitted", {
+          urlCount: absoluteUrls.length,
+          type: resolution.webhookType ?? null,
+        });
+        return;
+      }
+
+      if (bindings.indexNowKey && !live) {
+        console.error("[revalidate] Skipping IndexNow because URL warm failed", {
+          paths: resolution.paths,
+          type: resolution.webhookType ?? null,
+        });
+      }
+    }
+  );
 
   const waitUntil = (locals as CloudflareRuntimeLocals).runtime?.ctx?.waitUntil;
 
