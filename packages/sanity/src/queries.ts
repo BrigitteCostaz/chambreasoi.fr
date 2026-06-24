@@ -216,7 +216,7 @@ export interface FoldContentResult {
 }
 
 export const FOLD_CONTENT_QUERY = /* groq */ `
-  *[_type == "foldContent"][0]{
+  *[_type == "foldContent" && _id == "foldContent"][0]{
     seoTitle,
     mosaicTile1Text,
     mosaicTile2Line1,
@@ -241,7 +241,7 @@ export interface HeadlineContentResult {
 }
 
 export const HEADLINE_CONTENT_QUERY = /* groq */ `
-    *[_type == "headlineContent"][0]{
+    *[_type == "headlineContent" && _id == "headlineContent"][0]{
     headLineText,
     }
 `
@@ -258,7 +258,7 @@ export interface LocationSectionContentResult {
 }
 
 export const LOCATIONSECTION_CONTENT_QUERY = /* groq */ `
-    *[_type == "locationSectionContent"][0]{
+    *[_type == "locationSectionContent" && _id == "locationSectionContent"][0]{
     introText,
     mapLabel1,
     mapLabel2,
@@ -308,7 +308,7 @@ export interface LocationPageContentResult {
 }
 
 export const LOCATION_PAGE_CONTENT_QUERY = /* groq */ `
-  *[_type == "locationPageContent"][0]{
+  *[_type == "locationPageContent" && _id == "locationPageContent"][0]{
     eyebrow,
     introText,
     items[]{
@@ -502,7 +502,7 @@ const ROOM_PAGE_SECTION_PROJECTION = /* groq */ `
 `
 
 export const ROOM_PAGE_CONTENT_QUERY = /* groq */ `
-  *[_type == "roomPageContent"][0]{
+  *[_type == "roomPageContent" && _id == "roomPageContent"][0]{
     heroEyebrow,
     heroTitle,
     privateSection{

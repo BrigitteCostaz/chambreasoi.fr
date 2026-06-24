@@ -11,8 +11,10 @@ pnpm --filter web-chambreasoi-fr dev
 ## Build and deploy
 ```bash
 pnpm --filter web-chambreasoi-fr build
-pnpm --filter web-chambreasoi-fr deploy
+pnpm deploy:web
 ```
+
+From repo root, use `pnpm deploy:web` (not `pnpm --filter web-chambreasoi-fr deploy` — pnpm needs `run` for script names: `pnpm --filter web-chambreasoi-fr run deploy`).
 
 ## Verification
 ```bash
@@ -41,7 +43,7 @@ Legal pages are prerendered; `/tarifs-et-reservation` stays SSR because availabi
 
 ### Cache policy and publish freshness
 
-- **CMS-backed SSR pages** (`/`, `/la-chambre`, `/acces-et-localisation`, `/decouvrir-les-environs`, `/tarifs-et-reservation`) use `Cache-Control: private, no-store` in `public/_headers`, so HTML is not edge-cached and each request fetches fresh Sanity content.
+- **CMS-backed SSR pages** (`/`, `/la-chambre`, `/acces-et-localisation`, `/decouvrir-les-environs`, `/tarifs-et-reservation`) get `Cache-Control: private, no-store` from Astro middleware (`src/middleware.ts`). On Cloudflare Workers, `public/_headers` applies to static assets only — not HTML from the Worker — so middleware is required for SSR freshness.
 - **Legal pages** (`/legales/*`) are prerendered at build time and cached for 24h — CMS changes there require a redeploy.
 - **Static assets** (`/_astro/*`, `/fonts/*`, etc.) stay long-lived immutable cache.
 

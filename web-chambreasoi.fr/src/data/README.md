@@ -9,6 +9,9 @@ Each file is named by domain (`surroundings`, `practical-info`, `la-chambre`, `f
 
 ## Sanity singletons (local dev)
 
+Studio singletons use fixed document IDs (`roomPageContent`, `foldContent`, etc.). GROQ queries must filter on `_id` — not `[0]` alone — because legacy duplicate documents may exist in the dataset.
+
+- **roomPageContent** — Studio → *Page - La chambre* (`_id: roomPageContent`)
 - **surroundingsPageContent** — Studio → *Page - Bons plans* (`_id: surroundingsPageContent`). Includes **Image d’introduction** (intro hero column), galerie page, 3 accordéons; requires **Publish** (drafts are not returned by the public API).
 - **pricingSettings** — Studio → *Tarifs*; used via `getPricing()` (home fold, price section, tarifs practical-info cards).
 - **practicalInfoContent** — Studio → *Page - Infos pratiques* (`_id: practicalInfoContent`); disponibilités, tarifs, modalités et services on `/tarifs-et-reservation`. Requires **Publish** (drafts are not returned by the public API).
