@@ -1,6 +1,7 @@
 ---
 import "vanilla-calendar-pro/styles/index.css";
 import chevronIconUrl from "@icons/ion/chevron-down-sharp.svg?url";
+import closeIconUrl from "@icons/ion/close-sharp.svg?url";
 import { Icon } from "astro-icon/components";
 
 type AvailabilityDate = {
@@ -31,6 +32,7 @@ const calendarData = JSON.stringify({
   maxDate,
 });
 const chevronBackgroundImage = `url("${chevronIconUrl}")`;
+const closeBackgroundImage = `url("${closeIconUrl}")`;
 ---
 
 <div id="calendar" data-availability-calendar={calendarData}></div>
@@ -130,7 +132,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
       // selectedYear,
       selectionDatesMode: false,
       selectionMonthsMode: "only-arrows",
-      selectionYearsMode: false,
+      selectionYearsMode: "only-arrows",
       extensions: [annotations],
       popups,
       locale: "fr-FR",
@@ -149,7 +151,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   });
 </script>
 
-<style define:vars={{ chevronBackgroundImage }}>
+<style define:vars={{ chevronBackgroundImage, closeBackgroundImage }}>
   /* Etat global du calendrier. */
   :global([data-vc-theme].vc) {
     background: var(--color-bgCard);
@@ -216,23 +218,23 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
       opacity 160ms ease;
   }
 
-  /* Etat hover d'une date standard. */
+  /* État hover d'une date standard. */
   :global([data-vc-theme] .vc-date > .vc-date__btn:hover) {
     background-color: color-mix(in oklch, var(--color-accentStone) 9%, transparent);
   }
 
-  /* Etat focus clavier d'une date. */
+  /* État focus clavier d'une date. */
   :global([data-vc-theme] .vc-date > .vc-date__btn:focus-visible) {
     outline: 1px solid color-mix(in oklch, var(--color-accentForest) 58%, transparent);
     outline-offset: 2px;
   }
 
-  /* Etat weekend dans le mois courant. */
+  /* État weekend dans le mois courant. */
   :global([data-vc-theme] .vc-date[data-vc-date-weekend] > .vc-date__btn) {
     color: var(--color-txtMuted);
   }
 
-  /* Etat dates du mois precedent/suivant. */
+  /* État dates du mois precedent/suivant. */
   :global(
     [data-vc-theme]
       .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
@@ -242,7 +244,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
     color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
   }
 
-  /* Etat date du jour. */
+  /* État date du jour. */
   :global([data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn) {
     background: color-mix(in oklch, var(--color-accentStone) 13%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accentStone) 50%, transparent);
@@ -252,13 +254,13 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
     outline-offset: -1.5px;
   }
 
-  /* Etat hover de la date du jour. */
+  /* État hover de la date du jour. */
   :global([data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn:hover) {
     background: color-mix(in oklch, var(--color-accentStone) 17%, transparent);
     color: oklch(from var(--color-accentStone) calc(l - 0.2) calc(c + 0.04) h);
   }
 
-  /* Etat disponible dans le mois courant. */
+  /* État disponible dans le mois courant. */
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available) {
     background: color-mix(in oklch, var(--color-success) 15%, transparent);
     box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-success) 32%, transparent);
@@ -266,13 +268,13 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
     font-weight: 500;
   }
 
-  /* Etat hover disponible dans le mois courant. */
+  /* État hover disponible dans le mois courant. */
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available:hover) {
     background: color-mix(in oklch, var(--color-success) 22%, transparent);
     color: oklch(from var(--color-success) calc(l - 0.08) calc(c + 0.02) h);
   }
 
-  /* Etat complet dans le mois courant, y compris hover et popup ouvert. */
+  /* État complet dans le mois courant, y compris hover et popup ouvert. */
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable),
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable:hover),
   :global(
@@ -284,16 +286,37 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
     font-weight: 500;
   }
 
-  /* Etat non disponible par defaut, y compris hover et popup ouvert. */
+  /* État non disponible par defaut, y compris hover et popup ouvert. */
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable),
   :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable:hover),
   :global(
     [data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable[aria-expanded="true"]
   ) {
+    position: relative;
     background-color: transparent;
     box-shadow: none;
     color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
     font-weight: 450;
+  }
+
+  /* Croix SVG (close-sharp) plus grande et plus opaque que le chiffre. */
+  :global([data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable::after) {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 1.45em;
+    height: 1.45em;
+    pointer-events: none;
+    background-color: color-mix(in oklch, var(--color-txtMuted) 92%, var(--color-txtPri));
+    -webkit-mask-image: var(--closeBackgroundImage);
+    mask-image: var(--closeBackgroundImage);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
   }
 
   /* Etat disponible du mois precedent/suivant, sans fond ni hover. */
@@ -458,7 +481,28 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
   }
 
   .defaultUnavailableDates {
+    position: relative;
     background: transparent;
     box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-txtMuted) 55%, transparent);
+    font-size: 0.75rem;
+  }
+
+  .defaultUnavailableDates::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 1.45em;
+    height: 1.45em;
+    pointer-events: none;
+    background-color: color-mix(in oklch, var(--color-txtMuted) 92%, var(--color-txtPri));
+    -webkit-mask-image: var(--closeBackgroundImage);
+    mask-image: var(--closeBackgroundImage);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
   }
 </style>
