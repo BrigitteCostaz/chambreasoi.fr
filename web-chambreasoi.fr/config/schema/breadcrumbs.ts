@@ -19,11 +19,7 @@ export function buildBreadcrumbList(
     "@id": `${pageUrl}#breadcrumb`,
     itemListElement: items.map((item, index) => {
       const isLast = index === items.length - 1;
-      const itemUrl = item.path
-        ? new URL(item.path, siteUrl).href
-        : isLast
-          ? pageUrl
-          : undefined;
+      const itemUrl = item.path ? new URL(item.path, siteUrl).href : isLast ? pageUrl : undefined;
 
       return {
         "@type": "ListItem",

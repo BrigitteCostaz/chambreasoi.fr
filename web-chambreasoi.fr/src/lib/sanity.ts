@@ -53,7 +53,6 @@ export * from "@chambreasoi/sanity/queries";
 // ---------------------------------------------------------------------------
 
 import { fetchSanity } from "@chambreasoi/sanity/fetch";
-import { getAvailabilityQueryRange } from "@lib/availability-calendar";
 import {
   AVAILABILITY_MONTHS_QUERY,
   type AvailabilityMonthResult,
@@ -72,6 +71,7 @@ import {
   SURROUNDINGS_PAGE_CONTENT_QUERY,
   type SurroundingsPageContentResult,
 } from "@chambreasoi/sanity/queries";
+import { getAvailabilityQueryRange } from "@lib/availability-calendar";
 
 /**
  * Fetch the single foldContent document from Sanity.
@@ -124,7 +124,10 @@ export async function getAvailabilityMonths(): Promise<AvailabilityMonthResult[]
       }),
       new Promise<null>((_, reject) => {
         setTimeout(
-          () => reject(new Error(`availability fetch timed out after ${AVAILABILITY_FETCH_TIMEOUT_MS}ms`)),
+          () =>
+            reject(
+              new Error(`availability fetch timed out after ${AVAILABILITY_FETCH_TIMEOUT_MS}ms`)
+            ),
           AVAILABILITY_FETCH_TIMEOUT_MS
         );
       }),
@@ -132,7 +135,10 @@ export async function getAvailabilityMonths(): Promise<AvailabilityMonthResult[]
 
     return result ?? [];
   } catch (error) {
-    console.error("[availability] Sanity fetch failed; rendering calendar without CMS dates", error);
+    console.error(
+      "[availability] Sanity fetch failed; rendering calendar without CMS dates",
+      error
+    );
     return [];
   }
 }

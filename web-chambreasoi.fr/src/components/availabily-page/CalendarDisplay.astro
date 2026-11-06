@@ -18,8 +18,13 @@ type Props = {
   availabilityMonths: AvailabilityMonthResult[];
 };
 
-const { availabilityEyebrow, availabilityHeading, availabilityIntro, reservationIntro, availabilityMonths } =
-  Astro.props;
+const {
+  availabilityEyebrow,
+  availabilityHeading,
+  availabilityIntro,
+  reservationIntro,
+  availabilityMonths,
+} = Astro.props;
 
 const now = new Date();
 const currentMonthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;

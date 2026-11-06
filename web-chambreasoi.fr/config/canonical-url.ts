@@ -10,9 +10,7 @@ export function toCanonicalPageUrl(baseUrl: string, path: string): string {
   }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const withTrailingSlash = normalizedPath.endsWith("/")
-    ? normalizedPath
-    : `${normalizedPath}/`;
+  const withTrailingSlash = normalizedPath.endsWith("/") ? normalizedPath : `${normalizedPath}/`;
 
   return new URL(withTrailingSlash, `${origin}/`).href;
 }

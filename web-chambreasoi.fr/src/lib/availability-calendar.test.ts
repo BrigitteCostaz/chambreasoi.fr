@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildCalendarDates,
-  isIsoDate,
-  resolveCalendarMinMax,
-} from "./availability-calendar";
+import { buildCalendarDates, isIsoDate, resolveCalendarMinMax } from "./availability-calendar";
 
 describe("availability-calendar", () => {
   it("builds one entry per day and dedupes duplicate month documents", () => {

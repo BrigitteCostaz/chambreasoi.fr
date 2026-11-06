@@ -28,9 +28,7 @@ export function getAvailabilityQueryRange(monthsBefore = 6, monthsAfter = 18) {
 
 export function getCalendarDisplayRange() {
   const { minMonth, maxMonth } = getAvailabilityQueryRange();
-  const maxEnd = new Date(
-    Date.UTC(Number(maxMonth.slice(0, 4)), Number(maxMonth.slice(5, 7)), 0)
-  );
+  const maxEnd = new Date(Date.UTC(Number(maxMonth.slice(0, 4)), Number(maxMonth.slice(5, 7)), 0));
 
   return {
     minMonth,
@@ -72,10 +70,7 @@ export function buildCalendarDates(
       if (availabilityByDate.has(date)) {
         const available = availabilityByDate.get(date);
 
-        byDate.set(
-          date,
-          typeof available === "boolean" ? { date, available } : { date }
-        );
+        byDate.set(date, typeof available === "boolean" ? { date, available } : { date });
         continue;
       }
 
@@ -94,7 +89,10 @@ export function resolveCalendarMinMax(
   rangeEnd: string,
   fallbackMonthStart: string
 ) {
-  const sortedDates = dates.map(({ date }) => date).filter(isIsoDate).sort();
+  const sortedDates = dates
+    .map(({ date }) => date)
+    .filter(isIsoDate)
+    .sort();
   const fallbackMonthEnd = new Date(
     Date.UTC(Number(fallbackMonthStart.slice(0, 4)), Number(fallbackMonthStart.slice(5, 7)), 0)
   )
@@ -107,7 +105,5 @@ export function resolveCalendarMinMax(
   const minDate = rawMin < rangeStart ? rangeStart : rawMin > rangeEnd ? rangeEnd : rawMin;
   const maxDate = rawMax > rangeEnd ? rangeEnd : rawMax < rangeStart ? rangeStart : rawMax;
 
-  return minDate <= maxDate
-    ? { minDate, maxDate }
-    : { minDate: rangeStart, maxDate: rangeEnd };
+  return minDate <= maxDate ? { minDate, maxDate } : { minDate: rangeStart, maxDate: rangeEnd };
 }

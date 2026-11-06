@@ -66,7 +66,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
 </template>
 
 <script>
-  import { Calendar } from "vanilla-calendar-pro";
+  import { Calendar, annotations } from "vanilla-calendar-pro";
 
   type CalendarData = {
     availableDates: string[];
@@ -131,6 +131,7 @@ const chevronBackgroundImage = `url("${chevronIconUrl}")`;
       selectionDatesMode: false,
       selectionMonthsMode: "only-arrows",
       selectionYearsMode: false,
+      extensions: [annotations],
       popups,
       locale: "fr-FR",
       onCreateDateEls: (_calendar: Calendar, dateEl: HTMLElement) => {
