@@ -1,0 +1,56 @@
+---
+interface Props {
+  class?: string;
+  offsetClass?: string;
+  zIndexClass?: string;
+  mobileCols?: number;
+  mobileGapClass?: string;
+  desktopCols?: number;
+  desktopVisibleLines?: number;
+  desktopGapClass?: string;
+  desktopOnly?: boolean;
+  mobileOnly?: boolean;
+}
+
+const {
+  class: className = "",
+  offsetClass = "translate-x-[0.15rem]",
+  zIndexClass = "z-0",
+  mobileCols = 2,
+  mobileGapClass = "gap-4",
+  desktopCols = 5,
+  desktopVisibleLines = 4,
+  desktopGapClass = "gap-grid",
+  desktopOnly = false,
+  mobileOnly = false,
+} = Astro.props;
+
+const visibleLineCount = Math.max(0, desktopVisibleLines);
+const fillerCount = Math.max(0, desktopCols - visibleLineCount);
+const visibleLines = Array.from({ length: visibleLineCount });
+const fillerCells = Array.from({ length: fillerCount });
+---
+
+<div class:list={["pointer-events-none absolute inset-0", zIndexClass, offsetClass, className]}>
+  {
+    !desktopOnly && (
+      <div
+        class:list={["grid size-full", `grid-cols-${mobileCols}`, mobileGapClass, "lg:hidden"]}
+      />
+    )
+  }
+  {
+    !mobileOnly && (
+      <div
+        class:list={["hidden size-full", `grid-cols-${desktopCols}`, desktopGapClass, "lg:grid"]}
+      >
+        {visibleLines.map(() => (
+          <div class="grid-line" />
+        ))}
+        {fillerCells.map(() => (
+          <div />
+        ))}
+      </div>
+    )
+  }
+</div>

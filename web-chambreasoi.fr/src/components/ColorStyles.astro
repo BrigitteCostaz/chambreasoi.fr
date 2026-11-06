@@ -1,0 +1,27 @@
+---
+import { ColorData, darkOpaqueBgUtilitiesCSS, paletteToCSSVars } from "@config/colors";
+
+const lightVars = paletteToCSSVars(ColorData.colors.light);
+const darkVars = paletteToCSSVars(ColorData.colors.dark);
+const darkOpaqueBg = darkOpaqueBgUtilitiesCSS();
+
+const css = `
+:root {
+${lightVars}
+}
+
+html.dark {
+${darkVars}
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+${darkVars}
+  }
+}
+
+${darkOpaqueBg}
+`;
+---
+
+<style is:global set:html={css}></style>

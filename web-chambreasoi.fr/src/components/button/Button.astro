@@ -1,0 +1,340 @@
+---
+import { Icon } from "astro-icon/components";
+
+/**
+ * Polymorphic Button Component
+ *
+ * If this is to be a link (<a>), pass an "href" prop
+ * If this is to be a button (<button>), pass a "type" prop
+ *
+ * @example
+ * <!-- Button -->
+ * <Button variant="primary" type="submit">Submit</Button>
+ *
+ * @example
+ * <!-- Link -->
+ * <Button variant="primary" href="/about">About</Button>
+ */
+
+type BaseProps = {
+  variant?: "primary" | "secondary" | "accent" | "outline" | "ghost" | "link";
+  size?: "sm" | "default" | "lg";
+  class?: string;
+  /** Icon name from the local ion set — e.g. "ion/call-sharp" */
+  icon?: string;
+  /** Side the icon appears on. Defaults to "left". */
+  iconSide?: "left" | "right";
+};
+
+type ButtonProps = BaseProps & {
+  href?: never;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  target?: never;
+  rel?: never;
+  /** Inline handler, e.g. `history.back()` — only valid when rendering a `<button>`. */
+  onclick?: string;
+};
+
+type LinkProps = BaseProps & {
+  href: string;
+  type?: never;
+  disabled?: boolean; // Visual only for links
+  target?: string;
+  rel?: string;
+  onclick?: never;
+};
+
+type Props = ButtonProps | LinkProps;
+
+const {
+  variant = "primary",
+  size = "default",
+  class: className = "",
+  icon,
+  iconSide = "left",
+  href,
+  type = "button",
+  disabled = false,
+  target,
+  rel,
+  onclick,
+  ...rest
+} = Astro.props;
+
+// Determine component type
+const Component = href ? "a" : "button";
+const isLink = Component === "a";
+
+// Security: Auto-add rel="noopener noreferrer" for external links with target="_blank"
+let finalRel = rel;
+if (isLink && target === "_blank" && !rel) {
+  finalRel = "noopener noreferrer";
+} else if (isLink && target === "_blank" && rel && !rel.includes("noopener")) {
+  finalRel = `${rel} noopener noreferrer`;
+}
+
+// Accessibility: aria-disabled for links (they don't have native disabled attribute)
+const ariaDisabled = isLink && disabled ? "true" : undefined;
+const tabIndex = isLink && disabled ? -1 : undefined;
+
+// Build class list
+const classList = ["button", `button--${variant}`, `button--${size}`, className];
+---
+
+{
+  isLink ? (
+    <a
+      href={href}
+      target={target}
+      rel={finalRel}
+      aria-disabled={ariaDisabled}
+      tabindex={tabIndex}
+      class:list={classList}
+      {...rest}
+    >
+      {icon && iconSide === "left" && <Icon name={icon} class="button__icon" />}
+      <slot />
+      {icon && iconSide === "right" && <Icon name={icon} class="button__icon" />}
+    </a>
+  ) : (
+    <button type={type} disabled={disabled} onclick={onclick} class:list={classList} {...rest}>
+      {icon && iconSide === "left" && <Icon name={icon} class="button__icon" />}
+      <slot />
+      {icon && iconSide === "right" && <Icon name={icon} class="button__icon" />}
+    </button>
+  )
+}
+
+<style>
+  /* ─────────────────────────────
+   Base
+   No colors here. Ever.
+   ───────────────────────────── */
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    text-decoration: none;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 0;
+    transition: width 0.6s ease-in-out;
+    z-index: -1;
+  }
+
+  .button:hover::after {
+    width: 100%;
+  }
+
+  .button > * {
+    position: relative;
+    z-index: 1;
+    transition: color 0.6s ease-in-out;
+  }
+
+  .button__icon {
+    width: 1.2em;
+    height: 1.2em;
+    flex-shrink: 0;
+  }
+
+  .button:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--color-accentForest),
+      0 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Sizes */
+  .button--sm {
+    font-size: clamp(16px, calc(16 * 1px + 2 * (100vw - 1280 * 1px) / 1225), 18px);
+    padding: 1rem 1.5rem;
+    gap: calc(0.375rem * 2);
+  }
+
+  .button--default {
+    font-size: 1.31rem;
+    padding: 1.5rem 2rem;
+    gap: 0.5rem;
+  }
+
+  .button--lg {
+    font-size: 1.5rem;
+    padding: 2rem 2.5rem;
+    gap: 0.625rem;
+  }
+
+  /* ─────────────────────────────
+   Variants (own ALL colors)
+   ───────────────────────────── */
+  .button--primary {
+    background-color: var(--color-accentForest);
+    color: var(--color-bgBase);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .button--primary::after {
+    background-color: var(--color-accentStone);
+  }
+
+  .button--primary:hover {
+    color: var(--color-bgBase);
+  }
+
+  .button--primary:focus {
+    opacity: 0.9;
+  }
+
+  .button--primary:active {
+    opacity: 0.8;
+  }
+
+  .button--secondary {
+    background-color: var(--color-bgAlt);
+    color: var(--color-txtPri);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-color: oklch(from var(--color-txtMuted) l c h / 0.2);
+  }
+
+  .button--secondary::after {
+    background-color: var(--color-accentStone);
+  }
+
+  .button--secondary:hover {
+    color: var(--color-bgBase);
+  }
+
+  .button--secondary:focus {
+    opacity: 0.9;
+  }
+
+  .button--secondary:active {
+    opacity: 0.8;
+  }
+
+  .button--accent {
+    background-color: var(--color-accentTerra);
+    color: var(--color-bgBase);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .button--accent::after {
+    background-color: var(--color-accentBurgundy);
+  }
+
+  .button--accent:hover {
+    color: var(--color-bgBase);
+  }
+
+  .button--accent:focus {
+    opacity: 0.9;
+  }
+
+  .button--accent:active {
+    opacity: 0.8;
+  }
+
+  .button--outline {
+    background-color: transparent;
+    border: 2px solid oklch(from var(--color-txtMuted) l c h / 0.3);
+    color: var(--color-txtPri);
+  }
+
+  .button--outline::after {
+    background-color: var(--color-accentForest);
+  }
+
+  .button--outline:hover {
+    color: var(--color-bgBase);
+    border-color: var(--color-accentForest);
+  }
+
+  .button--outline:active {
+    opacity: 0.9;
+  }
+
+  .button--ghost {
+    background-color: transparent;
+    color: var(--color-txtPri);
+  }
+
+  .button--ghost::after {
+    background-color: var(--color-bgAlt);
+  }
+
+  .button--ghost:hover {
+    color: var(--color-txtPri);
+  }
+
+  .button--ghost:active {
+    opacity: 0.9;
+  }
+
+  .button--link {
+    background-color: transparent;
+    color: var(--color-txtPri);
+    text-decoration: none;
+    padding-left: 0;
+    padding-right: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .button--link.button--sm,
+  .button--link.button--default,
+  .button--link.button--lg {
+    padding: 0;
+    padding-bottom: 0.35rem;
+    gap: 0.35rem;
+  }
+
+  .button--link::after {
+    inset: auto;
+    left: 0;
+    bottom: 0.25rem;
+    width: 100%;
+    height: 1px;
+    background: var(--color-txtPri);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 260ms ease;
+    z-index: 0;
+  }
+
+  .button--link:hover {
+    text-decoration: none;
+    color: var(--color-txtPri);
+  }
+
+  .button--link:hover::after {
+    width: 100%;
+    transform: scaleX(1);
+  }
+
+  /* ─────────────────────────────
+   Disabled (wins over everything)
+   ───────────────────────────── */
+  .button:disabled,
+  a.button[aria-disabled="true"] {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.4;
+    background-color: var(--color-bgAlt);
+    color: var(--color-txtMuted);
+    border-color: oklch(from var(--color-txtMuted) l c h / 0.2);
+  }
+
+  a.button[aria-disabled="true"]:hover {
+    opacity: 0.4;
+  }
+</style>

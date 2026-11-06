@@ -1,0 +1,198 @@
+---
+import { siteConfig } from "@config/site";
+import { Icon } from "astro-icon/components";
+import Button from "./button/Button.astro";
+
+/**
+ * ThemeToggle.astro
+ *
+ * - Respects configured default: siteConfig.themeConfig.colors.mode ('auto'|'light'|'dark')
+ * - Allows user to override via UI: cycles auto -> light -> dark
+ * - Persists user choice in localStorage
+ * - Applies mode by toggling classes on <html>: 'light' and 'dark'
+ *
+ * CSS variable system expectation (from your ColorStyles):
+ * - :root holds light vars
+ * - html.dark holds dark vars
+ * - @media (prefers-color-scheme: dark) applies dark vars when neither .light nor .dark is present
+ *
+ * Therefore:
+ * - mode 'auto'  => remove both 'light' and 'dark' classes (let media query decide)
+ * - mode 'light' => add 'light', remove 'dark'
+ * - mode 'dark'  => add 'dark', remove 'light'
+ */
+
+const defaultMode = siteConfig.themeConfig.colors.mode;
+const STORAGE_KEY = "theme:mode";
+---
+
+<Button
+  type="button"
+  variant="ghost"
+  class="theme-toggle inline-flex items-center px-1 py-1"
+  aria-label="Toggle theme"
+  data-default-mode={defaultMode}
+>
+  <span class="theme-toggle__icons" aria-hidden="true">
+    <Icon name="ion/sun-sharp" class="w-5 h-5 icon-sun" />
+    <Icon name="ion/moon-sharp" class="w-5 h-5 icon-moon" />
+    <Icon name="ion/contrast-sharp" class="w-5 h-5 icon-auto" />
+  </span>
+</Button>
+
+<script is:inline>
+  (() => {
+    /** @typedef {"auto"|"light"|"dark"} ThemeMode */
+
+    const STORAGE_KEY = "theme:mode";
+
+    /** @param {ThemeMode} mode */
+    function applyMode(mode) {
+      const root = document.documentElement;
+      // Ensure mutual exclusivity and allow "auto" to mean "no explicit class".
+      root.classList.remove("light", "dark");
+      if (mode === "light") root.classList.add("light");
+      if (mode === "dark") root.classList.add("dark");
+      root.dataset.theme = mode;
+    }
+
+    /** @returns {ThemeMode | null} */
+    function readStoredMode() {
+      try {
+        const v = localStorage.getItem(STORAGE_KEY);
+        if (v === "auto" || v === "light" || v === "dark") return v;
+        return null;
+      } catch {
+        return null;
+      }
+    }
+
+    /** @param {ThemeMode} mode */
+    function storeMode(mode) {
+      try {
+        localStorage.setItem(STORAGE_KEY, mode);
+      } catch {
+        // ignore
+      }
+    }
+
+    /** @param {ThemeMode} mode */
+    function modeLabel(mode) {
+      if (mode === "auto") return "Auto";
+      if (mode === "light") return "Light";
+      return "Dark";
+    }
+
+    /** @param {ThemeMode} mode */
+    function nextMode(mode) {
+      if (mode === "auto") return "light";
+      if (mode === "light") return "dark";
+      return "auto";
+    }
+
+    const buttons = Array.from(document.querySelectorAll(".theme-toggle"));
+    if (!buttons.length) return;
+
+    /** @type {ThemeMode} */
+    const defaultMode = (() => {
+      const v = buttons[0]?.getAttribute("data-default-mode");
+      return v === "light" || v === "dark" || v === "auto" ? v : "auto";
+    })();
+
+    /** @type {ThemeMode} */
+    let currentMode = readStoredMode() ?? defaultMode;
+
+    // Initial apply
+    applyMode(currentMode);
+
+    function render() {
+      const label = modeLabel(currentMode);
+
+      buttons.forEach((btn) => {
+        const labelEl = btn.querySelector(".theme-toggle__label");
+        if (labelEl) labelEl.textContent = label;
+
+        btn.setAttribute("aria-pressed", currentMode === "dark" ? "true" : "false");
+        btn.setAttribute("data-mode", currentMode);
+        btn.setAttribute("title", `Theme: ${label} (click to change)`);
+      });
+    }
+
+    render();
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentMode = nextMode(currentMode);
+        storeMode(currentMode);
+        applyMode(currentMode);
+        render();
+      });
+    });
+
+    // If you're in auto mode, and system preference changes, the CSS will react
+    // (because we remove explicit classes). We only need to update the UI label.
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    if (media) {
+      media.addEventListener("change", () => {
+        if (currentMode === "auto") render();
+      });
+    }
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    color: var(--color-txtPri);
+    font: inherit;
+    line-height: 1;
+    transition:
+      color 0.2s ease,
+      opacity 0.2s ease;
+    opacity: 0.82;
+  }
+
+  .theme-toggle:hover {
+    background: transparent;
+    opacity: 1;
+  }
+
+  .theme-toggle:focus {
+    outline: 1px solid var(--color-accentStone);
+    outline-offset: 1px;
+  }
+
+  .theme-toggle__icons {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Hide all icons by default */
+  .theme-toggle__icons > :global(svg) {
+    display: none;
+    position: absolute;
+  }
+
+  /* Show the appropriate icon based on data-mode */
+  .theme-toggle[data-mode="light"] .icon-sun {
+    display: block;
+  }
+
+  .theme-toggle[data-mode="dark"] .icon-moon {
+    display: block;
+  }
+
+  .theme-toggle[data-mode="auto"] .icon-auto {
+    display: block;
+  }
+
+  .theme-toggle__label {
+    font-size: 0.95rem;
+  }
+</style>

@@ -1,0 +1,100 @@
+import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
+import {
+  ACCOMMODATION_SETTINGS_QUERY,
+  type AccommodationSettingsResult,
+} from "@chambreasoi/sanity/queries";
+import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
+import type { AccomodationConfig } from "@config/types";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
+import { isNonEmptyString } from "@utils/config-resolvers";
+
+const ACCOMMODATION_DEFAULTS: AccomodationConfig = {
+  checkinTime: "17:00",
+  checkoutTime: "10:00",
+
+  amenities: [
+    "Wi-Fi gratuit",
+    "Chauffage individuel",
+    "Terrasse privative",
+    "Salle de bain privative avec douche",
+    "Linges de toilette fournis",
+    "Draps fournis",
+    "Coin cuisine (18h-20h)",
+    "Espace commun avec télévision (18h-22h)",
+    "Parking gratuit sur place",
+    "Abri vélos sécurisé",
+    "Dressing",
+    "Bureau",
+    "Espace fumeur terrasse",
+    "Maison de plain-pied",
+  ],
+};
+
+type AccommodationCacheEntry = {
+  epoch: number;
+  value: AccomodationConfig;
+};
+
+let accommodationCache: AccommodationCacheEntry | null = null;
+
+registerCmsCacheResetter(() => {
+  accommodationCache = null;
+});
+
+function reportAccommodationFallback(
+  reason: "missing-document" | "fetch-error",
+  details?: unknown
+): void {
+  incrementFallbackCounter("accommodation");
+  console.warn("[fallback:accommodation]", {
+    criticality: "medium",
+    reason,
+    hasCachedValue: Boolean(accommodationCache?.value),
+    details: details instanceof Error ? details.message : details,
+  });
+}
+
+export async function getAccommodation(): Promise<AccomodationConfig> {
+  const cacheEpoch = getCmsCacheEpoch();
+  if (accommodationCache && accommodationCache.epoch === cacheEpoch) {
+    return accommodationCache.value;
+  }
+
+  try {
+    const cms = await fetchSanity<AccommodationSettingsResult>(ACCOMMODATION_SETTINGS_QUERY);
+    const cmsCheckin = cms?.checkinTime;
+    const cmsCheckout = cms?.checkoutTime;
+    const cmsAmenities = cms?.amenities;
+
+    accommodationCache = {
+      epoch: cacheEpoch,
+      value: {
+        checkinTime: isNonEmptyString(cmsCheckin) ? cmsCheckin : ACCOMMODATION_DEFAULTS.checkinTime,
+        checkoutTime: isNonEmptyString(cmsCheckout)
+          ? cmsCheckout
+          : ACCOMMODATION_DEFAULTS.checkoutTime,
+        amenities:
+          Array.isArray(cmsAmenities) && cmsAmenities.length > 0
+            ? cmsAmenities.filter((value): value is string => isNonEmptyString(value))
+            : ACCOMMODATION_DEFAULTS.amenities,
+      },
+    };
+
+    if (!cms) {
+      devLog("[accommodation] Using TS fallback (document missing or empty).");
+      reportAccommodationFallback("missing-document");
+    }
+
+    return accommodationCache.value;
+  } catch (error) {
+    devLog("[accommodation] Sanity fetch failed, using TS fallback.", error);
+    reportAccommodationFallback("fetch-error", error);
+    accommodationCache = {
+      epoch: cacheEpoch,
+      value: ACCOMMODATION_DEFAULTS,
+    };
+    return accommodationCache.value;
+  }
+}
+
+export const accommodationDefaults: AccomodationConfig = ACCOMMODATION_DEFAULTS;

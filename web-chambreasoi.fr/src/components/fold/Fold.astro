@@ -1,0 +1,318 @@
+---
+/* =========================
+ * Imports
+ * ========================= */
+import Button from "@components/button/Button.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
+import { getOrgData } from "@config/organization";
+import { getPricing } from "@config/pricing";
+import { getFoldContent } from "@lib/sanity";
+import { formatEuroFR } from "@utils/currency";
+import { resolveImage } from "@utils/imageUtils";
+import { defaultFoldContent, defaultFoldImageAlt } from "../../data/fallback/fold";
+
+/* =========================
+ * Types / Props
+ * ========================= */
+
+/** Sanity image field shape (asset ref + optional alt) */
+interface SanityImageSource {
+  asset?: { _ref?: string; _id?: string; url?: string };
+  alt?: string;
+}
+
+interface Props {
+  /** Sanity image source (preferred) */
+  image?: SanityImageSource | null;
+  /** Alt text override (defaults to image.alt or empty string) */
+  imageAlt?: string;
+  /** Local fallback image path (e.g., "@images/fold-fallback.webp") */
+  fallbackImagePath?: string;
+}
+
+/* =========================
+ * Props
+ * ========================= */
+const {
+  image: sanityImageSource = null,
+  imageAlt: altOverride,
+  fallbackImagePath = "@images/chambreasoi-accueil-facade.png",
+} = Astro.props;
+
+/* =========================
+ * Image handling: Sanity CDN with local fallback
+ * ========================= */
+
+// Target display size (CSS pixels) for the fold cover
+// The image fills ~40% of viewport width, so 800px covers up to 2000px viewports at 1x
+const coverWidth = 800;
+const coverHeight = 1200;
+
+const imageAlt = altOverride ?? sanityImageSource?.alt ?? defaultFoldImageAlt;
+const fallbackImage = await resolveImage(fallbackImagePath);
+const coverImageStyle = "object-fit: cover; object-position: center;";
+
+/* =========================
+ * Static Config
+ * ========================= */
+const mobileColors = ["bg-accentStone/25", "bg-accentBistre/20"];
+
+const desktopColors = [
+  "bg-accentStone/25",
+  "bg-accentForest/20",
+  "bg-accentBistre/25",
+  "bg-accentTerra/20",
+  "bg-accentTerra/20",
+];
+
+const squareCells = [
+  { align: "items-end", type: "heading" },
+  { align: "items-start", type: null },
+  { align: "items-start", type: "amenities" },
+];
+
+/* =========================
+ * Derived Config
+ * ========================= */
+const desktopColorsReversed = [...desktopColors].reverse();
+const mobileColorsReversed = [...mobileColors].reverse();
+
+// LEFT BLOCK
+const leftColors = desktopColors.slice(0, 3);
+const leftColorsReversed = desktopColorsReversed.slice(2, 5).reverse();
+
+/* =========================
+ * Data fetching
+ * ========================= */
+const pricing = await getPricing();
+const org = await getOrgData();
+const phoneDisplay = org.contact.phone.display;
+const phoneLink = org.contact.phone.link;
+
+/* =========================
+ * Final computed values
+ * ========================= */
+const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
+
+const fold = await getFoldContent();
+
+// Fallback strings mirror the original hardcoded content
+// and are used whenever the Sanity document has not been created yet.
+const f = {
+  seoTitle: fold?.seoTitle ?? defaultFoldContent.seoTitle,
+  mosaicTile1Text: fold?.mosaicTile1Text ?? defaultFoldContent.mosaicTile1Text,
+  mosaicTile2Line1: fold?.mosaicTile2Line1 ?? defaultFoldContent.mosaicTile2Line1,
+  mosaicTile2Line2: fold?.mosaicTile2Line2 ?? defaultFoldContent.mosaicTile2Line2,
+  amenitiesLabel: fold?.amenitiesLabel ?? defaultFoldContent.amenitiesLabel,
+  amenities: fold?.amenities ?? defaultFoldContent.amenities,
+  bookingNote: fold?.bookingNote ?? defaultFoldContent.bookingNote,
+};
+---
+
+<div
+  class="relative flex min-h-[calc(100dvh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
+>
+  <!-- Single semantic H1 (accessible, not duplicated) -->
+  <h1 class="sr-only">{f.seoTitle}</h1>
+
+  <!-- Mobile -->
+  <div class="mt-[0.8rem] flex w-full flex-col flex-1 xl:hidden">
+    <!-- Part 1: 2×2 Square Grid -->
+    <div class="grid grid-cols-2 gap-grid">
+      <!-- heading -->
+      <div class="heading-1 col-span-2 grid grid-cols-2 gap-grid" aria-hidden="true">
+        <div class:list={["square box-pad flex-col-start", desktopColors[0]]}>
+          {f.mosaicTile1Text}
+        </div>
+
+        <div class:list={["square box-pad flex-col-end text-right", desktopColors[1]]}>
+          <span>{f.mosaicTile2Line1}</span>
+          <span class="text-muted">{f.mosaicTile2Line2}</span>
+        </div>
+      </div>
+
+      <!-- amenities -->
+      <div class:list={["square box-pad flex-col-end", desktopColors[2]]}>
+        <ul class="list-ui text-ui-md text-primary">
+          <li class="pb-2">{f.amenitiesLabel}</li>
+          {f.amenities.map((item: string) => <li class="text-muted">{item}</li>)}
+        </ul>
+      </div>
+
+      <!-- pricing -->
+      <div class:list={["square box-pad flex-col-start justify-end", desktopColors[3]]}>
+        <p class="text-ui-md text-primary pb-2 font-medium">
+          à partir de {baseNightly1PersonEuroFR} la nuitée
+        </p>
+
+        <p class="text-ui-md text-muted uppercase tracking-wider pt-1">
+          {f.bookingNote}
+        </p>
+      </div>
+    </div>
+
+    <!-- Part 2: Photo + CTA -->
+    <div class="relative overflow-hidden flex-1 min-h-[240px] mt-[0.4rem]">
+      <SanityPicture
+        source={sanityImageSource}
+        alt={imageAlt}
+        width={coverWidth}
+        height={coverHeight}
+        sizes="100vw"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        fallback={fallbackImage}
+        class="absolute inset-0 w-full h-full"
+        style={coverImageStyle}
+      />
+
+      <!-- CTA -->
+      <div class="cta-top">
+        <Button
+          variant="accent"
+          size="sm"
+          icon="ion/call-sharp"
+          href={phoneLink}
+          class="inline-flex font-sans w-full items-center justify-center"
+        >
+          {phoneDisplay}
+        </Button>
+      </div>
+      <div class="cta-bottom">
+        <Button
+          class="inline-flex font-sans w-full items-center justify-center"
+          variant="primary"
+          size="sm"
+          href="/la-chambre"
+        >
+          Découvrir la chambre
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop -->
+  <div class="hidden w-full flex-row gap-grid xl:flex xl:flex-1">
+    <div class="relative flex flex-1 flex-col gap-grid">
+      <div class="relative w-full">
+        <div class="pointer-events-none absolute inset-0">
+          <div class="grid h-full grid-cols-3 gap-grid">
+            {leftColors.map((bgColor) => <div class:list={["relative", bgColor]} />)}
+          </div>
+        </div>
+        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
+          {
+            squareCells.map((cell) => (
+              <div class={`aspect-square flex ${cell.align} p-[0.8rem]`}>
+                {cell.type === "heading" && (
+                  <span aria-hidden="true" class="heading-1">
+                    {f.mosaicTile1Text}
+                  </span>
+                )}
+                {cell.type === "amenities" && (
+                  <ul class="flex flex-col font-display font-medium leading-none text-txtPri text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)] [list-style-type:none] [list-style-position:inside]">
+                    <li class="pb-2">{f.amenitiesLabel}</li>
+                    {f.amenities.map((item: string) => (
+                      <li class="text-txtMuted">{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <div class="relative flex flex-1">
+        <div class="pointer-events-none absolute inset-0">
+          <div class="grid h-full grid-cols-3 gap-grid">
+            {leftColorsReversed.map((bgColor) => <div class:list={["relative", bgColor]} />)}
+          </div>
+        </div>
+        <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
+          <div></div>
+          <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
+            <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
+            <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
+          </div>
+          <div
+            class="flex flex-col justify-end font-display font-medium p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
+          >
+            <div>
+              <p class="text-primary pb-2">à partir de {baseNightly1PersonEuroFR} la nuitée</p>
+              <p class="text-muted uppercase tracking-wider pb-6">{f.bookingNote}</p>
+            </div>
+            <Button
+              variant="accent"
+              size="sm"
+              icon="ion/call-sharp"
+              href={phoneLink}
+              class="inline-flex font-sans font-400 w-full items-center justify-center"
+            >
+              {phoneDisplay}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative flex flex-col" style="flex: 0 0 calc(40% - 0.2rem);">
+      <div class="fold-image-container">
+        <SanityPicture
+          source={sanityImageSource}
+          alt={imageAlt}
+          width={coverWidth}
+          height={coverHeight}
+          sizes="(max-width: 1024px) 100vw, 40vw"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          fallback={fallbackImage}
+          class="fold-image"
+        />
+      </div>
+      <div
+        class="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[0.4rem] -translate-x-1/2 bg-bgBase z-1 lg:translate-x-0"
+      >
+      </div>
+      <div class="relative w-full border-b-[0.4rem] border-bgBase box-content">
+        <div class="relative z-10 grid w-full grid-cols-2 gap-grid">
+          <div class="aspect-square"></div>
+          <div class="aspect-square"></div>
+        </div>
+      </div>
+      <div class="relative flex-1">
+        <div class="relative z-10 grid w-full h-full grid-cols-2">
+          <div></div>
+          <div class="flex items-end p-[0.8rem]">
+            <Button
+              class="inline-flex font-sans w-full items-center justify-center"
+              variant="primary"
+              size="sm"
+              href="/la-chambre"
+            >
+              Découvrir la chambre
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fold-image-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .fold-image-container :global(img),
+  .fold-image-container :global(.fold-image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+</style>

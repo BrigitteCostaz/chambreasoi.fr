@@ -1,0 +1,4 @@
+packages:
+  - web-chambreasoi.fr
+  - studio-chambreasoi.fr
+  - packages/*

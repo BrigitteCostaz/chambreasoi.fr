@@ -1,0 +1,99 @@
+---
+import { footerNavigation } from "@config/navigation";
+import type { NavLinkItem } from "@config/types/navigation";
+
+export interface Props {
+  items?: NavLinkItem[];
+  class?: string;
+  activeClass?: string;
+}
+
+const comparePathsWithTrailingSlash = (path1: string, path2: string): boolean => {
+  const ensureTrailingSlash = (path: string): string => (path.endsWith("/") ? path : `${path}/`);
+  return ensureTrailingSlash(path1) === ensureTrailingSlash(path2);
+};
+
+const {
+  items = footerNavigation,
+  class: className = "",
+  activeClass = "active-link",
+} = Astro.props as Props;
+---
+
+<nav class:list={["header-nav", "footer-nav", className]} aria-label="Navigation pied de page">
+  <ul class="footer-nav__list">
+    {
+      items.map((item) => {
+        const { text = "", link, newTab = false } = item;
+        const isExternal = link.startsWith("http") || link.startsWith("//");
+        const isActive = comparePathsWithTrailingSlash(Astro.url.pathname, link);
+        const opensNewTab = newTab || isExternal;
+
+        return (
+          <li class="footer-nav__item text-ui-sm">
+            <a
+              class:list={["footer-nav__link", isActive && activeClass]}
+              href={link}
+              target={opensNewTab ? "_blank" : "_self"}
+              rel={opensNewTab ? "noopener noreferrer" : undefined}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {text}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
+
+<style>
+  .footer-nav {
+    padding: 0.8rem;
+  }
+  .footer-nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-nav__item {
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-nav__link {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.35rem;
+    text-decoration: none;
+    transition:
+      color 200ms ease,
+      text-decoration-color 200ms ease;
+  }
+
+  .footer-nav__link::after {
+    content: "";
+    position: absolute;
+    left: 0rem; /* after:left-3.6 */
+    bottom: 0.25rem; /* after:bottom-1 */
+    width: calc(100%);
+    height: 1px;
+    background: var(--color-txtPri); /* after:bg-txtPri */
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 260ms ease;
+  }
+
+  .footer-nav__link:hover {
+    text-decoration: none;
+  }
+
+  .footer-nav__link:hover::after,
+  .footer-nav__link[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+</style>

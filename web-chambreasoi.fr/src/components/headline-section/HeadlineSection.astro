@@ -1,0 +1,90 @@
+---
+// import { Icon } from "astro-icon/components";
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import { getHeadlineContent } from "@lib/sanity";
+
+const headline = await getHeadlineContent();
+const h = {
+  headLineText:
+    headline?.headLineText ??
+    " Dans une maison individuelle de plain-pied, au calme et dans un environnement de verdure. Vous serez  attendu.e.s et accueilli.e.s par au moins une personne qui aura à coeur de rendre votre séjour chez nous agréable.",
+};
+---
+
+<div class="overflow-x-clip relative">
+  <!-- Grid overlay -->
+  <GridOverlay desktopOnly desktopCols={5} desktopVisibleLines={4} />
+
+  <!-- Content -->
+  <section
+    class="relative isolate size-full lg:border-x transition-colors duration-1000 ease-out lg:border-x-0 pt-32 lg:pt-60"
+  >
+    <div class="grid grid-cols-1 lg:grid-cols-5">
+      <div
+        data-reveal
+        data-reveal-delay="120"
+        class="lg:col-start-1 lg:col-span-1 lg:row-start-1 px-[0.4rem] flex items-center gap-grid pb-[3.6rem] lg:py-[4.8rem]"
+      >
+        <!-- <Icon class="text-txtPri size-[1.1rem]" name="ion/square-sharp" /> -->
+        <span class="heading-3">Services</span>
+      </div>
+
+      <h2
+        data-reveal
+        data-reveal-delay="240"
+        class="bg-accentBistre/25 lg:col-start-2 lg:col-span-4 lg:row-start-2 heading-2 max-w-[55ch] p-[0.8rem]"
+      >
+        {h.headLineText}
+      </h2>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Base hidden state — delay lives here so it only applies on entry, not exit */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+    /* Delay is set inline via --reveal-delay, defaulting to 0 */
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  // Astro defers scripts automatically — no DOMContentLoaded needed.
+  // Delay is driven by a data attribute so CSS and JS stay decoupled.
+
+  const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
+
+  // Stamp each element's delay as a CSS custom property so the
+  // transition-delay in the stylesheet can consume it directly.
+  elements.forEach((el) => {
+    const delay = el.dataset.revealDelay ?? "0";
+    el.style.setProperty("--reveal-delay", `${delay}ms`);
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        // Sync class add with the next paint to avoid forced reflow on
+        // fast-scrolling devices that batch multiple entries at once.
+        requestAnimationFrame(() => {
+          (entry.target as HTMLElement).classList.add("is-visible");
+        });
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  elements.forEach((el) => observer.observe(el));
+</script>

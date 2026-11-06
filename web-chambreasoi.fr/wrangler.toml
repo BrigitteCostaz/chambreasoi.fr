@@ -1,0 +1,44 @@
+# Legacy/unused — Astro deploy reads wrangler.jsonc (→ dist/server/wrangler.json).
+name = "chambreasoi-web"
+# main = "@astrojs/cloudflare/entrypoints/server"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Serve static assets emitted by Astro
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "404-page"
+
+# Public (non-secret) runtime variables.
+# - In Cloudflare Workers, read bindings using: `import { env } from "cloudflare:workers"`.
+# - These values are available at runtime (Worker bindings), not necessarily in process.env during `astro build`.
+# - Use them for values your SSR code needs at runtime (e.g. Sanity project config).
+#
+# NOTE: ENABLE_SANITY_STUDIO is intentionally absent here.
+# It is a BUILD-TIME flag read from process.env during `astro build`.
+# Putting it in [vars] has no effect on whether the /studio route is compiled in.
+# Production Studio is hosted at studio.chambreasoi.fr — not embedded on this site.
+# To test embedded /studio locally: ENABLE_SANITY_STUDIO=true pnpm dev
+[vars]
+PUBLIC_SANITY_PROJECT_ID = "vq8mnl17"
+PUBLIC_SANITY_DATASET = "production"
+
+# Sessions KV binding expected by @astrojs/cloudflare when sessions are enabled
+[[kv_namespaces]]
+binding = "SESSION"
+id = "01c4610c325f41059e0d0e32b6b48d15"
+preview_id = "01c4610c325f41059e0d0e32b6b48d15"
+
+# Preview environment (optional overrides)
+# Cloudflare uses this when deploying a preview environment via Wrangler.
+[env.preview]
+name = "chambreasoi-preview"
+
+# No extra vars needed for preview — PUBLIC_SANITY_* are inherited from [vars] above.
+
+
+[[env.preview.kv_namespaces]]
+binding = "SESSION"
+id = "01c4610c325f41059e0d0e32b6b48d15"
+preview_id = "01c4610c325f41059e0d0e32b6b48d15"

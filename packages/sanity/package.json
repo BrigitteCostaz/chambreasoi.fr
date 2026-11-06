@@ -1,0 +1,27 @@
+{
+  "name": "@chambreasoi/sanity",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
+    "./client": "./src/client.ts",
+    "./fetch": "./src/fetch.ts",
+    "./image": "./src/imageUrl.ts",
+    "./queries": "./src/queries.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@sanity/client": "^7.28.0",
+    "@sanity/image-url": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.12"
+  }
+}

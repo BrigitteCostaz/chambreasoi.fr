@@ -1,0 +1,71 @@
+---
+import RichTextInlineRenderer, {
+  type RichTextParagraphBlock,
+} from "@components/rich-text/RichTextInline.astro";
+
+export type RichTextMark = "strong" | "em";
+
+export interface RichTextSpan {
+  text: string;
+  href?: string;
+  marks?: RichTextMark[];
+}
+
+export type RichTextInline = string | RichTextSpan;
+
+export interface RichTextListBlock {
+  type: "list";
+  ordered?: boolean;
+  items: RichTextParagraphBlock[];
+}
+
+export type RichTextBlock = RichTextParagraphBlock | RichTextListBlock;
+
+interface Props {
+  block: RichTextBlock;
+  class?: string;
+  listClass?: string;
+  itemClass?: string;
+}
+
+const {
+  block,
+  class: className,
+  listClass = "[list-style-type:disc] space-y-[0.35rem] pl-[1.15rem]",
+  itemClass,
+} = Astro.props;
+
+const isListBlock = (value: RichTextBlock): value is RichTextListBlock =>
+  typeof value === "object" && !Array.isArray(value) && value.type === "list";
+---
+
+{
+  isListBlock(block) ? (
+    block.ordered ? (
+      <ol
+        class:list={[
+          className,
+          listClass.replace("[list-style-type:disc]", "[list-style-type:decimal]"),
+        ]}
+      >
+        {block.items.map((item) => (
+          <li class={itemClass}>
+            <RichTextInlineRenderer value={item} />
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <ul class:list={[className, listClass]}>
+        {block.items.map((item) => (
+          <li class={itemClass}>
+            <RichTextInlineRenderer value={item} />
+          </li>
+        ))}
+      </ul>
+    )
+  ) : (
+    <p class={className}>
+      <RichTextInlineRenderer value={block} />
+    </p>
+  )
+}

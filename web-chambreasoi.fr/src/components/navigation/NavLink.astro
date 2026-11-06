@@ -1,0 +1,90 @@
+---
+import type { NavLinkItem } from "@config/types/navigation";
+import { Icon } from "astro-icon/components";
+export interface Props {
+  navItem: NavLinkItem;
+  class?: string;
+  noIcon?: boolean;
+  noUnderline?: boolean;
+  activeClass?: string;
+  isLast?: boolean;
+  variant?: "header" | "footer";
+}
+
+const comparePathsWithTrailingSlash = (path1: string, path2: string): boolean => {
+  const ensureTrailingSlash = (path: string): string => (path.endsWith("/") ? path : `${path}/`);
+  return ensureTrailingSlash(path1) === ensureTrailingSlash(path2);
+};
+
+const {
+  navItem,
+  class: className = "",
+  noIcon = false,
+  noUnderline = false,
+  activeClass = "active-link",
+  isLast = false,
+  variant = "header",
+} = Astro.props;
+
+const { text, link, newTab = false, icon, accentColor = "Terra" } = navItem;
+
+const isExternal = link.startsWith("http") || link.startsWith("//");
+const isActive = comparePathsWithTrailingSlash(Astro.url.pathname, link);
+const opensNewTab = newTab || isExternal;
+
+// Variant-specific classes
+const linkClasses = {
+  header: "block overflow-hidden text-caption-30-fixed",
+  footer: "block text-sm",
+};
+
+const heightStyle = variant === "header" ? "48px" : "auto";
+
+// CSS variable reference for the accent color
+const accentColorVar = `var(--color-accent${accentColor})`;
+---
+
+{
+  variant === "header" ? (
+    <a
+      class:list={[linkClasses.header, "group", className, isActive && activeClass]}
+      style={`height:${heightStyle}`}
+      href={link}
+      target={opensNewTab ? "_blank" : "_self"}
+      rel={opensNewTab ? "noopener noreferrer" : ""}
+      aria-current={isActive ? "page" : undefined}
+    >
+      <div
+        class:list={[
+          "transition-transform duration-600 ease-out group-hover:-translate-y-[48px]",
+          isActive && "-translate-y-[48px]",
+        ]}
+      >
+        <div class="flex items-center justify-between px-[0.8rem]" style={`height:${heightStyle}`}>
+          <span>{text}</span>
+          <span
+            class="block size-1"
+            style={`background-color: oklch(from ${accentColorVar} l c h / 1)`}
+          />
+        </div>
+        <div
+          class="flex items-center justify-between px-[0.8rem]"
+          style={`height:${heightStyle}; background-color: oklch(from ${accentColorVar} l c h / 1); color: var(--color-bgBase)`}
+        >
+          <span>{text}</span>
+          <Icon class="text-2xl" name={icon} />
+        </div>
+      </div>
+    </a>
+  ) : (
+    <a
+      class:list={[linkClasses.footer, className, isActive && activeClass]}
+      href={link}
+      target={opensNewTab ? "_blank" : "_self"}
+      rel={opensNewTab ? "noopener noreferrer" : ""}
+      aria-current={isActive ? "page" : undefined}
+    >
+      <span>{text}</span>
+    </a>
+  )
+}

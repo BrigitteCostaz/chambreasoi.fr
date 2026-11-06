@@ -1,0 +1,57 @@
+---
+export type RichTextMark = "strong" | "em";
+
+export interface RichTextSpan {
+  text: string;
+  href?: string;
+  marks?: RichTextMark[];
+}
+
+export type RichTextInline = string | RichTextSpan;
+export type RichTextParagraphBlock = string | RichTextInline[];
+
+interface Props {
+  value: RichTextParagraphBlock;
+}
+
+const { value } = Astro.props;
+
+const spans = (Array.isArray(value) ? value : [value]).map((span, index) =>
+  typeof span === "string"
+    ? { key: `text-${index}`, text: span, marks: [] }
+    : { key: `text-${index}`, marks: [], ...span }
+);
+
+const isExternalHref = (href: string) => /^(https?:)?\/\//.test(href);
+---
+
+{
+  spans.map((span) =>
+    span.href ? (
+      <a
+        href={span.href}
+        class="underline underline-offset-4"
+        target={isExternalHref(span.href) ? "_blank" : undefined}
+        rel={isExternalHref(span.href) ? "noopener noreferrer" : undefined}
+      >
+        {span.marks.includes("strong") ? (
+          <strong class="font-semibold">
+            {span.marks.includes("em") ? <em class="italic">{span.text}</em> : span.text}
+          </strong>
+        ) : span.marks.includes("em") ? (
+          <em class="italic">{span.text}</em>
+        ) : (
+          span.text
+        )}
+      </a>
+    ) : span.marks.includes("strong") ? (
+      <strong class="font-semibold">
+        {span.marks.includes("em") ? <em class="italic">{span.text}</em> : span.text}
+      </strong>
+    ) : span.marks.includes("em") ? (
+      <em class="italic">{span.text}</em>
+    ) : (
+      span.text
+    )
+  )
+}
