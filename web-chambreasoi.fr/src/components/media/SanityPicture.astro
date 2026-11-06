@@ -1,8 +1,10 @@
 ---
+// src/components/media/SanityPicture.astro
 import { Image } from "astro:assets";
 import {
   buildSanityDprSrcSet,
   buildSanityImageUrl,
+  buildSanityWidthSrcSet,
   type SanityFitMode,
   type SanityImageFormat,
 } from "@lib/sanity";
@@ -25,6 +27,7 @@ interface Props {
   format?: SanityImageFormat;
   fit?: SanityFitMode;
   dprs?: number[];
+  widths?: number[];
   densities?: number[];
   fallback?: ImageMetadata | null;
   class?: string;
@@ -44,6 +47,7 @@ const {
   format = "webp",
   fit = "crop",
   dprs = [1, 1.5, 2],
+  widths,
   densities = [1, 1.5, 2],
   fallback = null,
   class: className,
@@ -59,15 +63,27 @@ const sanitySrc = buildSanityImageUrl({
   fit,
 });
 
-const sanitySrcSet = buildSanityDprSrcSet({
-  source,
-  width,
-  height,
-  dprs,
-  quality,
-  format,
-  fit,
-});
+// With `sizes`, use width descriptors so the browser respects the layout slot.
+// Without `sizes`, keep DPR descriptors for fixed CSS-pixel images.
+const sanitySrcSet = sizes
+  ? buildSanityWidthSrcSet({
+      source,
+      width,
+      height,
+      widths,
+      quality,
+      format,
+      fit,
+    })
+  : buildSanityDprSrcSet({
+      source,
+      width,
+      height,
+      dprs,
+      quality,
+      format,
+      fit,
+    });
 
 const shouldRenderSanityImage = Boolean(sanitySrc);
 const shouldRenderFallback = !shouldRenderSanityImage && Boolean(fallback);

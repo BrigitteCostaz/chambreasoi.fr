@@ -82,19 +82,12 @@ export default defineConfig({
       dark: "class",
     }),
     presetWebFonts({
-      provider: "bunny",
-      inlineImports: false,
+      provider: "none",
       fonts: {
-        sans: { name: "Karla", weights: [400, 500, 700] },
-        mono: {
-          name: "Victor Mono",
-          provider: "none",
-        },
-        // General Sans (self-hosted)
-        display: {
-          name: "General Sans",
-          provider: "none",
-        },
+        // Self-hosted in src/styles/fonts.css — provider none avoids Bunny/jsDelivr CSS.
+        sans: { name: "Karla" },
+        mono: { name: "Victor Mono" },
+        display: { name: "General Sans" },
       },
     }),
   ],

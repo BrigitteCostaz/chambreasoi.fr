@@ -12,6 +12,8 @@ export {
   sanityImageUrl,
   buildSanityImageUrl,
   buildSanityDprSrcSet,
+  buildSanityWidthSrcSet,
+  resolveSrcSetWidths,
   type SanityImageFormat,
 } from "./imageUrl.ts";
 export * from "./queries.ts";

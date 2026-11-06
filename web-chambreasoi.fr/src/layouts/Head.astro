@@ -79,8 +79,8 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
 ---
 
 <head>
-  <ColorStyles />
   <meta charset="utf-8" />
+  <ColorStyles />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
 
@@ -156,10 +156,20 @@ const graph: JsonLdNode[] = [...globalSchema, ...withDynamicWebPageFields];
     type="font/woff2"
     crossorigin
   />
-
-  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
-
-  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=karla:400,500,600&display=swap" />
+  <link
+    rel="preload"
+    href="/fonts/Karla-latin-400-normal.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
+  <link
+    rel="preload"
+    href="/fonts/Karla-latin-500-normal.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
 
   <Schema item={{ "@context": "https://schema.org", "@graph": graph }} />
 </head>

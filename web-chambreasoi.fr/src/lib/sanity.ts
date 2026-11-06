@@ -41,6 +41,8 @@ export { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 export {
   buildSanityDprSrcSet,
   buildSanityImageUrl,
+  buildSanityWidthSrcSet,
+  resolveSrcSetWidths,
   type SanityImageFormat,
   sanityImageUrl,
 } from "@chambreasoi/sanity/image";

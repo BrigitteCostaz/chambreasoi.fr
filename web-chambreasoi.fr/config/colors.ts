@@ -10,7 +10,7 @@ export const ColorData: ColorConfig = {
       bgCard: "oklch(98.6% 0.007 116deg)", // #fafbf6
 
       txtPri: "oklch(30.3% 0.005 122deg)", // #2e2f2c
-      txtMuted: "oklch(0.4672 0.0228 133.29)", // #555d50
+      txtMuted: "oklch(0.445 0.023 133.29)", // ~#4f574a — ≥4.5:1 on beige fold tiles
 
       accentForest: "oklch(48.0% 0.084 145deg)", // #3d6a3f
       accentStone: "oklch(0.4876 0.0303 221.14)", // #4d646c

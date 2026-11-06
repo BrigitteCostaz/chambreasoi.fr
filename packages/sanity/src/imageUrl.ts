@@ -54,6 +54,38 @@ interface BuildSrcSetOptions {
   fit?: SanityFitMode;
 }
 
+interface BuildWidthSrcSetOptions {
+  source: unknown;
+  /** Largest 1x CSS-pixel design width (also used as the `src` fallback size). */
+  width: number;
+  height: number;
+  /** Explicit candidate widths in CSS pixels. Defaults to a ladder up to `width * 2`. */
+  widths?: number[];
+  quality?: number;
+  format?: SanityImageFormat;
+  fit?: SanityFitMode;
+}
+
+/** Default width ladder for fluid `sizes`-aware srcsets (CSS pixels). */
+const DEFAULT_WIDTH_LADDER = [
+  320, 480, 640, 768, 800, 960, 1024, 1200, 1280, 1440, 1600, 1920,
+] as const;
+
+/**
+ * Build candidate widths for a fluid srcset.
+ *
+ * Caps at `width * 2` so a 2x DPR device can still fill the declared design
+ * width without emitting absurdly large Sanity URLs.
+ */
+export function resolveSrcSetWidths(width: number, widths?: number[]): number[] {
+  const max = Math.max(1, Math.round(width * 2));
+  const ladder = widths?.length ? widths : [...DEFAULT_WIDTH_LADDER];
+  const filtered = ladder.filter((w) => w > 0 && w <= max);
+  if (!filtered.includes(width)) filtered.push(width);
+  if (!filtered.includes(max)) filtered.push(max);
+  return [...new Set(filtered)].sort((a, b) => a - b);
+}
+
 // ---------------------------------------------------------------------------
 // Memoized builder
 // ---------------------------------------------------------------------------
@@ -175,6 +207,56 @@ export function buildSanityDprSrcSet({
     });
     if (url) {
       entries.push(`${url} ${dpr}x`);
+    }
+  }
+
+  return entries.length > 0 ? entries.join(", ") : null;
+}
+
+/**
+ * Build a width-descriptor (`w`) srcset for use with the HTML `sizes` attribute.
+ *
+ * Unlike {@link buildSanityDprSrcSet}, candidates do **not** set Sanity's `dpr`
+ * parameter — each URL is a distinct pixel width. Browsers then combine
+ * `sizes` + device DPR to pick the right file. Prefer this whenever `sizes`
+ * is set on the `<img>`.
+ *
+ * Returns `null` if source is missing or no valid entries could be produced.
+ *
+ * @example
+ *   <img
+ *     src={buildSanityImageUrl({ source: img, width: 800, height: 1200 })}
+ *     srcset={buildSanityWidthSrcSet({ source: img, width: 800, height: 1200 })}
+ *     sizes="(max-width: 1024px) 100vw, 40vw"
+ *   />
+ */
+export function buildSanityWidthSrcSet({
+  source,
+  width,
+  height,
+  widths,
+  quality = 80,
+  format = "webp",
+  fit = "crop",
+}: BuildWidthSrcSetOptions): string | null {
+  if (!source) return null;
+
+  const aspect = height / width;
+  const candidates = resolveSrcSetWidths(width, widths);
+  const entries: string[] = [];
+
+  for (const w of candidates) {
+    const h = Math.max(1, Math.round(w * aspect));
+    const url = buildSanityImageUrl({
+      source,
+      width: w,
+      height: h,
+      quality,
+      format,
+      fit,
+    });
+    if (url) {
+      entries.push(`${url} ${w}w`);
     }
   }
 

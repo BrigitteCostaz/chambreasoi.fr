@@ -94,9 +94,8 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
       width={coverWidth}
       height={coverHeight}
       sizes="(max-width: 1279px) 100vw, 40vw"
-      loading="eager"
+      loading="lazy"
       decoding="async"
-      fetchpriority="high"
       fallback={fallbackImage}
       class="block w-full h-auto"
     />
@@ -113,9 +112,8 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
           width={coverWidth}
           height={coverHeight}
           sizes="100vw"
-          loading="eager"
+          loading="lazy"
           decoding="async"
-          fetchpriority="high"
           fallback={fallbackImage}
         />
       </div>
