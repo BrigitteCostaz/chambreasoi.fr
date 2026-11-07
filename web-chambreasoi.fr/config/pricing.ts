@@ -1,6 +1,7 @@
+// config/pricing.ts
 import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 import { PRICING_SETTINGS_QUERY, type PricingSettingsResult } from "@chambreasoi/sanity/queries";
-import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
+import { loadCms } from "@config/load-cms";
 import type {
   MoneyCents,
   MoneyFormatter,
@@ -47,6 +48,8 @@ const DEFAULT_BASE_NIGHTLY: Record<1 | 2, MoneyCents> = {
 } as const;
 
 const DEFAULT_BREAKFAST_SURCHARGE: MoneyCents = 500;
+
+const DEFAULT_PRICING = buildPricingCatalog(DEFAULT_BASE_NIGHTLY, DEFAULT_BREAKFAST_SURCHARGE);
 
 function toSafeInteger(fallback: MoneyCents, value: unknown): MoneyCents {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : fallback;
@@ -123,17 +126,6 @@ function buildPricingCatalog(
   } as const;
 }
 
-type PricingCacheEntry = {
-  epoch: number;
-  value: PricingCatalog;
-};
-
-let pricingCache: PricingCacheEntry | null = null;
-
-registerCmsCacheResetter(() => {
-  pricingCache = null;
-});
-
 function reportPricingFallback(
   reason: "missing-document" | "fetch-error",
   details?: unknown
@@ -142,56 +134,40 @@ function reportPricingFallback(
   console.warn("[fallback:pricing]", {
     criticality: "high",
     reason,
-    hasCachedValue: Boolean(pricingCache?.value),
     details: details instanceof Error ? details.message : details,
   });
 }
 
 export async function getPricing(): Promise<PricingCatalog> {
-  const cacheEpoch = getCmsCacheEpoch();
+  return loadCms(
+    async () => {
+      const cms = await fetchSanity<PricingSettingsResult>(PRICING_SETTINGS_QUERY);
+      const baseNightly: Record<1 | 2, MoneyCents> = {
+        1: toSafeInteger(DEFAULT_BASE_NIGHTLY[1], cms?.baseNightly1Person),
+        2: toSafeInteger(DEFAULT_BASE_NIGHTLY[2], cms?.baseNightly2Person),
+      };
+      const breakfastSurcharge = toSafeInteger(
+        DEFAULT_BREAKFAST_SURCHARGE,
+        cms?.breakfastSurchargeCents
+      );
 
-  if (pricingCache && pricingCache.epoch === cacheEpoch) {
-    return pricingCache.value;
-  }
+      if (!cms) {
+        devLog("[pricing] Using TS fallback (document missing or empty).");
+        reportPricingFallback("missing-document");
+      }
 
-  try {
-    const cms = await fetchSanity<PricingSettingsResult>(PRICING_SETTINGS_QUERY);
-    const baseNightly: Record<1 | 2, MoneyCents> = {
-      1: toSafeInteger(DEFAULT_BASE_NIGHTLY[1], cms?.baseNightly1Person),
-      2: toSafeInteger(DEFAULT_BASE_NIGHTLY[2], cms?.baseNightly2Person),
-    };
-    const breakfastSurcharge = toSafeInteger(
-      DEFAULT_BREAKFAST_SURCHARGE,
-      cms?.breakfastSurchargeCents
-    );
-
-    pricingCache = {
-      epoch: cacheEpoch,
-      value: buildPricingCatalog(baseNightly, breakfastSurcharge),
-    };
-
-    if (!cms) {
-      devLog("[pricing] Using TS fallback (document missing or empty).");
-      reportPricingFallback("missing-document");
+      return buildPricingCatalog(baseNightly, breakfastSurcharge);
+    },
+    DEFAULT_PRICING,
+    (error) => {
+      devLog("[pricing] Sanity fetch failed, using TS fallback.", error);
+      reportPricingFallback("fetch-error", error);
     }
-
-    return pricingCache.value;
-  } catch (error) {
-    devLog("[pricing] Sanity fetch failed, using TS fallback.", error);
-    reportPricingFallback("fetch-error", error);
-    pricingCache = {
-      epoch: cacheEpoch,
-      value: buildPricingCatalog(DEFAULT_BASE_NIGHTLY, DEFAULT_BREAKFAST_SURCHARGE),
-    };
-    return pricingCache.value;
-  }
+  );
 }
 
 /** @deprecated Use `await getPricing()` instead. Sync fallback using hardcoded defaults only. */
-export const pricing: PricingCatalog = buildPricingCatalog(
-  DEFAULT_BASE_NIGHTLY,
-  DEFAULT_BREAKFAST_SURCHARGE
-);
+export const pricing: PricingCatalog = DEFAULT_PRICING;
 
 export function getPublicRatesByKey(catalog: PricingCatalog): Record<PublicRateKey, PublicRate> {
   return catalog.publicRates.reduce(

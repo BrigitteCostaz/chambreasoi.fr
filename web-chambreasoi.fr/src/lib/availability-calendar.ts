@@ -1,6 +1,10 @@
+// src/lib/availability-calendar.ts
 import type { AvailabilityMonthResult } from "@chambreasoi/sanity/queries";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Guest-facing calendar clock for this Savoie guesthouse. */
+export const GUESTHOUSE_TIME_ZONE = "Europe/Paris";
 
 export type CalendarAvailabilityDate = {
   date: string;
@@ -11,14 +15,47 @@ export function isIsoDate(value: string): boolean {
   return ISO_DATE_RE.test(value);
 }
 
+/** YYYY-MM-DD for `date` in the given IANA time zone (default Europe/Paris). */
+export function formatIsoDateInTimeZone(
+  date: Date,
+  timeZone: string = GUESTHOUSE_TIME_ZONE
+): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  if (!year || !month || !day) {
+    throw new Error(`Unable to format date in time zone ${timeZone}`);
+  }
+
+  return `${year}-${month}-${day}`;
+}
+
+export function getTodayIsoInParis(now: Date = new Date()): string {
+  return formatIsoDateInTimeZone(now, GUESTHOUSE_TIME_ZONE);
+}
+
 export function toMonthStart(date: Date): string {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-01`;
 }
 
-export function getAvailabilityQueryRange(monthsBefore = 6, monthsAfter = 18) {
-  const now = new Date();
-  const min = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsBefore, 1));
-  const max = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthsAfter, 1));
+export function getAvailabilityQueryRange(
+  monthsBefore = 6,
+  monthsAfter = 18,
+  now: Date = new Date()
+) {
+  const todayInParis = getTodayIsoInParis(now);
+  const year = Number(todayInParis.slice(0, 4));
+  const monthIndex = Number(todayInParis.slice(5, 7)) - 1;
+  const min = new Date(Date.UTC(year, monthIndex - monthsBefore, 1));
+  const max = new Date(Date.UTC(year, monthIndex + monthsAfter, 1));
 
   return {
     minMonth: toMonthStart(min),

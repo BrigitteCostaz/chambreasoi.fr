@@ -24,14 +24,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.7.0",
+    "@astrojs/cloudflare": "^14.4.6",
     "@astrojs/react": "^5.0.7",
     "@astrojs/sitemap": "^3.7.4",
     "@chambreasoi/sanity": "workspace:*",
     "@sanity/astro": "^3.6.0",
     "@sanity/client": "^7.28.0",
     "@unocss/reset": "^66.12.0",
-    "astro": "^6.4.8",
+    "astro": "^7.4.7",
     "astro-icon": "^1.2.0",
     "astro-leaflet": "^1.12.0",
     "astro-seo-schema": "^6.0.0",
@@ -40,13 +40,13 @@
     "react-dom": "^19.3.1",
     "sanity": "^5.31.2",
     "schema-dts": "^2.1.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "styled-components": "^6.6.0",
     "vanilla-calendar-pro": "~3.4.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@astrojs/node": "^10.1.4",
+    "@astrojs/node": "^11.1.11",
     "@biomejs/biome": "~2.6.5",
     "@cloudflare/workers-types": "^4.20260702.1",
     "@types/react": "^19.3.0",
@@ -57,7 +57,7 @@
     "typescript": "^6.0.3",
     "unocss": "^66.12.0",
     "vitest": "^4.1.12",
-    "wrangler": "4.107.1",
+    "wrangler": "4.158.0",
     "zod": "^4.6.7"
   }
 }

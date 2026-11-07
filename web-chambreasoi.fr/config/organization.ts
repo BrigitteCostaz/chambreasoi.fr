@@ -1,10 +1,10 @@
-// ./config/organization.ts
+// config/organization.ts
 import { devLog, fetchSanity } from "@chambreasoi/sanity/fetch";
 import {
   ORGANIZATION_SETTINGS_QUERY,
   type OrganizationSettingsResult,
 } from "@chambreasoi/sanity/queries";
-import { getCmsCacheEpoch, registerCmsCacheResetter } from "@config/cache";
+import { loadCms } from "@config/load-cms";
 import type { OrganizationConfig, PhotoCreditEntry } from "@config/types";
 import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
 import { resolveNumber, resolveString, resolveStringArray } from "@utils/config-resolvers";
@@ -191,17 +191,6 @@ function mapSanityToOrgData(
   };
 }
 
-type OrganizationCacheEntry = {
-  epoch: number;
-  value: OrganizationConfig;
-};
-
-let orgDataCache: OrganizationCacheEntry | null = null;
-
-registerCmsCacheResetter(() => {
-  orgDataCache = null;
-});
-
 function reportOrganizationFallback(
   reason: "missing-document" | "fetch-error",
   details?: unknown
@@ -210,40 +199,29 @@ function reportOrganizationFallback(
   console.warn("[fallback:organization]", {
     criticality: "high",
     reason,
-    hasCachedValue: Boolean(orgDataCache?.value),
     details: details instanceof Error ? details.message : details,
   });
 }
 
 export async function getOrgData(): Promise<OrganizationConfig> {
-  const cacheEpoch = getCmsCacheEpoch();
-  if (orgDataCache && orgDataCache.epoch === cacheEpoch) {
-    return orgDataCache.value;
-  }
+  return loadCms(
+    async () => {
+      const cms = await fetchSanity<OrganizationSettingsResult>(ORGANIZATION_SETTINGS_QUERY);
+      const merged = mapSanityToOrgData(cms, ORG_DEFAULTS);
 
-  try {
-    const cms = await fetchSanity<OrganizationSettingsResult>(ORGANIZATION_SETTINGS_QUERY);
-    const merged = mapSanityToOrgData(cms, ORG_DEFAULTS);
+      if (!cms) {
+        devLog("[orgData] Using TS fallback (document missing or empty).");
+        reportOrganizationFallback("missing-document");
+      }
 
-    if (!cms) {
-      devLog("[orgData] Using TS fallback (document missing or empty).");
-      reportOrganizationFallback("missing-document");
+      return merged;
+    },
+    ORG_DEFAULTS,
+    (error) => {
+      devLog("[orgData] Sanity fetch failed, using TS fallback.", error);
+      reportOrganizationFallback("fetch-error", error);
     }
-
-    orgDataCache = {
-      epoch: cacheEpoch,
-      value: merged,
-    };
-    return orgDataCache.value;
-  } catch (error) {
-    devLog("[orgData] Sanity fetch failed, using TS fallback.", error);
-    reportOrganizationFallback("fetch-error", error);
-    orgDataCache = {
-      epoch: cacheEpoch,
-      value: ORG_DEFAULTS,
-    };
-    return orgDataCache.value;
-  }
+  );
 }
 
 /** Synchronous fallback — use only when await is impossible. Prefer getOrgData(). */

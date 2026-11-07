@@ -1,0 +1,354 @@
+/* src/components/availabily-page/availability-calendar.css */
+/* Etat global du calendrier. */
+[data-vc-theme].vc {
+  background: var(--color-bgCard);
+  border-radius: 0;
+  color: var(--color-txtPri);
+}
+
+/* Etat du header mois/annee. */
+[data-vc-theme] .vc-header {
+  border-bottom: 0.5px solid color-mix(in oklch, var(--color-accentForest) 12%, transparent);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+}
+
+[data-vc-theme] .vc-header__content :is(.vc-month, .vc-year) {
+  color: var(--color-accentForest);
+  font-weight: 500;
+  letter-spacing: 0.015em;
+}
+
+/* Icone des fleches de navigation. */
+[data-vc-theme] .vc-header .vc-arrow::before {
+  /* Use the SVG as a mask to cut out the shape */
+  -webkit-mask-image: var(--chevronBackgroundImage);
+  mask-image: var(--chevronBackgroundImage);
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  /* The background-color now becomes the icon's color */
+  background-color: var(--color-accentForest);
+}
+
+/* Etat des labels de jours de semaine. */
+[data-vc-theme] .vc-week__day {
+  color: color-mix(in oklch, var(--color-txtPri) 78%, var(--color-accentForest));
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Etat des labels de jours weekend. */
+[data-vc-theme] .vc-week__day[data-vc-week-day-off] {
+  color: var(--color-txtMuted);
+}
+
+/* Etat normal d'une date. */
+[data-vc-theme] .vc-date > .vc-date__btn {
+  border-radius: 0;
+  color: var(--color-txtPri);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+/* État hover d'une date standard. */
+[data-vc-theme] .vc-date > .vc-date__btn:hover {
+  background-color: color-mix(in oklch, var(--color-accentStone) 9%, transparent);
+}
+
+/* État focus clavier d'une date. */
+[data-vc-theme] .vc-date > .vc-date__btn:focus-visible {
+  outline: 1px solid color-mix(in oklch, var(--color-accentForest) 58%, transparent);
+  outline-offset: 2px;
+}
+
+/* État weekend dans le mois courant. */
+[data-vc-theme] .vc-date[data-vc-date-weekend] > .vc-date__btn {
+  color: var(--color-txtMuted);
+}
+
+/* État dates du mois precedent/suivant. */
+
+  [data-vc-theme]
+    .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn
+ {
+  background-color: transparent;
+  color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+}
+
+/* État date du jour. */
+[data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn {
+  background: color-mix(in oklch, var(--color-accentStone) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accentStone) 50%, transparent);
+  color: oklch(from var(--color-accentStone) calc(l - 0.14) calc(c + 0.03) h);
+  font-weight: 500;
+  outline: 1.5px solid oklch(from var(--color-accentStone) l c h / 0.45);
+  outline-offset: -1.5px;
+}
+
+/* État hover de la date du jour. */
+[data-vc-theme] .vc-date[data-vc-date-today] > .vc-date__btn:hover {
+  background: color-mix(in oklch, var(--color-accentStone) 17%, transparent);
+  color: oklch(from var(--color-accentStone) calc(l - 0.2) calc(c + 0.04) h);
+}
+
+/* État disponible dans le mois courant. */
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available {
+  background: color-mix(in oklch, var(--color-success) 15%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-success) 32%, transparent);
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+/* État hover disponible dans le mois courant. */
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--available:hover {
+  background: color-mix(in oklch, var(--color-success) 22%, transparent);
+  color: oklch(from var(--color-success) calc(l - 0.08) calc(c + 0.02) h);
+}
+
+/* État complet dans le mois courant, y compris hover et popup ouvert. */
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable,
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable:hover,
+
+  [data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--unavailable[aria-expanded="true"]
+ {
+  background: color-mix(in oklch, var(--color-alert) 78%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in oklch, var(--color-alert) 32%, var(--color-txtPri));
+  color: var(--color-bgBase);
+  font-weight: 500;
+}
+
+/* État non disponible par defaut, y compris hover et popup ouvert. */
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable,
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable:hover,
+
+  [data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable[aria-expanded="true"]
+ {
+  position: relative;
+  background-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+  font-weight: 450;
+}
+
+/* Croix SVG (close-sharp) plus grande et plus opaque que le chiffre. */
+[data-vc-theme] .vc-date > .vc-date__btn.vc-date__btn--default-unavailable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.45em;
+  height: 1.45em;
+  pointer-events: none;
+  background-color: color-mix(in oklch, var(--color-txtMuted) 92%, var(--color-txtPri));
+  -webkit-mask-image: var(--closeBackgroundImage);
+  mask-image: var(--closeBackgroundImage);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Etat disponible du mois precedent/suivant, sans fond ni hover. */
+
+  [data-vc-theme]
+    .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn:is(
+      .vc-date__btn--available,
+      .vc-date__btn--available:hover,
+      .vc-date__btn--available[aria-expanded="true"]
+    )
+ {
+  background: color-mix(in oklch, var(--color-success) 9%, transparent);
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-success) 46%, var(--color-txtMuted));
+}
+
+/* Etat complet du mois precedent/suivant, y compris hover et popup ouvert. */
+
+  [data-vc-theme]
+    .vc-date:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn:is(
+      .vc-date__btn--unavailable,
+      .vc-date__btn--unavailable:hover,
+      .vc-date__btn--unavailable[aria-expanded="true"]
+    )
+ {
+  background: color-mix(in oklch, var(--color-alert) 9%, transparent);
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-alert) 46%, var(--color-txtMuted));
+}
+
+/* Etat popup des dates passees. */
+[data-vc-theme] .vc-date.vc-date--past [data-vc-date-popup] {
+  display: none;
+}
+
+/* Etat date passee dans le mois courant. */
+[data-vc-theme] .vc-date.vc-date--past > .vc-date__btn,
+[data-vc-theme] .vc-date.vc-date--past > .vc-date__btn:hover,
+
+  [data-vc-theme]
+    .vc-date.vc-date--past
+    > .vc-date__btn:is(
+      .vc-date__btn--available,
+      .vc-date__btn--unavailable,
+      .vc-date__btn--default-unavailable
+    )
+,
+
+  [data-vc-theme]
+    .vc-date.vc-date--past
+    > .vc-date__btn:is(
+      .vc-date__btn--available,
+      .vc-date__btn--unavailable,
+      .vc-date__btn--default-unavailable
+    ):hover
+ {
+  background-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-txtMuted) 48%, transparent);
+  font-weight: 400;
+}
+
+/* Etat date passee du mois precedent/suivant. */
+
+  [data-vc-theme]
+    .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn
+,
+
+  [data-vc-theme]
+    .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn:hover
+ {
+  background-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+  font-weight: 450;
+}
+
+/* Etat date passee disponible du mois precedent/suivant. */
+
+  [data-vc-theme]
+    .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn:is(
+      .vc-date__btn--available,
+      .vc-date__btn--available:hover,
+      .vc-date__btn--available[aria-expanded="true"]
+    )
+ {
+  background-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+  font-weight: 450;
+}
+
+/* Etat date passee complete du mois precedent/suivant. */
+
+  [data-vc-theme]
+    .vc-date.vc-date--past:is([data-vc-date-month="prev"], [data-vc-date-month="next"])
+    > .vc-date__btn:is(
+      .vc-date__btn--unavailable,
+      .vc-date__btn--unavailable:hover,
+      .vc-date__btn--unavailable[aria-expanded="true"]
+    )
+ {
+  background-color: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--color-txtMuted) 58%, transparent);
+  font-weight: 450;
+}
+
+/* Etat du popup d'information. */
+[data-vc-date-popup].vc-date__popup {
+  background-color: var(--color-bgCard);
+  border: 0.5px solid color-mix(in oklch, var(--color-accentForest) 16%, transparent);
+  border-radius: 0;
+  box-shadow: 0 0.75rem 1.75rem color-mix(in oklch, var(--color-accentStone) 16%, transparent);
+  color: var(--color-txtPri);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Icone dans le popup d'information. */
+[data-vc-date-popup] svg {
+  font-size: 1rem;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  color: var(--color-txtPri);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.square {
+  display: inline-block;
+  width: 16px;
+  aspect-ratio: 16 / 10;
+  border-radius: 0;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
+
+.availableDates {
+  background: color-mix(in oklch, var(--color-success) 28%, transparent);
+}
+
+.unavailableDates {
+  background: color-mix(in oklch, var(--color-alert) 78%, transparent);
+}
+
+.defaultUnavailableDates {
+  position: relative;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-txtMuted) 55%, transparent);
+  font-size: 0.75rem;
+}
+
+.defaultUnavailableDates::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.45em;
+  height: 1.45em;
+  pointer-events: none;
+  background-color: color-mix(in oklch, var(--color-txtMuted) 92%, var(--color-txtPri));
+  -webkit-mask-image: var(--closeBackgroundImage);
+  mask-image: var(--closeBackgroundImage);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}

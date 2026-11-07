@@ -1,15 +1,16 @@
 ---
+// src/components/fold/Fold.astro
 /* =========================
  * Imports
  * ========================= */
 import Button from "@components/button/Button.astro";
 import SanityPicture from "@components/media/SanityPicture.astro";
-import { getOrgData } from "@config/organization";
-import { getPricing } from "@config/pricing";
-import { getFoldContent } from "@lib/sanity";
+import type { OrganizationConfig } from "@config/types";
+import type { PricingCatalog } from "@config/types/pricing";
 import { formatEuroFR } from "@utils/currency";
 import { resolveImage } from "@utils/imageUtils";
-import { defaultFoldContent, defaultFoldImageAlt } from "../../data/fallback/fold";
+import type { FoldDisplayContent } from "../../data/adapters/fold";
+import { defaultFoldImageAlt } from "../../data/fallback/fold";
 
 /* =========================
  * Types / Props
@@ -22,6 +23,12 @@ interface SanityImageSource {
 }
 
 interface Props {
+  /** Merged fold copy (CMS + defaults) — fetched by the page */
+  content: FoldDisplayContent;
+  /** Pricing catalog — fetched by the page */
+  pricing: PricingCatalog;
+  /** Organization config — fetched by the page */
+  org: OrganizationConfig;
   /** Sanity image source (preferred) */
   image?: SanityImageSource | null;
   /** Alt text override (defaults to image.alt or empty string) */
@@ -34,6 +41,9 @@ interface Props {
  * Props
  * ========================= */
 const {
+  content: f,
+  pricing,
+  org,
   image: sanityImageSource = null,
   imageAlt: altOverride,
   fallbackImagePath = "@images/chambreasoi-accueil-facade.png",
@@ -81,32 +91,9 @@ const mobileColorsReversed = [...mobileColors].reverse();
 const leftColors = desktopColors.slice(0, 3);
 const leftColorsReversed = desktopColorsReversed.slice(2, 5).reverse();
 
-/* =========================
- * Data fetching
- * ========================= */
-const pricing = await getPricing();
-const org = await getOrgData();
 const phoneDisplay = org.contact.phone.display;
 const phoneLink = org.contact.phone.link;
-
-/* =========================
- * Final computed values
- * ========================= */
 const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceCents);
-
-const fold = await getFoldContent();
-
-// Fallback strings mirror the original hardcoded content
-// and are used whenever the Sanity document has not been created yet.
-const f = {
-  seoTitle: fold?.seoTitle ?? defaultFoldContent.seoTitle,
-  mosaicTile1Text: fold?.mosaicTile1Text ?? defaultFoldContent.mosaicTile1Text,
-  mosaicTile2Line1: fold?.mosaicTile2Line1 ?? defaultFoldContent.mosaicTile2Line1,
-  mosaicTile2Line2: fold?.mosaicTile2Line2 ?? defaultFoldContent.mosaicTile2Line2,
-  amenitiesLabel: fold?.amenitiesLabel ?? defaultFoldContent.amenitiesLabel,
-  amenities: fold?.amenities ?? defaultFoldContent.amenities,
-  bookingNote: fold?.bookingNote ?? defaultFoldContent.bookingNote,
-};
 ---
 
 <div

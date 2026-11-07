@@ -1,4 +1,3 @@
-import { invalidateCmsCache } from "@config/cache";
 import { submitIndexNow, toAbsoluteUrls } from "@config/indexnow";
 import { normalizeBaseUrl } from "@config/public-routes";
 import { purgeCloudflareCache } from "@lib/revalidate/purge";
@@ -155,11 +154,8 @@ export const ALL: APIRoute = async ({ request, locals }) => {
     return new Response(`Cloudflare cache purge failed: ${purgeResult.error}`, { status: 502 });
   }
 
-  const cacheEpoch = invalidateCmsCache();
-
-  console.info("[revalidate] Purge and in-memory cache invalidation complete", {
+  console.info("[revalidate] Cloudflare cache purge complete", {
     paths: resolution.paths,
-    cacheEpoch,
     type: resolution.webhookType ?? null,
   });
 
