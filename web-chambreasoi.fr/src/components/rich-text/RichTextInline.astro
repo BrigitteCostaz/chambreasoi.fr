@@ -35,7 +35,7 @@ const isExternalHref = (href: string) => /^(https?:)?\/\//.test(href);
         rel={isExternalHref(span.href) ? "noopener noreferrer" : undefined}
       >
         {span.marks.includes("strong") ? (
-          <strong class="font-semibold">
+          <strong class="font-medium">
             {span.marks.includes("em") ? <em class="italic">{span.text}</em> : span.text}
           </strong>
         ) : span.marks.includes("em") ? (
@@ -45,7 +45,7 @@ const isExternalHref = (href: string) => /^(https?:)?\/\//.test(href);
         )}
       </a>
     ) : span.marks.includes("strong") ? (
-      <strong class="font-semibold">
+      <strong class="font-medium">
         {span.marks.includes("em") ? <em class="italic">{span.text}</em> : span.text}
       </strong>
     ) : span.marks.includes("em") ? (

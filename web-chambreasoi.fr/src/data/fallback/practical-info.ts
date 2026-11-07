@@ -9,6 +9,7 @@ export const tariffAccentClasses = [
   "bg-accentForest/20",
   "bg-accentBistre/25",
   "bg-accentStone/25",
+  "bg-accentForest/20",
 ] as const;
 
 export const accentClasses: Record<PracticalInfoAccent, string> = {

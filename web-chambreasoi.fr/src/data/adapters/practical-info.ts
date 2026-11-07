@@ -52,7 +52,7 @@ export const getPracticalInfoRenderModel = async (
     eyebrow: practicalInfo?.eyebrow ?? "Infos pratiques",
     tariffsHeading: practicalInfo?.tariffsHeading ?? "Tarifs pour une nuitée",
     kitchenImage: practicalInfo?.kitchenImage ?? null,
-    kitchenImageAlt: practicalInfo?.kitchenImage?.alt ?? "Cuisine de la maison d'hôtes",
+    priceImageAlt: practicalInfo?.kitchenImage?.alt ?? "Cuisine de la maison d'hôtes",
     bookingHeading: practicalInfo?.bookingHeading ?? "Modalités de réservation",
     bookingEyebrow: practicalInfo?.bookingEyebrow ?? null,
     bookingImage: practicalInfo?.bookingImage ?? null,

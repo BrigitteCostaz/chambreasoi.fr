@@ -170,6 +170,7 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
             class="inline-flex font-sans w-full items-center justify-center"
             variant="stone"
             size="sm"
+            icon="ion/calendar-sharp"
             href="/tarifs-et-reservation/#agenda"
           >
             Voir les disponibilités
@@ -227,9 +228,20 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
         </div>
         <div class="relative z-10 grid w-full grid-cols-3 gap-grid">
           <div></div>
-          <div class="flex flex-col items-start p-[0.8rem] text-left" aria-hidden="true">
-            <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
-            <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
+          <div class="flex flex-col gap-[1.6rem] p-[0.8rem] text-left">
+            <div class="flex flex-col" aria-hidden="true">
+              <span class="heading-1 pb-2">{f.mosaicTile2Line1}</span>
+              <span class="heading-1 text-txtMuted">{f.mosaicTile2Line2}</span>
+            </div>
+            <Button
+              class="mt-auto inline-flex font-sans w-full items-center justify-center"
+              variant="stone"
+              size="sm"
+              icon="ion/calendar-sharp"
+              href="/tarifs-et-reservation/#agenda"
+            >
+            Disponibilités
+            </Button>
           </div>
           <div
             class="flex flex-col justify-end font-display font-medium p-[0.8rem] text-left text-[clamp(18px,calc(18px+22.5*(100vw-375px)/1225),22.5px)]"
@@ -278,17 +290,7 @@ const baseNightly1PersonEuroFR = formatEuroFR(pricing.baseNightlyRates[0].priceC
       </div>
       <div class="relative flex-1">
         <div class="relative z-10 grid w-full h-full grid-cols-2">
-          <div class="flex items-end p-[0.8rem]">
-            <Button
-              class="inline-flex font-sans w-full items-center justify-center"
-              variant="stone"
-              size="sm"
-              href="/tarifs-et-reservation/#agenda"
-            >
-              Voir les disponibilités
-            </Button>
-          </div>
-          <div class="flex items-end p-[0.8rem]">
+          <div class="col-start-2 flex items-end p-[0.8rem]">
             <Button
               class="inline-flex font-sans w-full items-center justify-center"
               variant="primary"

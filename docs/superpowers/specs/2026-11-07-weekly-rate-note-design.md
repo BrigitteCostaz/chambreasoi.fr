@@ -22,14 +22,13 @@ Append `bg-accentForest/20` to `tariffAccentClasses` in `src/data/fallback/pract
 
 ## Desktop height
 
-From the `lg` breakpoint upward, the kitchen photo sets the row height and the five cards fit inside it.
+From the `lg` breakpoint upward, the rates column and the kitchen photo share one height. The five cards stay within the photo, and their text is not clipped.
 
-- The figure keeps `aspect-[4/3]`. Remove `lg:aspect-auto`, which currently lets the cards stretch the photo.
-- The rates column is `lg:min-h-0 lg:h-full`, so its content cannot grow the grid row. `lg:overflow-hidden` is only a guard.
+- The figure keeps `aspect-[4/3]` and drops `lg:aspect-auto`. It also uses `lg:h-full`, so when the cards need more than a 4/3 box the photo stretches with them (`object-cover`). Forcing the cards into a fixed 4/3 box at 1024px clips the weekly sentence.
+- The rates column is `lg:h-auto lg:min-h-full`. It does not use `overflow-hidden`.
 - The heading block stays `lg:shrink-0` at its current size and counts toward the same height.
-- Each of the five articles is `lg:flex-1 lg:min-h-0`. Their boxes share the height left under the heading and end flush with the bottom of the photo.
-- Vertical padding no longer grows at `lg`. Drop `lg:pb-[1.6rem]` and keep `p-[0.8rem]`. Inner gap becomes `lg:gap-[0.8rem]` (it stays `gap-[1.2rem]` below `lg`).
-- If the weekly sentence is clipped at 1024px, lower the `lg` padding to `0.6rem` before accepting any clipped text.
+- Each article is `lg:flex-1` and is not `lg:min-h-0`. Flex can use spare photo height. It cannot shrink a card below its text.
+- Vertical padding no longer grows at `lg`. `lg:pb-[1.6rem]` is removed. Padding is `p-[0.8rem]` below `lg` and `lg:p-[0.6rem]` from `lg`, which is what keeps the weekly sentence intact at 1024px. Inner gap is `gap-[1.2rem] lg:gap-[0.8rem]`.
 
 Below `lg`, cards and photo stay stacked. The photo keeps `aspect-[4/3]`. There is no shared height rule.
 

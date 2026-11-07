@@ -20,7 +20,7 @@ const { item, reservationLabels } = Astro.props;
       ) : null
     }
     <div class="flex flex-wrap items-center gap-[0.6rem]">
-      <h4 class="text-ui-lg font-semibold leading-snug">{item.title}</h4>
+      <h4 class="text-ui-lg font-medium leading-snug">{item.title}</h4>
       {
         item.reservationRequired ? (
           <span class="border border-txtPri/10 px-[0.55rem] py-[0.18rem] text-[0.72rem] leading-none">

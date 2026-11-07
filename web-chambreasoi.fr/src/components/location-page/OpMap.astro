@@ -11,6 +11,7 @@ import {
   defaultFoldAmenities,
   defaultSecondaryMapMarker,
 } from "../../data/fallback/location-page";
+import accesPoster from "../../assets/maps/acces-poster.webp";
 
 const orgData = await getOrgData();
 const fold = await getFoldContent();
@@ -99,22 +100,35 @@ type OpMapBoundary = {
 const boundaries: OpMapBoundary[] = [...defaultBoundaries];
 ---
 
-<Leaflet
-  id={mapId}
-  options={{
-    center,
-    zoom: 13,
-    tileLayer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    tileLayerOptions: {
-      subdomains: ["a", "b", "c"],
-      maxZoom: 17,
+{/* Poster stays in the DOM at full opacity after tiles paint: removing or
+    fading it would hand LCP back to a 256px Leaflet tile. */}
+<div class="op-map-frame">
+  <img
+    class="op-map-poster"
+    src={accesPoster.src}
+    width={accesPoster.width}
+    height={accesPoster.height}
+    alt="Carte de Challes-les-Eaux : une chambre à soi, le Médipôle de Savoie et la sortie 20 de l'autoroute A43"
+    fetchpriority="high"
+    decoding="async"
+  />
+  <Leaflet
+    id={mapId}
+    options={{
+      center,
+      zoom: 13,
+      tileLayer: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      tileLayerOptions: {
+        subdomains: ["a", "b", "c"],
+        maxZoom: 17,
 
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
-    },
-  }}
-  class="op-map"
-/>
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+      },
+    }}
+    class="op-map"
+  />
+</div>
 
 <div class="op-map-markers" data-map-id={mapId} hidden>
   {
@@ -430,11 +444,40 @@ const boundaries: OpMapBoundary[] = [...defaultBoundaries];
 </script>
 
 <style>
-  .op-map {
+  .op-map-frame {
+    position: relative;
     margin-top: 10vh;
     width: 100%;
-    min-height: 50vh;
+    height: 50vh;
   }
+
+  .op-map-poster {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .op-map-frame :global(astro-leaflet) {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+  }
+
+  .op-map {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  :global(.op-map-frame .leaflet-container) {
+    background: transparent;
+  }
+
   :global(.leaflet-popup-content-wrapper) {
     background-color: var(--color-bgCard);
     color: var(--color-txtPri);
