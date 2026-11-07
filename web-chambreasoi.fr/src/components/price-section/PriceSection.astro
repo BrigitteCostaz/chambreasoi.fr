@@ -236,8 +236,10 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
       var(--pricing-title-height, auto) /* title */
       1fr;
     width: 100%;
+    /* Standard property only. A paired -webkit-backdrop-filter is what
+       Lightning CSS keeps in the production bundle, and current Chromium
+       ignores that prefix (backdrop-filter computes to none). */
     backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     background: rgb(26 26 30 / 0.2);
     border-block: 1px solid color-mix(in oklch, var(--color-bgBase) 50%, transparent);
   }
@@ -377,8 +379,7 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
       /* Reset grid rows so content (not the 1st-row track) drives the height */
       grid-template-rows: auto;
       grid-auto-rows: auto;
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
+      backdrop-filter: none;
       background: rgb(26 26 30 / 0.45);
     }
 
