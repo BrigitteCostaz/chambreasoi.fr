@@ -151,8 +151,8 @@ const f = {
       </div>
     </div>
 
-    <!-- Part 2: Photo + CTA -->
-    <div class="relative overflow-hidden flex-1 min-h-[240px] mt-[0.4rem]">
+    <!-- Part 2: Photo + CTA — fills leftover height; spare space pads above/below the stack -->
+    <div class="relative mt-[1.6rem] flex min-h-0 flex-1 flex-col overflow-hidden">
       <SanityPicture
         source={sanityImageSource}
         alt={imageAlt}
@@ -167,27 +167,36 @@ const f = {
         style={coverImageStyle}
       />
 
-      <!-- CTA -->
-      <div class="cta-top">
-        <Button
-          variant="accent"
-          size="sm"
-          icon="ion/call-sharp"
-          href={phoneLink}
-          class="inline-flex font-sans w-full items-center justify-center"
-        >
-          {phoneDisplay}
-        </Button>
-      </div>
-      <div class="cta-bottom">
-        <Button
-          class="inline-flex font-sans w-full items-center justify-center"
-          variant="primary"
-          size="sm"
-          href="/la-chambre"
-        >
-          Découvrir la chambre
-        </Button>
+      <div class="relative z-10 flex flex-1 flex-col px-[0.8rem]">
+        <div class="min-h-[0.8rem] flex-1" aria-hidden="true"></div>
+        <div class="flex flex-col gap-[0.8rem]">
+          <Button
+            variant="accent"
+            size="sm"
+            icon="ion/call-sharp"
+            href={phoneLink}
+            class="inline-flex font-sans w-full items-center justify-center"
+          >
+            {phoneDisplay}
+          </Button>
+          <Button
+            class="inline-flex font-sans w-full items-center justify-center"
+            variant="stone"
+            size="sm"
+            href="/tarifs-et-reservation/#agenda"
+          >
+            Voir les disponibilités
+          </Button>
+          <Button
+            class="inline-flex font-sans w-full items-center justify-center"
+            variant="primary"
+            size="sm"
+            href="/la-chambre"
+          >
+            Découvrir la chambre
+          </Button>
+        </div>
+        <div class="min-h-[0.8rem] flex-1" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -282,7 +291,16 @@ const f = {
       </div>
       <div class="relative flex-1">
         <div class="relative z-10 grid w-full h-full grid-cols-2">
-          <div></div>
+          <div class="flex items-end p-[0.8rem]">
+            <Button
+              class="inline-flex font-sans w-full items-center justify-center"
+              variant="stone"
+              size="sm"
+              href="/tarifs-et-reservation/#agenda"
+            >
+              Voir les disponibilités
+            </Button>
+          </div>
           <div class="flex items-end p-[0.8rem]">
             <Button
               class="inline-flex font-sans w-full items-center justify-center"

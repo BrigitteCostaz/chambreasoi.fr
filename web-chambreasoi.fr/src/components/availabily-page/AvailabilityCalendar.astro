@@ -148,6 +148,64 @@ const closeBackgroundImage = `url("${closeIconUrl}")`;
     const calendar = new Calendar(element, calendarOptions);
 
     calendar.init();
+
+    /** Center #calendar in the free viewport when arriving via #agenda. */
+    if (location.hash === "#agenda") {
+      history.scrollRestoration = "manual";
+
+      const calendarEl = document.getElementById("calendar") ?? element;
+      const agendaEl =
+        document.getElementById("agenda") ??
+        document.querySelector<HTMLElement>("[data-agenda-anchor]");
+
+      const restoreAgendaId = () => {
+        if (!agendaEl || agendaEl.id === "agenda") return;
+        agendaEl.id = "agenda";
+        agendaEl.removeAttribute("data-agenda-anchor");
+      };
+
+      const scrollAgendaTarget = () => {
+        if (!calendarEl) {
+          restoreAgendaId();
+          agendaEl?.scrollIntoView({ behavior: "instant", block: "start" });
+          return;
+        }
+
+        const rect = calendarEl.getBoundingClientRect();
+        const pageY = window.scrollY + rect.top;
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        const headerOffset = isDesktop
+          ? Number.parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue("--header-height")
+            ) || 0
+          : 0;
+        const mobileNav = document.querySelector<HTMLElement>("[data-mobile-nav] nav");
+        const mobileNavHeight =
+          !isDesktop && mobileNav ? mobileNav.getBoundingClientRect().height : 0;
+        const freeHeight = window.innerHeight - headerOffset - mobileNavHeight;
+
+        const top =
+          rect.height >= freeHeight
+            ? pageY - headerOffset
+            : pageY - headerOffset - (freeHeight - rect.height) / 2;
+
+        window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      };
+
+      const finishAgendaScroll = () => {
+        scrollAgendaTarget();
+        // Re-attaching id can trigger a native hash jump — re-center after restore.
+        restoreAgendaId();
+        scrollAgendaTarget();
+      };
+
+      scrollAgendaTarget();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollAgendaTarget);
+      });
+      window.addEventListener("load", finishAgendaScroll, { once: true });
+      window.setTimeout(finishAgendaScroll, 150);
+    }
   });
 </script>
 

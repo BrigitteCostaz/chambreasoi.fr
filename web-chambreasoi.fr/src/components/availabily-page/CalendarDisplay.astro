@@ -38,6 +38,24 @@ const {
 ---
 
 <section id="disponibilites" class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  {/*
+    When arriving via #agenda, strip the id before the browser's native hash jump
+    so AvailabilityCalendar can center #calendar, then restore the id.
+  */}
+  <script is:inline>
+    (() => {
+      if (location.hash !== "#agenda") return;
+      history.scrollRestoration = "manual";
+      const disarm = () => {
+        const el = document.getElementById("agenda");
+        if (!el) return;
+        el.dataset.agendaAnchor = "true";
+        el.removeAttribute("id");
+      };
+      disarm();
+      document.addEventListener("DOMContentLoaded", disarm, { once: true });
+    })();
+  </script>
   <GridOverlay />
 
   <div class="relative z-10 grid grid-cols-1 lg:grid-cols-5">
@@ -49,7 +67,10 @@ const {
       <span class="heading-3">{availabilityEyebrow}</span>
     </div>
 
-    <div class="px-[0.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-2">
+    <div
+      id="agenda"
+      class="scroll-mt-[var(--header-height,0px)] px-[0.4rem] lg:col-span-4 lg:col-start-2 lg:row-start-2"
+    >
       <div data-reveal data-reveal-delay="120" class="max-w-[72ch]">
         <h1 class="heading-2 text-balance">{availabilityHeading}</h1>
         <div class="mt-[1.6rem] max-w-[65ch] space-y-[0.8rem] text-balance text-ui-lg font-medium">

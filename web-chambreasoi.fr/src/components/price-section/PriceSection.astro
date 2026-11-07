@@ -40,10 +40,10 @@ const {
  * Image handling: Sanity CDN with local fallback
  * ========================= */
 
-// Target display size (CSS pixels) for the fold cover
-// The image fills ~40% of viewport width, so 800px covers up to 2000px viewports at 1x
-const coverWidth = 1280;
-const coverHeight = 1152;
+// Full-bleed hero (`.hero-image` is width 100%). Design width 1920 covers
+// common desktop viewports at 1x; the w-srcset ladder goes up to width*2 for retina.
+const coverWidth = 1920;
+const coverHeight = 1728;
 
 const imageAlt =
   altOverride ??
@@ -93,9 +93,10 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
       alt={imageAlt}
       width={coverWidth}
       height={coverHeight}
-      sizes="(max-width: 1279px) 100vw, 40vw"
+      sizes="100vw"
       loading="lazy"
       decoding="async"
+      quality={85}
       fallback={fallbackImage}
       class="block w-full h-auto"
     />
@@ -114,6 +115,7 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
           sizes="100vw"
           loading="lazy"
           decoding="async"
+          quality={85}
           fallback={fallbackImage}
         />
       </div>

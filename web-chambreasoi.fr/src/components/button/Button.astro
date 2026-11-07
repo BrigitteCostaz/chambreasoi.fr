@@ -17,7 +17,7 @@ import { Icon } from "astro-icon/components";
  */
 
 type BaseProps = {
-  variant?: "primary" | "secondary" | "accent" | "outline" | "ghost" | "link";
+  variant?: "primary" | "secondary" | "stone" | "accent" | "outline" | "ghost" | "link";
   size?: "sm" | "default" | "lg";
   class?: string;
   /** Icon name from the local ion set — e.g. "ion/call-sharp" */
@@ -196,6 +196,28 @@ const classList = ["button", `button--${variant}`, `button--${size}`, className]
   }
 
   .button--primary:active {
+    opacity: 0.8;
+  }
+
+  .button--stone {
+    background-color: var(--color-accentStone);
+    color: var(--color-bgBase);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .button--stone::after {
+    background-color: var(--color-accentForest);
+  }
+
+  .button--stone:hover {
+    color: var(--color-bgBase);
+  }
+
+  .button--stone:focus {
+    opacity: 0.9;
+  }
+
+  .button--stone:active {
     opacity: 0.8;
   }
 
