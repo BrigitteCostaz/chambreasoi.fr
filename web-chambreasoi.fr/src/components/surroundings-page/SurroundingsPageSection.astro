@@ -1,0 +1,130 @@
+---
+import { sanityConfig } from "@chambreasoi/sanity/config";
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import SurroundingsCardGrid from "@components/surroundings-page/SurroundingsCardGrid.astro";
+import SurroundingsGalleryImages from "@components/surroundings-page/SurroundingsGalleryImages.astro";
+import SurroundingsPageIntro from "@components/surroundings-page/SurroundingsPageIntro.astro";
+import { incrementFallbackCounter } from "@lib/observability/fallbackMetrics";
+import { devLog, getSurroundingsPageContent } from "@lib/sanity";
+import { resolveSurroundingsPageContent } from "../../data/adapters/surroundings";
+import { fallbackContent, reservationLabels } from "../../data/fallback/surroundings";
+
+const sanityContent = await getSurroundingsPageContent();
+const { projectId, dataset } = sanityConfig();
+
+if (!sanityContent) {
+  incrementFallbackCounter("surroundings");
+}
+
+devLog("surroundingsPageContent", sanityContent ? "cms" : "fallback", { projectId, dataset });
+const content = resolveSurroundingsPageContent({
+  sanityContent,
+  fallbackContent,
+  reservationLabels,
+});
+
+const accordions = content.accordions;
+---
+
+<SurroundingsPageIntro
+  content={content}
+  sanityIntroImage={sanityContent?.introImage}
+  fallbackIntro={fallbackContent.images[0]}
+/>
+
+<section class="relative overflow-x-clip py-[3.6rem] lg:py-[6.4rem]">
+  <GridOverlay />
+  <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5 lg:items-start">
+    <SurroundingsCardGrid accordions={accordions} reservationLabels={reservationLabels} />
+    <SurroundingsGalleryImages images={content.galleryImages} variant="page" />
+  </div>
+</section>
+
+<style>
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .surroundings-accordion__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 500ms ease-in-out;
+  }
+
+  .surroundings-accordion[open]:not(.is-closing) .surroundings-accordion__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .surroundings-accordion.is-closing .surroundings-accordion__panel {
+    grid-template-rows: 0fr;
+  }
+
+  .surroundings-accordion__panel-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .surroundings-accordion.is-closing .surroundings-accordion__chevron {
+    transform: rotate(0deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .surroundings-accordion__panel {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const ACCORDION_CLOSE_MS = 300;
+
+  const initSurroundingsAccordions = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    document.querySelectorAll<HTMLDetailsElement>(".surroundings-accordion").forEach((details) => {
+      const summary = details.querySelector("summary");
+      if (!summary || summary.dataset.accordionBound === "true") return;
+
+      summary.dataset.accordionBound = "true";
+
+      summary.addEventListener("click", (event) => {
+        if (prefersReducedMotion || !details.open) return;
+
+        event.preventDefault();
+        details.classList.add("is-closing");
+
+        const panel = details.querySelector<HTMLElement>(".surroundings-accordion__panel");
+        let finished = false;
+
+        const finishClose = () => {
+          if (finished) return;
+          finished = true;
+          details.classList.remove("is-closing");
+          details.open = false;
+        };
+
+        if (!panel) {
+          finishClose();
+          return;
+        }
+
+        panel.addEventListener(
+          "transitionend",
+          (transitionEvent) => {
+            if (
+              transitionEvent.target === panel &&
+              transitionEvent.propertyName === "grid-template-rows"
+            ) {
+              finishClose();
+            }
+          },
+          { once: true }
+        );
+
+        window.setTimeout(finishClose, ACCORDION_CLOSE_MS);
+      });
+    });
+  };
+
+  initSurroundingsAccordions();
+</script>

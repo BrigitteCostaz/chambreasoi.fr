@@ -1,0 +1,31 @@
+---
+// src/pages/index.astro
+import Fold from "@components/fold/Fold.astro";
+import HeadLineSection from "@components/headline-section/HeadlineSection.astro";
+import LocationSection from "@components/location-section/LocationSection.astro";
+import PriceSection from "@components/price-section/PriceSection.astro";
+import { getOrgData } from "@config/organization";
+import { getPricing } from "@config/pricing";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getFoldContent } from "@lib/sanity";
+import { mergeFoldContent } from "../data/adapters/fold";
+
+const [fold, pricing, org] = await Promise.all([
+  getFoldContent(),
+  getPricing(),
+  getOrgData(),
+]);
+const foldContent = mergeFoldContent(fold);
+---
+
+<BaseLayout>
+  <Fold
+    image={fold?.coverImage ?? null}
+    content={foldContent}
+    pricing={pricing}
+    org={org}
+  />
+  <HeadLineSection />
+  <LocationSection />
+  <PriceSection image={fold?.priceCoverImage ?? null} />
+</BaseLayout>

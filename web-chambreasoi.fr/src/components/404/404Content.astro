@@ -1,0 +1,107 @@
+---
+import Button from "@components/button/Button.astro";
+import SanityPicture from "@components/media/SanityPicture.astro";
+import { resolveImage } from "@utils/imageUtils";
+
+const IMAGE_PATH = "@images/chambreasoi-mt-granier-404.png";
+const IMAGE_WIDTH = 1280;
+const IMAGE_HEIGHT = 960;
+const imageAlt = "Le mont Granier, photographie d'archive";
+
+const granierImage = await resolveImage(IMAGE_PATH);
+const coverImageStyle = "object-fit: contain; object-position: center;";
+---
+
+<article
+  class="404-article bg-transparent lg:bg-accentForest/20 relative z-10 grid min-w-0 grid-cols-1 gap-grid px-[0.4rem] pt-[3.2rem] lg:pb-[6rem] lg:pt-0 text-ui-sm leading-relaxed lg:grid-cols-5 lg:items-start"
+>
+  <div
+    class="flex flex-col min-h-full min-w-0 gap-[1.6rem] lg:col-span-2 lg:col-start-2 lg:row-start-1"
+  >
+    <div class="flex flex-col gap-[1.6rem] lg:-translate-y-[1.2rem]">
+      <p class="max-w-[65ch] text-balance">
+        Tout comme le mont Granier en 1248, une partie de cette page s'est effondrée. Ne vous
+        inquiétez pas, cet éboulement n'a fait aucune victime, mais le contenu que vous cherchez a
+        disparu sous les décombres.
+      </p>
+      <p class="max-w-[65ch] text-balance">
+        Ce n'est peut-être qu'une erreur de frappe ou un lien cassé. Laissez-nous vous guider vers
+        un terrain stable.
+      </p>
+    </div>
+    <div class="flex flex-col gap-[0.8rem] max-w-[30ch] mt-[2.4rem]">
+      <Button
+        variant="ghost"
+        size="sm"
+        type="button"
+        onclick="history.back()"
+        iconSide="right"
+        icon="ion/arrow-forward-sharp"
+        class="legal-back-button"
+      >
+        Revenir sur vos pas
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        href="/"
+        icon="ion/arrow-forward-sharp"
+        iconSide="right"
+        class="legal-back-button"
+      >
+        Retour au sommet (Accueil)
+      </Button>
+    </div>
+  </div>
+  <div
+    class="lg:col-span-2 lg:col-start-3 transform lg:translate-x-[clamp(45%,calc(100vw-1280px),25%)] lg:row-start-1 mt-[1.6rem] lg:mt-0"
+  >
+    {
+      granierImage ? (
+        <figure class="animate-float relative min-w-0 overflow-hidden">
+          <SanityPicture
+            source={null}
+            alt={imageAlt}
+            width={IMAGE_WIDTH}
+            height={IMAGE_HEIGHT}
+            sizes="(max-width: 1024px) 100vw, 40vw"
+            loading="lazy"
+            decoding="async"
+            fallback={granierImage}
+            class="h-auto w-full "
+            style={coverImageStyle}
+          />
+        </figure>
+      ) : null
+    }
+  </div>
+
+  <style>
+    .legal-back-button {
+      justify-content: space-between !important;
+      padding-left: 0.8rem !important;
+    }
+
+    /* Floating animation - keeping the existing animation */
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-10px) rotate(1deg);
+      }
+    }
+
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-float {
+        animation: none;
+      }
+    }
+  </style>
+</article>

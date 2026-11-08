@@ -1,0 +1,95 @@
+---
+import SiteLogo from "@components/site-logo/SiteLogo.astro";
+import { headerNavigation } from "@config/navigation";
+import type { NavLinkItem } from "@config/types/navigation";
+import NavLink from "./NavLink.astro";
+
+export interface Props {
+  items?: NavLinkItem[];
+  variant?: "header" | "footer";
+  class?: string;
+  activeClass?: string;
+}
+
+const {
+  items = headerNavigation,
+  variant = "header",
+  class: className = "header-nav",
+  activeClass = "active-link",
+} = Astro.props as Props;
+
+// Filter based on variant if needed
+const visibleItems: NavLinkItem[] =
+  variant === "header"
+    ? items.filter((item: NavLinkItem) => item.showInDesktopNav !== false)
+    : items;
+---
+
+<div class="relative overflow-x-clip">
+  <!-- GRID OVERLAY -->
+  <div class="pointer-events-none absolute inset-0 z-0 translate-x-[0.15rem]">
+    <!-- Mobile -->
+    <div class="grid size-full grid-cols-2 gap-4 lg:hidden">
+      <div
+        class="relative h-full after:absolute after:inset-y-0 after:right-0 after:translate-x-full after:w-1 after:bg-txtPri after:content-['']"
+      >
+      </div>
+      <div></div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="hidden size-full grid-cols-5 gap-grid lg:grid">
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div class="grid-line"></div>
+      <div></div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class:list={["nav-links", className, "relative z-10"]} aria-label="Navigation principale">
+    <ul class="nav-links__list grid grid-cols-5 gap-grid list-none m-0 p-0">
+      <!-- Logo -->
+      <li
+        class="nav-links__item flex items-center group relative overflow-hidden
+        after:content-['']
+        after:absolute after:inset-y-0 after:left-0
+        after:w-0 hover:after:w-full
+        after:bg-[var(--color-accentForest)]
+        after:transition-all after:duration-600 after:ease-in-out"
+      >
+        <div class="relative z-10 min-w-0 px-[0.8rem]">
+          <SiteLogo />
+        </div>
+      </li>
+
+      <!-- Links -->
+      {
+        visibleItems.map((navItem, index) => (
+          <li class="nav-links__item m-0 p-0">
+            <NavLink
+              navItem={navItem}
+              variant={variant}
+              activeClass={activeClass}
+              isLast={index === visibleItems.length - 1}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  .nav-links::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: oklch(from var(--color-txtPri) l c h / 0.2);
+    opacity: 0.2;
+  }
+</style>

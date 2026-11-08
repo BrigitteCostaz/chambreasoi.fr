@@ -1,0 +1,11 @@
+---
+import LocationPageSection from "@components/location-page/LocationPageSection.astro";
+import OpMap from "@components/location-page/OpMap.astro";
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <LocationPageSection>
+    <OpMap slot="map" />
+  </LocationPageSection>
+</BaseLayout>

@@ -1,0 +1,37 @@
+---
+import GridOverlay from "@components/layout/GridOverlay.astro";
+import PolitiqueConfidentialiteContent from "@components/legals/PolitiqueConfidentialiteContent.astro";
+import { getOrgData } from "@config/organization";
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+export const prerender = true;
+
+const org = await getOrgData();
+---
+
+<BaseLayout>
+  <section>
+    <div class="relative overflow-x-clip py-[.8rem] lg:pb-[4.8rem] lg:bg-accentBistre/20">
+      <GridOverlay />
+      <div
+        class="relative z-10 grid grid-cols-1 gap-grid py-[6rem] lg:grid-cols-5 lg:py-[8rem] bg-accentBistre/20 lg:bg-transparent"
+      >
+        <div
+          class="col-span-full flex flex-col gap-[3.2rem] px-[0.4rem] lg:col-span-4 lg:col-start-2"
+        >
+          <span class="heading-3 uppercase">Données personnelles</span>
+          <h1 class="heading-2 text-balance">Politique de confidentialité</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative overflow-x-clip pb-[6rem] lg:pb-[10rem]">
+    <GridOverlay />
+    <div class="relative z-10 grid grid-cols-1 gap-grid lg:grid-cols-5">
+      <div class="col-span-full max-w-[80ch] px-[0.4rem] pt-[3.2rem] lg:col-span-4 lg:col-start-2">
+        <PolitiqueConfidentialiteContent org={org} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

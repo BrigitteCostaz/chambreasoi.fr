@@ -1,0 +1,81 @@
+---
+// src/components/availabily-page/AvailabilityCalendar.astro
+import "vanilla-calendar-pro/styles/index.css";
+import "./availability-calendar.css";
+import chevronIconUrl from "@icons/ion/chevron-down-sharp.svg?url";
+import closeIconUrl from "@icons/ion/close-sharp.svg?url";
+import { Icon } from "astro-icon/components";
+
+type AvailabilityDate = {
+  date: string;
+  available?: boolean;
+};
+
+interface Props {
+  month: string;
+  dates: AvailabilityDate[];
+  minDate: string;
+  maxDate: string;
+}
+
+const { month, dates, minDate, maxDate } = Astro.props;
+const availableDates = dates.filter(({ available }) => available === true).map(({ date }) => date);
+const unavailableDates = dates
+  .filter(({ available }) => available === false)
+  .map(({ date }) => date);
+const defaultUnavailableDates = dates
+  .filter(({ available }) => available === undefined)
+  .map(({ date }) => date);
+const calendarData = JSON.stringify({
+  availableDates,
+  unavailableDates,
+  defaultUnavailableDates,
+  minDate,
+  maxDate,
+});
+const chevronBackgroundImage = `url("${chevronIconUrl}")`;
+const closeBackgroundImage = `url("${closeIconUrl}")`;
+---
+
+<div
+  class="availability-calendar-root"
+  style={`--chevronBackgroundImage: ${chevronBackgroundImage}; --closeBackgroundImage: ${closeBackgroundImage};`}
+>
+  <div id="calendar" data-availability-calendar={calendarData}></div>
+
+  <div class="calendar-legend" aria-label="Legende des disponibilites">
+    <span class="legend-item">
+      <span class="square availableDates" aria-hidden="true"></span>Disponible
+    </span>
+    <span class="legend-item">
+      <span class="square unavailableDates" aria-hidden="true"></span>Complet
+    </span>
+    <span class="legend-item">
+      <span class="square defaultUnavailableDates" aria-hidden="true"></span>Non disponible
+    </span>
+  </div>
+</div>
+
+<template id="availability-icon-available">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/checkbox-sharp" /><span>Disponible</span>
+  </div>
+</template>
+
+<template id="availability-icon-unavailable">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/close-circle-sharp" /><span>Complet</span>
+  </div>
+</template>
+
+<template id="availability-icon-default-unavailable">
+  <div class="flex items-center gap-1">
+    <Icon name="ion/close-sharp" /><span>Non disponible</span>
+  </div>
+</template>
+
+<script>
+  import { initAvailabilityCalendars } from "./availability-calendar-client";
+
+  initAvailabilityCalendars();
+</script>
