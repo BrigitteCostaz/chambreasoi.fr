@@ -92,7 +92,7 @@ const l = {
   </div>
 </section>
 
-<div class="hidden xl:block parallax-map h-[calc(100dvh-var(--header-height,0px))]" data-parallax>
+<div class="hidden xl:block parallax-map h-[calc(100dvh-var(--header-height,0px))]">
   <div class="parallax-layer">
     <SvgMap class="map-svg" aria-label="Carte de la région" role="img" />
   </div>
@@ -221,16 +221,20 @@ const l = {
     --bg-speed-main: -25vh;
   }
 
-  /* ── CSS Scroll Animations (Chromium) ───────────────────────────────────────
-     animation-fill-mode: both holds the final `to` state after the range
-     exits, so these are already fire-once in the forward direction.
+  .parallax-map {
+    background-color: var(--color-bgBase);
+  }
+
+  /* ── CSS Scroll Animations ──────────────────────────────────────────────────
+     Keyframes stay inside @supports so browsers without a scroll timeline do
+     not snap to the final keyframe via animation-fill-mode: both.
   ────────────────────────────────────────────────────────────────────────── */
-  @supports (animation-timeline: view()) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
     .parallax-layer {
       animation: parallax-shift linear both;
       animation-timeline: --parallax;
       animation-range: entry 0% exit 100%;
-      animation-duration: 1ms;
+      animation-duration: auto;
     }
     @keyframes parallax-shift {
       from {
@@ -245,7 +249,7 @@ const l = {
       animation: map-bg-fade linear both;
       animation-timeline: --parallax;
       animation-range: entry 0% exit 100%;
-      animation-duration: 1ms;
+      animation-duration: auto;
     }
     @keyframes map-bg-fade {
       from {
@@ -257,48 +261,16 @@ const l = {
     }
   }
 
-  .parallax-map {
-    background-color: color-mix(
-      in oklch,
-      var(--color-bgCard) calc(var(--map-progress, 0) * 100%),
-      var(--color-bgBase)
-    );
+  @media (prefers-reduced-motion: reduce) {
+    .parallax-layer,
+    .parallax-map {
+      animation: none;
+    }
   }
 </style>
 
 <script>
   import { initRevealOnIntersect } from "@utils/reveal";
-
-  // ── Parallax layer shift (desktop only) ─────────────────────────────────────
-  // Handles only the background translateY. Reveal logic is no longer here —
-  // it lives in the shared IntersectionObserver below so it never reverses.
-
-  let ticking = false;
-
-  document.querySelectorAll<HTMLElement>("[data-parallax]").forEach((hero) => {
-    const layer = hero.querySelector<HTMLElement>(".parallax-layer");
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-
-      requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-        const progress = Math.min(
-          Math.max((window.innerHeight - rect.top) / (window.innerHeight + rect.height), 0),
-          1
-        );
-
-        if (layer) layer.style.transform = `translateY(${progress * -25}vh)`;
-        hero.style.setProperty("--map-progress", String(progress));
-
-        ticking = false;
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-  });
 
   // ── Fire-once reveal — desktop + mobile ─────────────────────────────────────
   // Stamps --reveal-delay from data-reveal-delay so the CSS transition-delay

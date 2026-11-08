@@ -71,7 +71,7 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
 </section>
 
 <section
-  class="relative flex min-h-[calc(100dvh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
+  class="price-parallax relative flex min-h-[calc(100dvh-var(--header-height,0px)-16px)] w-full flex-col overflow-hidden"
 >
   <!-- Grid overlay (your existing one stays untouched) -->
   <div class="pointer-events-none absolute inset-0 z-10 translate-x-[0.15rem]">
@@ -172,6 +172,8 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
 <style>
   /* =========================
    * Hero image (desktop only)
+   * Tall in-flow photo kept; a small scroll drift moves only the media
+   * inside .hero-image so the tariff card stays put.
    * ========================= */
   .hero-image {
     position: relative;
@@ -181,8 +183,50 @@ const breakfastSurchargeEuroFR = formatEuroFR(pricing.breakfast.surchargeCents);
   }
 
   @media (min-width: 1280px) {
+    .price-parallax {
+      view-timeline-name: --price-parallax;
+      view-timeline-axis: block;
+    }
+
     .hero-image {
       display: block;
+      overflow: hidden;
+    }
+
+    .hero-image :global(img) {
+      display: block;
+      width: 100%;
+      height: auto;
+      will-change: transform;
+      transform: scale(1.08);
+      transform-origin: center center;
+    }
+  }
+
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    @media (min-width: 1280px) {
+      .hero-image :global(img) {
+        animation: price-parallax-drift linear both;
+        animation-timeline: --price-parallax;
+        animation-range: entry 0% exit 100%;
+        animation-duration: auto;
+      }
+    }
+
+    @keyframes price-parallax-drift {
+      from {
+        transform: scale(1.08) translateY(5vh);
+      }
+      to {
+        transform: scale(1.08) translateY(-5vh);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-image :global(img) {
+      animation: none;
+      transform: none;
     }
   }
 
